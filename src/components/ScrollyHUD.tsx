@@ -128,14 +128,6 @@ export default function ScrollyHUD({
       </div>
 
       {/* Bottom Status HUD */}
-      <footer className="flex flex-col sm:flex-row items-start sm:items-end justify-end w-full gap-3 text-[10px] sm:text-xs font-mono tracking-[0.2em] text-neutral-400 pointer-events-auto">
-        {/* Bottom Right: Scroll Indicator & Progress */}
-        <div className="flex items-center gap-4 bg-black/30 backdrop-blur-md px-3 py-2 rounded border border-white/10">
-          <span className="text-neutral-500">PROGRESS</span>
-          <span className="text-white font-bold">{Math.round(scrollProgress * 100)}%</span>
-          <span className="inline-block animate-bounce text-emerald-400">↓</span>
-        </div>
-      </footer>
     </div>
   );
 }
