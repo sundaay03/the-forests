@@ -1,11 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { soundscape } from './AudioAtmosphere';
-
 interface ScrollyHUDProps {
   activeChapter: number;
-  scrollProgress: number;
+  scrollProgress?: number;
   onJumpToChapter: (index: number) => void;
 }
 
@@ -20,85 +17,10 @@ const CHAPTERS = [
 
 export default function ScrollyHUD({
   activeChapter,
-  scrollProgress,
   onJumpToChapter,
 }: ScrollyHUDProps) {
-  const [isAudioActive, setIsAudioActive] = useState(false);
-
-  // Update audio mood whenever active chapter changes
-  useEffect(() => {
-    if (soundscape && isAudioActive) {
-      soundscape.updateMoodByChapter(activeChapter);
-    }
-  }, [activeChapter, isAudioActive]);
-
-  const toggleAudio = () => {
-    if (!soundscape) return;
-    const nextState = !isAudioActive;
-    setIsAudioActive(nextState);
-    soundscape.setPlaying(nextState);
-    if (nextState) {
-      soundscape.updateMoodByChapter(activeChapter);
-    }
-  };
-
-  const currentChapter = CHAPTERS[activeChapter] || CHAPTERS[0];
-
   return (
-    <div className="fixed inset-0 pointer-events-none z-30 select-none flex flex-col justify-between p-6 sm:p-10">
-      {/* Top Bar HUD */}
-      <header className="flex items-center justify-between w-full pointer-events-auto">
-        {/* Brand / Logo */}
-        <div className="flex items-center gap-3">
-          <span
-            className={`h-2.5 w-2.5 rounded-full transition-colors duration-500 ${
-              activeChapter === 2 || activeChapter === 3
-                ? 'bg-red-500 shadow-[0_0_12px_#ef4444]'
-                : activeChapter === 4
-                ? 'bg-neutral-400'
-                : activeChapter === 5
-                ? 'bg-emerald-300 shadow-[0_0_15px_#6ee7b7]'
-                : 'bg-emerald-400 shadow-[0_0_12px_#10b981]'
-            }`}
-          />
-          <span className="text-xs sm:text-sm font-mono tracking-[0.3em] uppercase text-white font-bold">
-            THE FORESTS
-          </span>
-        </div>
-
-        {/* Center Chapter Pill */}
-        <div className="hidden sm:flex items-center gap-2 border border-white/15 bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-full text-[11px] font-mono tracking-widest text-neutral-300">
-          <span className="text-emerald-400 font-bold">{currentChapter.tag}</span>
-          <span>/</span>
-          <span className="text-white">{currentChapter.title}</span>
-        </div>
-
-        {/* Audio Toggle */}
-        <button
-          onClick={toggleAudio}
-          className="flex items-center gap-2 border border-white/20 bg-black/40 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-mono uppercase tracking-widest text-neutral-300 hover:text-white hover:border-white/40 transition-all cursor-pointer"
-        >
-          <div className="flex items-end gap-[2px] h-3">
-            <span
-              className={`w-[2px] bg-emerald-400 transition-all duration-300 ${
-                isAudioActive ? 'h-3 animate-pulse' : 'h-1'
-              }`}
-            />
-            <span
-              className={`w-[2px] bg-emerald-400 transition-all duration-300 ${
-                isAudioActive ? 'h-2 animate-bounce' : 'h-1'
-              }`}
-            />
-            <span
-              className={`w-[2px] bg-emerald-400 transition-all duration-300 ${
-                isAudioActive ? 'h-3.5 animate-pulse' : 'h-1'
-              }`}
-            />
-          </div>
-          <span>{isAudioActive ? 'ATMOSPHERE ON' : 'AUDIO OFF'}</span>
-        </button>
-      </header>
-
+    <div className="fixed inset-0 pointer-events-none z-30 select-none">
       {/* Right Progress Rail with Click-to-Jump Navigation */}
       <div className="fixed right-6 sm:right-10 top-1/2 -translate-y-1/2 flex flex-col items-end gap-5 pointer-events-auto">
         {CHAPTERS.map((chap, idx) => {
@@ -129,9 +51,6 @@ export default function ScrollyHUD({
           );
         })}
       </div>
-
-      {/* Bottom Status HUD */}
     </div>
   );
 }
-

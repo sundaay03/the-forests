@@ -37,8 +37,8 @@ export default function ScrollyExperience() {
       const clampedProg = Math.max(0, Math.min(1, prog));
       setScrollProgress(clampedProg);
 
-      // Map progress to 6 chapters (0 to 5)
-      const rawChapter = Math.min(5, Math.floor(clampedProg * 6));
+      // Map progress to 5 chapters (0 to 4)
+      const rawChapter = Math.min(4, Math.floor(clampedProg * 5));
       setActiveChapter(rawChapter);
     };
 
@@ -83,7 +83,7 @@ export default function ScrollyExperience() {
   const handleJumpToChapter = (chapterIndex: number) => {
     if (!containerRef.current || !lenisRef.current) return;
     const containerHeight = containerRef.current.offsetHeight - window.innerHeight;
-    const targetScroll = (chapterIndex / 6) * containerHeight;
+    const targetScroll = (chapterIndex / 5) * containerHeight;
     lenisRef.current.scrollTo(targetScroll, {
       duration: 1.6,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -91,7 +91,7 @@ export default function ScrollyExperience() {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full h-[1200vh] bg-black">
+    <div ref={containerRef} className="relative w-full h-[1000vh] bg-black">
       {/* Fixed Sticky Viewport (100vh) */}
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden">
         {/* Cinematic Video Backgrounds (Scroll-driven Scrubbing Engine) */}
