@@ -1,26 +1,73 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #000000;
+  --foreground: #ffffff;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #000000;
+  color: #ffffff;
+  overflow-x: hidden;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Lenis Recommended Smooth Scroll Rules */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Kinetic Shimmer & Chromatic Aberration Animations */
+@keyframes heatShimmer {
+  0%, 100% {
+    transform: translateY(0) skewX(0deg) scale(1);
+    filter: drop-shadow(0 0 25px rgba(255, 87, 34, 0.7));
+  }
+  25% {
+    transform: translateY(-1.5px) skewX(0.8deg) scale(1.005);
+    filter: drop-shadow(0 0 35px rgba(255, 112, 67, 0.9));
+  }
+  50% {
+    transform: translateY(1px) skewX(-0.6deg) scale(0.998);
+    filter: drop-shadow(0 0 20px rgba(230, 81, 0, 0.65));
+  }
+  75% {
+    transform: translateY(-0.8px) skewX(0.5deg) scale(1.002);
+    filter: drop-shadow(0 0 30px rgba(255, 138, 101, 0.85));
+  }
+}
+
+.animate-heat-shimmer {
+  animation: heatShimmer 1.8s ease-in-out infinite;
+}
+
+@keyframes emergencyPulse {
+  0%, 100% {
+    border-color: rgba(239, 68, 68, 0.8);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+  }
+}
+
+.animate-emergency-beacon {
+  animation: emergencyPulse 1.2s ease-in-out infinite;
 }
