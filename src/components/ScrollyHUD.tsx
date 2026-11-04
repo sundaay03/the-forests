@@ -15,6 +15,7 @@ const CHAPTERS = [
   { id: 3, tag: '03', title: 'THE INFERNO' },
   { id: 4, tag: '04', title: 'THE FRONTLINE' },
   { id: 5, tag: '05', title: 'THE ASHES' },
+  { id: 6, tag: '06', title: 'THE REBIRTH' },
 ];
 
 export default function ScrollyHUD({
@@ -55,6 +56,8 @@ export default function ScrollyHUD({
                 ? 'bg-red-500 shadow-[0_0_12px_#ef4444]'
                 : activeChapter === 4
                 ? 'bg-neutral-400'
+                : activeChapter === 5
+                ? 'bg-emerald-300 shadow-[0_0_15px_#6ee7b7]'
                 : 'bg-emerald-400 shadow-[0_0_12px_#10b981]'
             }`}
           />

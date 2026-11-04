@@ -14,8 +14,8 @@ export default function ScrollyChapter({
   // Live containment counter for Scene 4
   const [containment, setContainment] = useState(0);
 
-  // Local progress inside Scene 3 (0.40 to 0.60 mapped to 0.0 -> 1.0)
-  const s3Prog = Math.max(0, Math.min(1, (scrollProgress - 0.40) / 0.20));
+  // Local progress inside Scene 3 (0.333 to 0.500 mapped to 0.0 -> 1.0)
+  const s3Prog = Math.max(0, Math.min(1, (scrollProgress - 0.333) / 0.167));
 
   useEffect(() => {
     if (activeChapter === 3) {
@@ -52,13 +52,6 @@ export default function ScrollyChapter({
             : 'opacity-0 scale-95'
         }`}
       >
-        <span
-          className={`text-[11px] sm:text-xs font-mono tracking-[0.35em] uppercase text-emerald-400/90 mb-4 transition-all duration-700 delay-100 ${
-            activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'
-          }`}
-        >
-          ACT I • THE ENTRANCE
-        </span>
 
         {/* Headline with Vertical Mask Slide-up & Letter Stagger */}
         <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.88] text-white flex flex-wrap justify-center overflow-hidden py-2">
@@ -97,13 +90,7 @@ export default function ScrollyChapter({
             : 'opacity-0 scale-95'
         }`}
       >
-        <span
-          className={`text-[11px] sm:text-xs font-mono tracking-[0.35em] uppercase text-emerald-400 mb-4 transition-all duration-700 delay-100 ${
-            activeChapter === 1 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'
-          }`}
-        >
-          ACT II • THE CANOPY
-        </span>
+        
 
         {/* Split-word blur-to-sharp focus with horizontal tracking expansion */}
         <h1
@@ -136,9 +123,6 @@ export default function ScrollyChapter({
           transition: 'opacity 0.15s ease-out, filter 0.2s ease-out',
         }}
       >
-        <span className="text-[11px] sm:text-xs font-mono tracking-[0.35em] uppercase text-amber-500 mb-4">
-          ACT III • THE INFERNO
-        </span>
 
         {/* Fast kinetic reveal with heat-shimmer & orange-amber text glow */}
         <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)]">
@@ -207,9 +191,6 @@ export default function ScrollyChapter({
           }`}
         >
           <span className="h-2.5 w-2.5 rounded-full bg-red-600 animate-ping" />
-          <span className="text-[11px] sm:text-xs font-mono tracking-[0.35em] uppercase text-red-500 font-bold">
-            ACT IV • EMERGENCY DISPATCH
-          </span>
         </div>
 
         {/* High-contrast Red/White Stencil Typography */}
@@ -284,6 +265,53 @@ export default function ScrollyChapter({
         >
           Rebirth begins in the cold soil.
         </p>
+      </div>
+
+      {/* ===================== SCENE 6: THE REBIRTH (360° ROTATION) ===================== */}
+      <div
+        className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-1000 ease-out px-4 pointer-events-none ${
+          activeChapter === 5
+            ? 'opacity-100 scale-100'
+            : 'opacity-0 scale-95'
+        }`}
+      >
+        <span
+          className={`text-[11px] sm:text-xs font-mono tracking-[0.35em] uppercase text-emerald-400 mb-4 transition-all duration-700 delay-100 ${
+            activeChapter === 5 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'
+          }`}
+        >
+          ACT VI • THE REBIRTH
+        </span>
+
+        {/* Headline with cinematic tracking and glowing emerald aura */}
+        <h1
+          className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[0.06em] text-white py-2 transition-all duration-1000 ease-out ${
+            activeChapter === 5
+              ? 'opacity-100 translate-y-0 drop-shadow-[0_0_35px_rgba(16,185,129,0.4)]'
+              : 'opacity-0 translate-y-6'
+          }`}
+        >
+          ETERNAL CYCLE
+        </h1>
+
+        {/* Subtitle */}
+        <p
+          className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-300 tracking-wide max-w-xl transition-all duration-1000 delay-500 ${
+            activeChapter === 5 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}
+        >
+          From dust and ash, life turns full circle. The forest breathes again.
+        </p>
+
+        {/* 360° indicator badge */}
+        <div
+          className={`mt-6 inline-flex items-center gap-2 border border-emerald-500/30 bg-emerald-950/40 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-mono tracking-widest text-emerald-300 transition-all duration-700 delay-700 ${
+            activeChapter === 5 ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
+          }`}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+          <span>360° ROTATION ANIMATION</span>
+        </div>
       </div>
     </div>
   );

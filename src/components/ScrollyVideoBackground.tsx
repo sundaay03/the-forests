@@ -15,14 +15,16 @@ interface SceneMeta {
   playEndProg: number;
   endProg: number;
   isRealtime?: boolean;
+  isImage?: boolean;
 }
 
 const SCENE_DATA: SceneMeta[] = [
-  { id: 1, src: '/scene/scene1/1.mp4', duration: 10.03, startProg: 0.0, playEndProg: 0.16, endProg: 0.2 },
-  { id: 2, src: '/scene/scene2/2.mp4', duration: 10.03, startProg: 0.2, playEndProg: 0.36, endProg: 0.4 },
-  { id: 3, src: '/scene/scene3/3.mp4', duration: 7.01,  startProg: 0.4, playEndProg: 0.56, endProg: 0.6, isRealtime: true },
-  { id: 4, src: '/scene/scene4/4.mp4', duration: 10.03, startProg: 0.6, playEndProg: 0.76, endProg: 0.8 },
-  { id: 5, src: '/scene/scene5/5.mp4', duration: 9.75,  startProg: 0.8, playEndProg: 0.96, endProg: 1.0 },
+  { id: 1, src: '/scene/scene1/1.mp4', duration: 10.03, startProg: 0.0,   playEndProg: 0.135, endProg: 0.167 },
+  { id: 2, src: '/scene/scene2/2.mp4', duration: 10.03, startProg: 0.167, playEndProg: 0.300, endProg: 0.333 },
+  { id: 3, src: '/scene/scene3/3.mp4', duration: 7.01,  startProg: 0.333, playEndProg: 0.465, endProg: 0.500, isRealtime: true },
+  { id: 4, src: '/scene/scene4/4.mp4', duration: 10.03, startProg: 0.500, playEndProg: 0.635, endProg: 0.667 },
+  { id: 5, src: '/scene/scene5/5.mp4', duration: 9.75,  startProg: 0.667, playEndProg: 0.800, endProg: 0.833 },
+  { id: 6, src: '/scene/scene6/6.png', duration: 0,     startProg: 0.833, playEndProg: 0.970, endProg: 1.000, isImage: true },
 ];
 
 export default function ScrollyVideoBackground({
@@ -58,11 +60,12 @@ export default function ScrollyVideoBackground({
   // 2. Prime scrubbing videos on mount (Scenes 1, 2, 4, 5)
   useEffect(() => {
     videoRefs.current.forEach((video, index) => {
-      if (!video) return;
+      const scene = SCENE_DATA[index];
+      if (!video || !scene || scene.isImage) return;
       video.muted = true;
       video.playsInline = true;
 
-      if (SCENE_DATA[index].isRealtime) {
+      if (scene.isRealtime) {
         video.loop = true;
         return;
       }
@@ -95,8 +98,8 @@ export default function ScrollyVideoBackground({
       const prog = scrollProgRef.current;
 
       SCENE_DATA.forEach((scene, index) => {
-        // Scene 3 runs independently in realtime; NEVER touch or seek it in scrub loop
-        if (scene.isRealtime) return;
+        // Scene 3 runs independently in realtime, Scene 6 is static image; NEVER seek in scrub loop
+        if (scene.isRealtime || scene.isImage) return;
 
         const video = videoRefs.current[index];
         if (!video) return;
@@ -184,31 +187,56 @@ export default function ScrollyVideoBackground({
             style={{
               opacity: Math.max(0, Math.min(1, opacity)),
               zIndex: opacity > 0.01 ? 2 : 1,
-              transition: 'opacity 0.2s ease-out',
+              transition: 'opacity 0.25s ease-out',
             }}
           >
-            <video
-              ref={(el) => {
-                videoRefs.current[index] = el;
-              }}
-              src={scene.src}
-              playsInline
-              muted
-              autoPlay={scene.isRealtime || false}
-              loop={scene.isRealtime || false}
-              preload="auto"
-              className="w-full h-full object-cover scale-[1.01]"
-              style={{
-                filter:
-                  index === 2
-                    ? 'contrast(1.15) saturate(1.2)'
-                    : index === 3
-                    ? 'contrast(1.25) brightness(0.95)'
-                    : index === 4
-                    ? 'contrast(1.1) saturate(0.55) brightness(0.85)'
-                    : 'contrast(1.05) saturate(1.05)',
-              }}
-            />
+            {scene.isImage ? (
+              /* Scene 6: 360° Rotated Cosmic / Earth Forest Image */
+              <div className="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden">
+                {/* Outer wrapper: scroll-scrubbed rotation (spins 0 to 360 deg as you scroll) */}
+                <div
+                  className="w-[150vmax] h-[150vmax] flex-shrink-0 flex items-center justify-center will-change-transform"
+                  style={{
+                    transform: `rotate(${Math.max(0, Math.min(1, (scrollProgress - scene.startProg) / (scene.endProg - scene.startProg))) * 360}deg)`,
+                  }}
+                >
+                  {/* Inner wrapper: continuous ambient 360-degree rotation animation */}
+                  <div className="w-full h-full flex items-center justify-center animate-rotate-360 will-change-transform">
+                    <img
+                      src={scene.src}
+                      alt="Scene 6 - The Rebirth"
+                      className="w-full h-full object-cover scale-[1.08]"
+                      style={{
+                        filter: 'contrast(1.1) saturate(1.15) brightness(0.95)',
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <video
+                ref={(el) => {
+                  videoRefs.current[index] = el;
+                }}
+                src={scene.src}
+                playsInline
+                muted
+                autoPlay={scene.isRealtime || false}
+                loop={scene.isRealtime || false}
+                preload="auto"
+                className="w-full h-full object-cover scale-[1.01]"
+                style={{
+                  filter:
+                    index === 2
+                      ? 'contrast(1.15) saturate(1.2)'
+                      : index === 3
+                      ? 'contrast(1.25) brightness(0.95)'
+                      : index === 4
+                      ? 'contrast(1.1) saturate(0.55) brightness(0.85)'
+                      : 'contrast(1.05) saturate(1.05)',
+                }}
+              />
+            )}
           </div>
         );
       })}
@@ -217,7 +245,7 @@ export default function ScrollyVideoBackground({
       <div className="absolute inset-0 z-10 bg-radial-gradient from-transparent via-black/35 to-black/85 pointer-events-none" />
       <div className="absolute inset-0 z-10 bg-gradient-to-t from-black via-transparent to-black/60 pointer-events-none" />
 
-      {/* Atmospheric Fire/Emergency Gradient for Scene 3 & 4 */}
+      {/* Atmospheric Fire/Emergency/Renewal Gradient */}
       <div
         className="absolute inset-0 z-10 pointer-events-none transition-opacity duration-700"
         style={{
@@ -226,8 +254,10 @@ export default function ScrollyVideoBackground({
               ? 'radial-gradient(circle at 50% 80%, rgba(255, 87, 34, 0.24) 0%, transparent 70%)'
               : activeChapter === 3
               ? 'radial-gradient(circle at 20% 80%, rgba(239, 68, 68, 0.22) 0%, transparent 60%)'
+              : activeChapter === 5
+              ? 'radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.16) 0%, transparent 75%)'
               : 'transparent',
-          opacity: activeChapter === 2 || activeChapter === 3 ? 1 : 0,
+          opacity: activeChapter === 2 || activeChapter === 3 || activeChapter === 5 ? 1 : 0,
         }}
       />
     </div>

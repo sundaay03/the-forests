@@ -107,6 +107,10 @@ class ProceduralSoundscape {
         this.droneOsc.frequency.linearRampToValueAtTime(36.7, now + 2.0); // D1
         this.filterNode.frequency.linearRampToValueAtTime(220, now + 2.0);
         break;
+      case 5: // Scene 6: The Rebirth (Warm harmonic resurgence)
+        this.droneOsc.frequency.linearRampToValueAtTime(73.42, now + 1.5); // D2
+        this.filterNode.frequency.linearRampToValueAtTime(620, now + 1.5);
+        break;
     }
   }
 

@@ -71,3 +71,16 @@ html.lenis, html.lenis body {
 .animate-emergency-beacon {
   animation: emergencyPulse 1.2s ease-in-out infinite;
 }
+
+@keyframes rotate360 {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-rotate-360 {
+  animation: rotate360 25s linear infinite;
+}
