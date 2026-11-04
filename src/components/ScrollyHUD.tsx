@@ -23,20 +23,6 @@ export default function ScrollyHUD({
   onJumpToChapter,
 }: ScrollyHUDProps) {
   const [isAudioActive, setIsAudioActive] = useState(false);
-  const [timecode, setTimecode] = useState('00:00:00:00');
-
-  // Dynamic Timecode Generator
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      const s = String(now.getSeconds()).padStart(2, '0');
-      const ms = String(Math.floor(now.getMilliseconds() / 10)).padStart(2, '0');
-      setTimecode(`${h}:${m}:${s}:${ms}`);
-    }, 60);
-    return () => clearInterval(interval);
-  }, []);
 
   // Update audio mood whenever active chapter changes
   useEffect(() => {
@@ -142,20 +128,7 @@ export default function ScrollyHUD({
       </div>
 
       {/* Bottom Status HUD */}
-      <footer className="flex flex-col sm:flex-row items-start sm:items-end justify-between w-full gap-3 text-[10px] sm:text-xs font-mono tracking-[0.2em] text-neutral-400 pointer-events-auto">
-        {/* Bottom Left: Timecode and Coordinates */}
-        <div className="flex flex-col gap-1 bg-black/30 backdrop-blur-md px-3 py-2 rounded border border-white/10">
-          <div className="flex items-center gap-3 text-white">
-            <span className="text-emerald-400 font-bold">TIMECODE:</span>
-            <span>{timecode}</span>
-          </div>
-          <div className="flex items-center gap-2 text-neutral-400">
-            <span>LAT: 47°33&apos;14&quot;N</span>
-            <span>•</span>
-            <span>LON: 121°44&apos;31&quot;W</span>
-          </div>
-        </div>
-
+      <footer className="flex flex-col sm:flex-row items-start sm:items-end justify-end w-full gap-3 text-[10px] sm:text-xs font-mono tracking-[0.2em] text-neutral-400 pointer-events-auto">
         {/* Bottom Right: Scroll Indicator & Progress */}
         <div className="flex items-center gap-4 bg-black/30 backdrop-blur-md px-3 py-2 rounded border border-white/10">
           <span className="text-neutral-500">PROGRESS</span>
