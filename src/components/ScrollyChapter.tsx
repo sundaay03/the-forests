@@ -32,20 +32,33 @@ export default function ScrollyChapter({
     s1TitleBlur = fadeRatio * 8;
   }
 
-  // Scene 1: "About" appears at detik 7 (fades in from detik 6.8 to 7.8)
+  // Scene 1: "About" appears at detik 7, stays until detik 9.5, then fades away before Scene 2
   let s1AboutOpacity = 0;
   let s1AboutTranslateY = 24;
-  if (s1Time >= 7.8) {
-    s1AboutOpacity = 1;
-    s1AboutTranslateY = 0;
-  } else if (s1Time >= 6.8) {
-    const enterRatio = (s1Time - 6.8) / 1.0;
+  let s1AboutBlur = 0;
+
+  if (s1Time < 6.8) {
+    s1AboutOpacity = 0;
+    s1AboutTranslateY = 24;
+    s1AboutBlur = 4;
+  } else if (s1Time < 7.6) {
+    // Fade in between detik 6.8 and 7.6
+    const enterRatio = (s1Time - 6.8) / 0.8;
     s1AboutOpacity = Math.max(0, Math.min(1, enterRatio));
     s1AboutTranslateY = (1 - s1AboutOpacity) * 24;
+    s1AboutBlur = (1 - s1AboutOpacity) * 4;
+  } else if (s1Time <= 9.5) {
+    // Stays fully visible until detik 9.5
+    s1AboutOpacity = 1;
+    s1AboutTranslateY = 0;
+    s1AboutBlur = 0;
+  } else {
+    // Fades away starting at detik 9.5 (9.5 to 10.03s)
+    const exitRatio = Math.min(1, (s1Time - 9.5) / 0.5);
+    s1AboutOpacity = Math.max(0, 1 - exitRatio);
+    s1AboutTranslateY = -exitRatio * 30; // lifts upward as it fades away
+    s1AboutBlur = exitRatio * 6;
   }
-  // Soft fade out near transition to Scene 2 (detik 9.6 - 10.0)
-  const s1AboutExit = s1Time > 9.6 ? Math.max(0, 1 - (s1Time - 9.6) / 0.43) : 1;
-  const finalAboutOpacity = s1AboutOpacity * s1AboutExit;
 
   // Local progress inside Scene 3 (0.333 to 0.500 mapped to 0.0 -> 1.0)
   const s3Prog = Math.max(0, Math.min(1, (scrollProgress - 0.333) / 0.167));
@@ -123,12 +136,13 @@ export default function ScrollyChapter({
           </p>
         </div>
 
-        {/* Phase 2: "About" Section (appears at detik 7) */}
+        {/* Phase 2: "About" Section (appears at detik 7, stays until detik 9.5, then fades away) */}
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center px-6 transition-all duration-300 ease-out pointer-events-none max-w-4xl mx-auto"
+          className="absolute inset-0 flex flex-col items-center justify-center px-6 transition-all duration-200 ease-out pointer-events-none max-w-4xl mx-auto"
           style={{
-            opacity: finalAboutOpacity,
+            opacity: s1AboutOpacity,
             transform: `translateY(${s1AboutTranslateY}px)`,
+            filter: `blur(${s1AboutBlur}px)`,
           }}
         >
           {/* Category Tag */}
