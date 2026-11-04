@@ -32,7 +32,7 @@ export default function ScrollyChapter({
     s1TitleBlur = fadeRatio * 8;
   }
 
-  // Scene 1: "About" appears at detik 7, stays until detik 9.5, then fades away before Scene 2
+  // Scene 1: "About" appears at detik 7 and stays until the end of Scene 1
   let s1AboutOpacity = 0;
   let s1AboutTranslateY = 24;
   let s1AboutBlur = 0;
@@ -47,17 +47,11 @@ export default function ScrollyChapter({
     s1AboutOpacity = Math.max(0, Math.min(1, enterRatio));
     s1AboutTranslateY = (1 - s1AboutOpacity) * 24;
     s1AboutBlur = (1 - s1AboutOpacity) * 4;
-  } else if (s1Time <= 9.5) {
-    // Stays fully visible until detik 9.5
+  } else {
+    // Stays fully visible and maintained until the end of video in Scene 1
     s1AboutOpacity = 1;
     s1AboutTranslateY = 0;
     s1AboutBlur = 0;
-  } else {
-    // Fades away starting at detik 9.5 (9.5 to 10.03s)
-    const exitRatio = Math.min(1, (s1Time - 9.5) / 0.5);
-    s1AboutOpacity = Math.max(0, 1 - exitRatio);
-    s1AboutTranslateY = -exitRatio * 30; // lifts upward as it fades away
-    s1AboutBlur = exitRatio * 6;
   }
 
   // Local progress inside Scene 3 (0.333 to 0.500 mapped to 0.0 -> 1.0)
@@ -136,7 +130,7 @@ export default function ScrollyChapter({
           </p>
         </div>
 
-        {/* Phase 2: "About" Section (appears at detik 7, stays until detik 9.5, then fades away) */}
+        {/* Phase 2: "About" Section (appears at detik 7 and remains active until end of Scene 1) */}
         <div
           className="absolute inset-0 flex flex-col items-center justify-center px-6 transition-all duration-200 ease-out pointer-events-none max-w-4xl mx-auto"
           style={{
@@ -145,10 +139,6 @@ export default function ScrollyChapter({
             filter: `blur(${s1AboutBlur}px)`,
           }}
         >
-          {/* Category Tag */}
-          <span className="text-[11px] sm:text-xs font-mono tracking-[0.35em] uppercase text-emerald-400 mb-3">
-            ARCHIVE // 01
-          </span>
 
           {/* Headline */}
           <h2 className="text-5xl sm:text-7xl md:text-8xl font-black uppercase tracking-tight text-white drop-shadow-[0_0_35px_rgba(255,255,255,0.3)]">
@@ -159,19 +149,6 @@ export default function ScrollyChapter({
           <p className="mt-5 sm:mt-6 text-sm sm:text-base md:text-lg font-light text-neutral-200 tracking-wide max-w-2xl leading-relaxed">
             An interactive cinematic journey into ancient woodlands — witnessing their primordial majesty, the sudden terror of wildfire, and nature&apos;s quiet resilience toward rebirth.
           </p>
-
-          {/* Telemetry / Metadata Badges */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-[10px] sm:text-[11px] font-mono tracking-widest text-neutral-400">
-            <span className="border border-white/20 bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-full text-neutral-300">
-              ORIGINAL FOOTAGE
-            </span>
-            <span className="border border-white/20 bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-full text-neutral-300">
-              6 CHAPTERS
-            </span>
-            <span className="border border-emerald-500/40 bg-emerald-950/40 text-emerald-300 backdrop-blur-md px-4 py-1.5 rounded-full">
-              SCROLL ENGINE
-            </span>
-          </div>
         </div>
       </div>
 
