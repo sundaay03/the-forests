@@ -32,12 +32,13 @@ export default function ScrollyChapter({
     s1TitleBlur = fadeRatio * 8;
   }
 
-  // Scene 1: "About" appears at detik 7 and stays until the end of Scene 1
+  // Scene 1: "About" appears at detik 7, remains visible, and fades out away before transition to Scene 2
   let s1AboutOpacity = 0;
   let s1AboutTranslateY = 24;
   let s1AboutBlur = 0;
 
   if (s1Time < 6.8) {
+    // Before detik 7: hidden
     s1AboutOpacity = 0;
     s1AboutTranslateY = 24;
     s1AboutBlur = 4;
@@ -47,11 +48,17 @@ export default function ScrollyChapter({
     s1AboutOpacity = Math.max(0, Math.min(1, enterRatio));
     s1AboutTranslateY = (1 - s1AboutOpacity) * 24;
     s1AboutBlur = (1 - s1AboutOpacity) * 4;
-  } else {
-    // Stays fully visible and maintained until the end of video in Scene 1
+  } else if (scrollProgress < 0.128) {
+    // Stays fully visible throughout Scene 1 until the video concludes
     s1AboutOpacity = 1;
     s1AboutTranslateY = 0;
     s1AboutBlur = 0;
+  } else {
+    // Fades out away before transition to Scene 2 (scrollProgress 0.128 to 0.142)
+    const exitRatio = Math.min(1, Math.max(0, (scrollProgress - 0.128) / 0.014));
+    s1AboutOpacity = Math.max(0, 1 - exitRatio);
+    s1AboutTranslateY = -exitRatio * 35; // floats upward as it fades away
+    s1AboutBlur = exitRatio * 8;
   }
 
   // Local progress inside Scene 3 (0.333 to 0.500 mapped to 0.0 -> 1.0)
@@ -130,7 +137,7 @@ export default function ScrollyChapter({
           </p>
         </div>
 
-        {/* Phase 2: "About" Section (appears at detik 7 and remains active until end of Scene 1) */}
+        {/* Phase 2: "About" Section (appears at detik 7 and fades out away before transition to Scene 2) */}
         <div
           className="absolute inset-0 flex flex-col items-center justify-center px-6 transition-all duration-200 ease-out pointer-events-none max-w-4xl mx-auto"
           style={{
