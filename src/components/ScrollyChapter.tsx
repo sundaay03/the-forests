@@ -14,8 +14,41 @@ export default function ScrollyChapter({
   // Live containment counter for Scene 4
   const [containment, setContainment] = useState(0);
 
-  // Local progress inside Scene 3 (0.40 to 0.60 mapped to 0.0 -> 1.0)
-  const s3Prog = Math.max(0, Math.min(1, (scrollProgress - 0.40) / 0.20));
+  // Scene 1 Video Playback Time (mapped from scrollProgress 0.0 to 0.135 across 10.03s duration)
+  const s1Time = Math.min(10.03, Math.max(0, (scrollProgress / 0.135) * 10.03));
+
+  // Scene 1: "THE FORESTS" title and subtitle fade out away between detik 4 and 5
+  let s1TitleOpacity = 1;
+  let s1TitleTranslateY = 0;
+  let s1TitleBlur = 0;
+  if (s1Time >= 5.0) {
+    s1TitleOpacity = 0;
+    s1TitleTranslateY = -35;
+    s1TitleBlur = 8;
+  } else if (s1Time >= 4.0) {
+    const fadeRatio = (s1Time - 4.0) / 1.0;
+    s1TitleOpacity = Math.max(0, Math.min(1, 1 - fadeRatio));
+    s1TitleTranslateY = -fadeRatio * 35;
+    s1TitleBlur = fadeRatio * 8;
+  }
+
+  // Scene 1: "About" appears at detik 7 (fades in from detik 6.8 to 7.8)
+  let s1AboutOpacity = 0;
+  let s1AboutTranslateY = 24;
+  if (s1Time >= 7.8) {
+    s1AboutOpacity = 1;
+    s1AboutTranslateY = 0;
+  } else if (s1Time >= 6.8) {
+    const enterRatio = (s1Time - 6.8) / 1.0;
+    s1AboutOpacity = Math.max(0, Math.min(1, enterRatio));
+    s1AboutTranslateY = (1 - s1AboutOpacity) * 24;
+  }
+  // Soft fade out near transition to Scene 2 (detik 9.6 - 10.0)
+  const s1AboutExit = s1Time > 9.6 ? Math.max(0, 1 - (s1Time - 9.6) / 0.43) : 1;
+  const finalAboutOpacity = s1AboutOpacity * s1AboutExit;
+
+  // Local progress inside Scene 3 (0.333 to 0.500 mapped to 0.0 -> 1.0)
+  const s3Prog = Math.max(0, Math.min(1, (scrollProgress - 0.333) / 0.167));
 
   useEffect(() => {
     if (activeChapter === 3) {
@@ -44,7 +77,7 @@ export default function ScrollyChapter({
 
   return (
     <div className="relative z-20 flex flex-col items-center justify-center min-h-screen px-6 text-center select-none pointer-events-none w-full">
-      {/* ===================== SCENE 1: THE ENTRANCE ===================== */}
+      {/* ===================== SCENE 1: THE ENTRANCE & ABOUT ===================== */}
       <div
         className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-700 ease-out px-4 pointer-events-none ${
           activeChapter === 0
@@ -52,34 +85,80 @@ export default function ScrollyChapter({
             : 'opacity-0 scale-95'
         }`}
       >
-
-        {/* Headline with Vertical Mask Slide-up & Letter Stagger */}
-        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.88] text-white flex flex-wrap justify-center overflow-hidden py-2">
-          {'THE FORESTS'.split('').map((char, i) => (
-            <span
-              key={i}
-              style={{
-                transitionDelay: `${120 + i * 45}ms`,
-              }}
-              className={`inline-block transform transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                activeChapter === 0
-                  ? 'translate-y-0 opacity-100'
-                  : 'translate-y-full opacity-0'
-              }`}
-            >
-              {char === ' ' ? '\u00A0' : char}
-            </span>
-          ))}
-        </h1>
-
-        {/* Subtitle */}
-        <p
-          className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-300 tracking-wide max-w-xl transition-all duration-700 delay-500 ${
-            activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}
+        {/* Phase 1: "THE FORESTS" and subtitle (fades out between detik 4 and 5) */}
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center px-4 transition-all duration-200 ease-out pointer-events-none"
+          style={{
+            opacity: s1TitleOpacity,
+            transform: `translateY(${s1TitleTranslateY}px)`,
+            filter: `blur(${s1TitleBlur}px)`,
+          }}
         >
-          Before civilization, silence reigned.
-        </p>
+          {/* Headline with Vertical Mask Slide-up & Letter Stagger */}
+          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.88] text-white flex flex-wrap justify-center overflow-hidden py-2">
+            {'THE FORESTS'.split('').map((char, i) => (
+              <span
+                key={i}
+                style={{
+                  transitionDelay: `${120 + i * 45}ms`,
+                }}
+                className={`inline-block transform transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  activeChapter === 0
+                    ? 'translate-y-0 opacity-100'
+                    : 'translate-y-full opacity-0'
+                }`}
+              >
+                {char === ' ' ? '\u00A0' : char}
+              </span>
+            ))}
+          </h1>
+
+          {/* Subtitle */}
+          <p
+            className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-300 tracking-wide max-w-xl transition-all duration-700 delay-500 ${
+              activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}
+          >
+            Before civilization, silence reigned.
+          </p>
+        </div>
+
+        {/* Phase 2: "About" Section (appears at detik 7) */}
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center px-6 transition-all duration-300 ease-out pointer-events-none max-w-4xl mx-auto"
+          style={{
+            opacity: finalAboutOpacity,
+            transform: `translateY(${s1AboutTranslateY}px)`,
+          }}
+        >
+          {/* Category Tag */}
+          <span className="text-[11px] sm:text-xs font-mono tracking-[0.35em] uppercase text-emerald-400 mb-3">
+            ARCHIVE // 01
+          </span>
+
+          {/* Headline */}
+          <h2 className="text-5xl sm:text-7xl md:text-8xl font-black uppercase tracking-tight text-white drop-shadow-[0_0_35px_rgba(255,255,255,0.3)]">
+            ABOUT
+          </h2>
+
+          {/* Narrative Overview */}
+          <p className="mt-5 sm:mt-6 text-sm sm:text-base md:text-lg font-light text-neutral-200 tracking-wide max-w-2xl leading-relaxed">
+            An interactive cinematic journey into ancient woodlands — witnessing their primordial majesty, the sudden terror of wildfire, and nature&apos;s quiet resilience toward rebirth.
+          </p>
+
+          {/* Telemetry / Metadata Badges */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-[10px] sm:text-[11px] font-mono tracking-widest text-neutral-400">
+            <span className="border border-white/20 bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-full text-neutral-300">
+              ORIGINAL FOOTAGE
+            </span>
+            <span className="border border-white/20 bg-black/50 backdrop-blur-md px-4 py-1.5 rounded-full text-neutral-300">
+              6 CHAPTERS
+            </span>
+            <span className="border border-emerald-500/40 bg-emerald-950/40 text-emerald-300 backdrop-blur-md px-4 py-1.5 rounded-full">
+              SCROLL ENGINE
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* ===================== SCENE 2: THE CANOPY ===================== */}
