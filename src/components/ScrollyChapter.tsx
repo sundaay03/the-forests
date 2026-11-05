@@ -14,8 +14,8 @@ export default function ScrollyChapter({
   // Live containment counter for Scene 4
   const [containment, setContainment] = useState(0);
 
-  // Scene 1 Video Playback Time (mapped from scrollProgress 0.0 to 0.135 across 10.03s duration)
-  const s1Time = Math.min(10.03, Math.max(0, (scrollProgress / 0.135) * 10.03));
+  // Scene 1 Video Playback Time (mapped from scrollProgress 0.0 to 0.135 across 9.98s duration)
+  const s1Time = Math.min(9.98, Math.max(0, (scrollProgress / 0.135) * 9.98));
 
   // Scene 1: "THE FORESTS" title and subtitle fade out away between detik 4 and 5
   let s1TitleOpacity = 1;

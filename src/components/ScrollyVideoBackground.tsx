@@ -18,7 +18,7 @@ interface SceneMeta {
 }
 
 const SCENE_DATA: SceneMeta[] = [
-  { id: 1, src: '/scene/scene1/1.mp4', duration: 10.03, startProg: 0.0, playEndProg: 0.16, endProg: 0.2 },
+  { id: 1, src: '/scene/scene1/11.mp4', duration: 9.98, startProg: 0.0, playEndProg: 0.16, endProg: 0.2 },
   { id: 2, src: '/scene/scene2/2.mp4', duration: 10.03, startProg: 0.2, playEndProg: 0.36, endProg: 0.4 },
   { id: 3, src: '/scene/scene3/3.mp4', duration: 7.01,  startProg: 0.4, playEndProg: 0.56, endProg: 0.6, isRealtime: true },
   { id: 4, src: '/scene/scene4/4.mp4', duration: 10.03, startProg: 0.6, playEndProg: 0.76, endProg: 0.8 },
