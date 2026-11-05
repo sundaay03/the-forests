@@ -32,6 +32,7 @@ export default function ScrollyVideoBackground({
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const scrollProgRef = useRef(scrollProgress);
   scrollProgRef.current = scrollProgress;
+  const lerpTimesRef = useRef<number[]>([0, 0, 0, 0, 0]);
 
   // 1. Dedicated Realtime Playback Controller for Scene 3 (THE INFERNO)
   // Ensures Video 3 plays continuously at normal speed, looping forever, even when not scrolling
@@ -122,17 +123,17 @@ export default function ScrollyVideoBackground({
           targetTime = ratio * duration;
         }
 
-        const safeTime = Math.max(0, Math.min(targetTime, duration - 0.01));
+        // Ultra-fluid 120 FPS lerp interpolation to eliminate all micro-stutters
+        const currentLerp = lerpTimesRef.current[index] ?? 0;
+        const nextLerp = currentLerp + (targetTime - currentLerp) * 0.25;
+        lerpTimesRef.current[index] = nextLerp;
 
-        // Direct seek when threshold > 0.02s
-        if (Math.abs(video.currentTime - safeTime) > 0.02) {
+        const safeTime = Math.max(0, Math.min(nextLerp, duration - 0.01));
+
+        // Precision 120 FPS frame seek (threshold ~0.004s for sub-frame accuracy)
+        if (Math.abs(video.currentTime - safeTime) > 0.004) {
           try {
-            const v = video as HTMLVideoElement & { fastSeek?: (t: number) => void };
-            if (typeof v.fastSeek === 'function') {
-              v.fastSeek(safeTime);
-            } else {
-              v.currentTime = safeTime;
-            }
+            video.currentTime = safeTime;
           } catch {
             // Ignore if seeking fails before metadata
           }
