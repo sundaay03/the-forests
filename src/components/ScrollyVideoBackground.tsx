@@ -98,6 +98,11 @@ export default function ScrollyVideoBackground({
         // Scene 3 runs independently in realtime; NEVER touch or seek it in scrub loop
         if (scene.isRealtime) return;
 
+        // Performance optimization: Only seek videos that are currently visible or approaching
+        const isNearActive =
+          prog >= (scene.startProg - 0.05) && prog <= (scene.endProg + 0.05);
+        if (!isNearActive) return;
+
         const video = videoRefs.current[index];
         if (!video) return;
 
@@ -122,7 +127,12 @@ export default function ScrollyVideoBackground({
         // Direct seek when threshold > 0.02s
         if (Math.abs(video.currentTime - safeTime) > 0.02) {
           try {
-            video.currentTime = safeTime;
+            const v = video as HTMLVideoElement & { fastSeek?: (t: number) => void };
+            if (typeof v.fastSeek === 'function') {
+              v.fastSeek(safeTime);
+            } else {
+              v.currentTime = safeTime;
+            }
           } catch {
             // Ignore if seeking fails before metadata
           }
@@ -196,9 +206,12 @@ export default function ScrollyVideoBackground({
               muted
               autoPlay={scene.isRealtime || false}
               loop={scene.isRealtime || false}
-              preload="auto"
+              preload={index <= 1 ? 'auto' : 'metadata'}
               className="w-full h-full object-cover scale-[1.01]"
               style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
                 filter:
                   index === 2
                     ? 'contrast(1.15) saturate(1.2)'
