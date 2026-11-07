@@ -285,13 +285,6 @@ export default function ScrollyChapter({
             : 'opacity-0 scale-95'
         }`}
       >
-        <span
-          className={`text-[11px] sm:text-xs font-mono tracking-[0.35em] uppercase text-neutral-400 mb-4 transition-all duration-700 delay-100 ${
-            activeChapter === 4 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'
-          }`}
-        >
-          ACT V • THE ASHES
-        </span>
 
         {/* Letter-by-letter opacity fade mimicking settling ash */}
         <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-neutral-200 flex flex-wrap justify-center py-2">
@@ -330,13 +323,6 @@ export default function ScrollyChapter({
             : 'opacity-0 scale-95'
         }`}
       >
-        <span
-          className={`text-[11px] sm:text-xs font-mono tracking-[0.35em] uppercase text-amber-400 mb-4 transition-all duration-700 delay-100 ${
-            activeChapter === 5 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'
-          }`}
-        >
-          ACT VI • THE HUMAN TOLL
-        </span>
 
         {/* Headline with cinematic tracking and smoke blur-to-sharp */}
         <h1
@@ -367,23 +353,16 @@ export default function ScrollyChapter({
             : 'opacity-0 scale-95'
         }`}
       >
-        <span
-          className={`text-[11px] sm:text-xs font-mono tracking-[0.35em] uppercase text-emerald-400 mb-4 transition-all duration-700 delay-100 ${
-            activeChapter === 6 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'
-          }`}
-        >
-          ACT VII • THE REBIRTH
-        </span>
 
-        {/* Headline with glowing emerald aura */}
+        {/* Headline */}
         <h1
-          className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[0.05em] text-white py-2 transition-all duration-1000 ease-out drop-shadow-[0_0_40px_rgba(16,185,129,0.5)] ${
+          className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[0.05em] text-white py-2 transition-all duration-1000 ease-out ${
             activeChapter === 6
               ? 'opacity-100 translate-y-0 scale-100'
               : 'opacity-0 translate-y-6 scale-95'
           }`}
         >
-          <span className="text-emerald-400">NEW</span> ROOTS
+          REFOREST
         </h1>
 
         {/* Subtitle */}
