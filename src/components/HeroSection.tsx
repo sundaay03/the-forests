@@ -8,7 +8,7 @@ export default function HeroSection() {
             THE
           </h1>
           <h1 className="text-6xl sm:text-8xl md:text-[10rem] lg:text-[12rem] font-black leading-[0.88] uppercase tracking-wider text-white">
-            FORESTS
+            FOREST
           </h1>
         </div>
       </main>

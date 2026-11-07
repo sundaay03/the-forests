@@ -32,14 +32,18 @@ export default function ScrollyExperience() {
     });
     lenisRef.current = lenis;
 
+    let lastProg = -1;
     const updateScrollMetrics = (prog: number) => {
       if (typeof prog !== 'number' || isNaN(prog)) return;
       const clampedProg = Math.max(0, Math.min(1, prog));
+      if (Math.abs(clampedProg - lastProg) < 0.00005) return;
+      lastProg = clampedProg;
+
       setScrollProgress(clampedProg);
 
       // Map progress to 5 chapters (0 to 4)
       const rawChapter = Math.min(4, Math.floor(clampedProg * 5));
-      setActiveChapter(rawChapter);
+      setActiveChapter((prev) => (prev === rawChapter ? prev : rawChapter));
     };
 
     // 2. Synchronize Lenis with State
@@ -91,7 +95,7 @@ export default function ScrollyExperience() {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full h-[1000vh] bg-black">
+    <div ref={containerRef} suppressHydrationWarning className="relative w-full h-[1000vh] bg-black">
       {/* Fixed Sticky Viewport (100vh) */}
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden">
         {/* Cinematic Video Backgrounds (Scroll-driven Scrubbing Engine) */}

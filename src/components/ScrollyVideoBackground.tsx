@@ -18,11 +18,11 @@ interface SceneMeta {
 }
 
 const SCENE_DATA: SceneMeta[] = [
-  { id: 1, src: '/scene/scene1/11.mp4', duration: 9.98, startProg: 0.0, playEndProg: 0.16, endProg: 0.2 },
-  { id: 2, src: '/scene/scene2/2.mp4', duration: 10.03, startProg: 0.2, playEndProg: 0.36, endProg: 0.4 },
-  { id: 3, src: '/scene/scene3/3.mp4', duration: 7.01,  startProg: 0.4, playEndProg: 0.56, endProg: 0.6, isRealtime: true },
-  { id: 4, src: '/scene/scene4/4.mp4', duration: 10.03, startProg: 0.6, playEndProg: 0.76, endProg: 0.8 },
-  { id: 5, src: '/scene/scene5/5.mp4', duration: 9.75,  startProg: 0.8, playEndProg: 0.96, endProg: 1.0 },
+  { id: 1, src: '/scene/scene1/1.webm', duration: 9.93, startProg: 0.0, playEndProg: 0.16, endProg: 0.2 },
+  { id: 2, src: '/scene/scene2/2.webm', duration: 9.93, startProg: 0.2, playEndProg: 0.36, endProg: 0.4 },
+  { id: 3, src: '/scene/scene3/3.webm', duration: 6.98, startProg: 0.4, playEndProg: 0.56, endProg: 0.6, isRealtime: true },
+  { id: 4, src: '/scene/scene4/4.webm', duration: 9.93, startProg: 0.6, playEndProg: 0.76, endProg: 0.8 },
+  { id: 5, src: '/scene/scene5/5.webm', duration: 9.71, startProg: 0.8, playEndProg: 0.96, endProg: 1.0 },
 ];
 
 export default function ScrollyVideoBackground({
@@ -33,6 +33,7 @@ export default function ScrollyVideoBackground({
   const scrollProgRef = useRef(scrollProgress);
   scrollProgRef.current = scrollProgress;
   const lerpTimesRef = useRef<number[]>([0, 0, 0, 0, 0]);
+  const desiredTimesRef = useRef<number[]>([0, 0, 0, 0, 0]);
 
   // 1. Dedicated Realtime Playback Controller for Scene 3 (THE INFERNO)
   // Ensures Video 3 plays continuously at normal speed, looping forever, even when not scrolling
@@ -56,8 +57,25 @@ export default function ScrollyVideoBackground({
     }
   }, [activeChapter]);
 
-  // 2. Prime scrubbing videos on mount (Scenes 1, 2, 4, 5)
+  // 2. Prime scrubbing videos on mount (Scenes 1, 2, 4, 5) & setup non-blocking seek coalescing
   useEffect(() => {
+    const cleanupListeners: (() => void)[] = [];
+
+    const commitSeek = (index: number) => {
+      const video = videoRefs.current[index];
+      if (!video || SCENE_DATA[index].isRealtime) return;
+      if (video.readyState < 1 || video.seeking) return;
+
+      const target = desiredTimesRef.current[index] ?? 0;
+      if (Math.abs(video.currentTime - target) > 0.008) {
+        try {
+          video.currentTime = target;
+        } catch {
+          // Ignore if seeking fails before metadata is ready
+        }
+      }
+    };
+
     videoRefs.current.forEach((video, index) => {
       if (!video) return;
       video.muted = true;
@@ -67,6 +85,12 @@ export default function ScrollyVideoBackground({
         video.loop = true;
         return;
       }
+
+      const onSeeked = () => {
+        commitSeek(index);
+      };
+      video.addEventListener('seeked', onSeeked);
+      cleanupListeners.push(() => video.removeEventListener('seeked', onSeeked));
 
       const wakeUp = () => {
         const p = video.play();
@@ -88,7 +112,7 @@ export default function ScrollyVideoBackground({
       }
     });
 
-    // 3. Continuous 60fps Scrubbing Loop for Scenes 1, 2, 4, 5
+    // 3. Continuous 120fps Lerp Scrubbing Loop for Scenes 1, 2, 4, 5
     let animId: number;
 
     const scrub = () => {
@@ -101,7 +125,7 @@ export default function ScrollyVideoBackground({
 
         // Performance optimization: Only seek videos that are currently visible or approaching
         const isNearActive =
-          prog >= (scene.startProg - 0.05) && prog <= (scene.endProg + 0.05);
+          prog >= scene.startProg - 0.08 && prog <= scene.endProg + 0.08;
         if (!isNearActive) return;
 
         const video = videoRefs.current[index];
@@ -123,21 +147,17 @@ export default function ScrollyVideoBackground({
           targetTime = ratio * duration;
         }
 
-        // Ultra-fluid 120 FPS lerp interpolation to eliminate all micro-stutters
+        // Ultra-fluid lerp interpolation to eliminate micro-stutters
         const currentLerp = lerpTimesRef.current[index] ?? 0;
-        const nextLerp = currentLerp + (targetTime - currentLerp) * 0.25;
+        const diff = targetTime - currentLerp;
+        const nextLerp = Math.abs(diff) < 0.002 ? targetTime : currentLerp + diff * 0.28;
         lerpTimesRef.current[index] = nextLerp;
 
         const safeTime = Math.max(0, Math.min(nextLerp, duration - 0.01));
+        desiredTimesRef.current[index] = safeTime;
 
-        // Precision 120 FPS frame seek (threshold ~0.004s for sub-frame accuracy)
-        if (Math.abs(video.currentTime - safeTime) > 0.004) {
-          try {
-            video.currentTime = safeTime;
-          } catch {
-            // Ignore if seeking fails before metadata
-          }
-        }
+        // Non-blocking frame seek: never abort an in-flight VP9 decode
+        commitSeek(index);
       });
     };
 
@@ -145,12 +165,16 @@ export default function ScrollyVideoBackground({
 
     return () => {
       cancelAnimationFrame(animId);
+      cleanupListeners.forEach((fn) => fn());
     };
   }, []);
 
   return (
-    <div className="absolute inset-0 w-full h-full overflow-hidden bg-black select-none pointer-events-none">
-      {/* 5 Stacked Optimized Videos with Fast GPU Crossfade */}
+    <div
+      suppressHydrationWarning
+      className="absolute inset-0 w-full h-full overflow-hidden bg-black select-none pointer-events-none"
+    >
+      {/* 5 Stacked Optimized WebM Videos with Fast GPU Crossfade */}
       {SCENE_DATA.map((scene, index) => {
         // Calculate crossfade opacity
         let opacity = 0;
@@ -188,31 +212,38 @@ export default function ScrollyVideoBackground({
           }
         }
 
+        const clampedOpacity = Math.max(0, Math.min(1, opacity));
+
         return (
           <div
             key={scene.id}
+            suppressHydrationWarning
             className="absolute inset-0 w-full h-full"
             style={{
-              opacity: Math.max(0, Math.min(1, opacity)),
-              zIndex: opacity > 0.01 ? 2 : 1,
-              transition: 'opacity 0.2s ease-out',
+              opacity: clampedOpacity,
+              zIndex: clampedOpacity > 0.01 ? 2 : 1,
+              transition: 'opacity 0.18s ease-out',
+              willChange: 'opacity',
             }}
           >
             <video
               ref={(el) => {
                 videoRefs.current[index] = el;
               }}
+              suppressHydrationWarning
               src={scene.src}
               playsInline
               muted
               autoPlay={scene.isRealtime || false}
               loop={scene.isRealtime || false}
-              preload={index <= 1 ? 'auto' : 'metadata'}
-              className="w-full h-full object-cover scale-[1.01]"
+              preload="auto"
+              className="w-full h-full object-cover"
               style={{
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
+                transform: 'translateZ(0) scale(1.01)',
+                willChange: 'transform',
                 filter:
                   index === 2
                     ? 'contrast(1.15) saturate(1.2)'
@@ -228,8 +259,8 @@ export default function ScrollyVideoBackground({
       })}
 
       {/* Cinematic Vignette Overlays */}
-      <div className="absolute inset-0 z-10 bg-radial-gradient from-transparent via-black/35 to-black/85 pointer-events-none" />
-      <div className="absolute inset-0 z-10 bg-gradient-to-t from-black via-transparent to-black/60 pointer-events-none" />
+      <div className="absolute inset-0 z-10 vignette-cinematic pointer-events-none" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-transparent to-black/60 pointer-events-none" />
 
       {/* Atmospheric Fire/Emergency Gradient for Scene 3 & 4 */}
       <div

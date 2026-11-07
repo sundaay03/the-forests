@@ -14,10 +14,10 @@ export default function ScrollyChapter({
   // Live containment counter for Scene 4
   const [containment, setContainment] = useState(0);
 
-  // Scene 1 Video Playback Time (mapped from scrollProgress 0.0 to 0.135 across 9.98s duration)
-  const s1Time = Math.min(9.98, Math.max(0, (scrollProgress / 0.135) * 9.98));
+  // Scene 1 Video Playback Time (mapped from scrollProgress 0.0 to 0.135 across 9.93s duration)
+  const s1Time = Math.min(9.93, Math.max(0, (scrollProgress / 0.135) * 9.93));
 
-  // Scene 1: "THE FORESTS" title and subtitle fade out away between detik 4 and 5
+  // Scene 1: "THE FOREST" title and subtitle fade out away between detik 4 and 5
   let s1TitleOpacity = 1;
   let s1TitleTranslateY = 0;
   let s1TitleBlur = 0;
@@ -99,7 +99,7 @@ export default function ScrollyChapter({
             : 'opacity-0 scale-95'
         }`}
       >
-        {/* Phase 1: "THE FORESTS" and subtitle (fades out between detik 4 and 5) */}
+        {/* Phase 1: "THE FOREST" and subtitle (fades out between detik 4 and 5) */}
         <div
           className="absolute inset-0 flex flex-col items-center justify-center px-4 transition-all duration-200 ease-out pointer-events-none"
           style={{
@@ -108,33 +108,47 @@ export default function ScrollyChapter({
             filter: `blur(${s1TitleBlur}px)`,
           }}
         >
-          {/* Headline with Vertical Mask Slide-up & Letter Stagger */}
-          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.88] text-white flex flex-wrap justify-center overflow-hidden py-2">
-            {'THE FORESTS'.split('').map((char, i) => (
-              <span
-                key={i}
-                style={{
-                  transitionDelay: `${120 + i * 45}ms`,
-                }}
-                className={`inline-block transform transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  activeChapter === 0
-                    ? 'translate-y-0 opacity-100'
-                    : 'translate-y-full opacity-0'
-                }`}
-              >
-                {char === ' ' ? '\u00A0' : char}
-              </span>
-            ))}
-          </h1>
+          <div className="relative flex flex-col items-center justify-center">
+            {/* Cinematic Ambient Dark Shadow behind text (feathered soft radial shadow, no box borders) */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 -m-8 sm:-m-16 rounded-full pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 45%, rgba(0,0,0,0) 75%)',
+                filter: 'blur(35px)',
+                transform: 'translate3d(0, 0, 0)',
+              }}
+            />
 
-          {/* Subtitle */}
-          <p
-            className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-300 tracking-wide max-w-xl transition-all duration-700 delay-500 ${
-              activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-            }`}
-          >
-            Before civilization, silence reigned.
-          </p>
+            {/* Headline with Vertical Mask Slide-up & Letter Stagger */}
+            <h1 className="relative text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.88] text-white flex flex-wrap justify-center overflow-hidden py-3 sm:py-5 text-cinematic-shadow">
+              {'THE FOREST'.split('').map((char, i) => (
+                <span
+                  key={i}
+                  style={{
+                    transitionDelay: `${120 + i * 45}ms`,
+                  }}
+                  className={`inline-block transform transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    activeChapter === 0
+                      ? 'translate-y-0 opacity-100'
+                      : 'translate-y-full opacity-0'
+                  }`}
+                >
+                  {char === ' ' ? '\u00A0' : char}
+                </span>
+              ))}
+            </h1>
+
+            {/* Subtitle */}
+            <p
+              className={`relative mt-6 sm:mt-8 text-xs sm:text-sm md:text-base font-semibold text-white/95 tracking-[0.25em] uppercase max-w-xl transition-all duration-700 delay-500 subtitle-cinematic-shadow ${
+                activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
+            >
+              Before civilization, silence reigned.
+            </p>
+          </div>
         </div>
 
         {/* Phase 2: "About" Section (appears at detik 7 and fades out away before transition to Scene 2) */}
@@ -146,16 +160,29 @@ export default function ScrollyChapter({
             filter: `blur(${s1AboutBlur}px)`,
           }}
         >
+          <div className="relative flex flex-col items-center justify-center w-full">
+            {/* Cinematic Ambient Dark Shadow behind About */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 -m-8 sm:-m-12 rounded-full pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0) 80%)',
+                filter: 'blur(35px)',
+                transform: 'translate3d(0, 0, 0)',
+              }}
+            />
 
-          {/* Headline */}
-          <h2 className="text-5xl sm:text-7xl md:text-8xl font-black uppercase tracking-tight text-white drop-shadow-[0_0_35px_rgba(255,255,255,0.3)]">
-            ABOUT
-          </h2>
+            {/* Headline */}
+            <h2 className="relative text-5xl sm:text-7xl md:text-8xl font-black uppercase tracking-tight text-white text-cinematic-shadow">
+              ABOUT
+            </h2>
 
-          {/* Narrative Overview */}
-          <p className="mt-5 sm:mt-6 text-sm sm:text-base md:text-lg font-light text-neutral-200 tracking-wide max-w-2xl leading-relaxed">
-            An interactive cinematic journey into ancient woodlands — witnessing their primordial majesty, the sudden terror of wildfire, and nature&apos;s quiet resilience toward rebirth.
-          </p>
+            {/* Narrative Overview */}
+            <p className="relative mt-5 sm:mt-6 text-sm sm:text-base md:text-lg font-normal text-white/95 tracking-wide max-w-2xl leading-relaxed subtitle-cinematic-shadow">
+              An interactive cinematic journey into ancient woodlands — witnessing their primordial majesty, the sudden terror of wildfire, and nature&apos;s quiet resilience toward rebirth.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -167,8 +194,6 @@ export default function ScrollyChapter({
             : 'opacity-0 scale-95'
         }`}
       >
-        
-
         {/* Split-word blur-to-sharp focus with horizontal tracking expansion */}
         <h1
           className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase leading-[0.9] text-white transform transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
@@ -177,7 +202,7 @@ export default function ScrollyChapter({
               : 'blur-md tracking-tighter opacity-0'
           }`}
         >
-          THE LIVING LUNG
+          WONDERFULL OF INDONESIAN
         </h1>
 
         {/* Subtitle */}
@@ -307,7 +332,6 @@ export default function ScrollyChapter({
             : 'opacity-0 scale-95'
         }`}
       >
-
         {/* Letter-by-letter opacity fade mimicking settling ash */}
         <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-neutral-200 flex flex-wrap justify-center py-2">
           {'WHAT REMAINS'.split('').map((char, i) => (
