@@ -12,7 +12,6 @@ const CHAPTERS = [
   { id: 3, tag: '03', title: 'THE INFERNO' },
   { id: 4, tag: '04', title: 'THE FRONTLINE' },
   { id: 5, tag: '05', title: 'THE ASHES' },
-  { id: 6, tag: '06', title: 'THE REBIRTH' },
 ];
 
 export default function ScrollyHUD({

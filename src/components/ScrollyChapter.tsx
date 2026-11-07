@@ -228,55 +228,8 @@ export default function ScrollyChapter({
 
         {/* Fast kinetic reveal with heat-shimmer & orange-amber text glow */}
         <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)]">
-          CONSUMPTION
+          FOREST AND LAND FIRES
         </h1>
-
-        {/* Subtitle */}
-        <p className="mt-4 sm:mt-6 text-sm sm:text-lg md:text-xl font-mono text-amber-200/90 tracking-wide max-w-xl">
-          Ignition spreads at 15 kilometers per hour.
-        </p>
-
-        {/* Scroll-Driven Crisis Telemetry Cards (Objects that appear as user scrolls) */}
-        <div
-          className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl w-full font-mono text-[11px] sm:text-xs transition-all duration-500"
-          style={{
-            opacity: s3Prog >= 0.25 ? Math.min(1, (s3Prog - 0.25) / 0.15) : 0,
-            transform: `translateY(${s3Prog >= 0.25 ? 0 : 25}px)`,
-          }}
-        >
-          <div className="bg-black/60 border border-amber-600/50 backdrop-blur-md rounded-lg p-3 text-left">
-            <span className="text-neutral-400 block text-[9px] uppercase tracking-wider">THERMAL FLUX</span>
-            <span className="text-amber-400 font-bold text-base block mt-0.5">920°C</span>
-            <div className="w-full bg-neutral-800 h-1 rounded-full mt-2 overflow-hidden">
-              <div
-                className="bg-amber-500 h-full transition-all duration-300"
-                style={{ width: `${Math.min(100, Math.max(20, s3Prog * 120))}%` }}
-              />
-            </div>
-          </div>
-
-          <div className="bg-black/60 border border-amber-600/50 backdrop-blur-md rounded-lg p-3 text-left">
-            <span className="text-neutral-400 block text-[9px] uppercase tracking-wider">SPREAD VELOCITY</span>
-            <span className="text-white font-bold text-base block mt-0.5">15 KM/H</span>
-            <span className="text-amber-300/80 text-[10px] block mt-1">HIGH-WIND DRIVEN</span>
-          </div>
-
-          <div className="bg-black/60 border border-red-600/50 backdrop-blur-md rounded-lg p-3 text-left">
-            <span className="text-neutral-400 block text-[9px] uppercase tracking-wider">PERIMETER BREACH</span>
-            <span className="text-red-400 font-bold text-base block mt-0.5">UNCONTAINED</span>
-            <span className="text-red-400/80 text-[10px] block mt-1">CODE RED ALERT</span>
-          </div>
-        </div>
-
-        {/* Scroll Instruction Hint for Scene 3 */}
-        <div
-          className="mt-6 text-[10px] font-mono tracking-widest text-amber-400/80 uppercase transition-opacity duration-300"
-          style={{
-            opacity: s3Prog > 0.1 && s3Prog < 0.65 ? 1 : 0,
-          }}
-        >
-          <span>SCROLL TO ADVANCE NARRATIVE →</span>
-        </div>
       </div>
 
       {/* ===================== SCENE 4: THE RESISTANCE ===================== */}
