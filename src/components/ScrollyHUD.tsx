@@ -20,37 +20,52 @@ export default function ScrollyHUD({
   activeChapter,
   onJumpToChapter,
 }: ScrollyHUDProps) {
+  const currentChap = CHAPTERS[activeChapter] ?? CHAPTERS[0];
+
   return (
     <div className="fixed inset-0 pointer-events-none z-30 select-none">
-      {/* Right Progress Rail with Click-to-Jump Navigation */}
-      <div className="fixed right-6 sm:right-10 top-1/2 -translate-y-1/2 flex flex-col items-end gap-5 pointer-events-auto">
-        {CHAPTERS.map((chap, idx) => {
-          const isActive = activeChapter === idx;
-          return (
-            <button
-              key={chap.id}
-              onClick={() => onJumpToChapter(idx)}
-              className="group flex items-center gap-3 cursor-pointer py-1"
-            >
-              <span
-                className={`text-[10px] font-mono tracking-widest transition-all duration-300 ${
-                  isActive
-                    ? 'text-white opacity-100 translate-x-0'
-                    : 'text-neutral-500 opacity-0 group-hover:opacity-100 -translate-x-2'
-                }`}
+      {/* Top Navigation Rail with Click-to-Jump Navigation */}
+      <div className="fixed top-6 sm:top-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-auto">
+        {/* Active Chapter Indicator */}
+        <div className="flex items-center gap-2 text-[10px] sm:text-xs font-mono tracking-[0.25em] uppercase text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] transition-all duration-300">
+          <span className="text-neutral-400">{currentChap.tag}</span>
+          <span className="text-neutral-600">/</span>
+          <span className="font-semibold text-white tracking-widest">
+            {currentChap.title}
+          </span>
+        </div>
+
+        {/* Horizontal Navigation Dots Rail */}
+        <div className="flex items-center gap-2.5 sm:gap-3 py-1">
+          {CHAPTERS.map((chap, idx) => {
+            const isActive = activeChapter === idx;
+            return (
+              <button
+                key={chap.id}
+                onClick={() => onJumpToChapter(idx)}
+                aria-label={chap.title}
+                className="group relative flex flex-col items-center justify-center py-2 px-1 cursor-pointer"
               >
-                {chap.title}
-              </span>
-              <div
-                className={`h-2 transition-all duration-300 rounded-full ${
-                  isActive
-                    ? 'w-7 bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]'
-                    : 'w-2 bg-neutral-600 group-hover:bg-neutral-400 group-hover:w-3'
-                }`}
-              />
-            </button>
-          );
-        })}
+                <div
+                  className={`h-1.5 transition-all duration-300 rounded-full drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)] ${
+                    isActive
+                      ? 'w-7 sm:w-9 bg-white shadow-[0_0_12px_rgba(255,255,255,0.95)]'
+                      : 'w-2 bg-neutral-500/70 group-hover:bg-white group-hover:w-3.5'
+                  }`}
+                />
+
+                {/* Hover Tooltip for Quick Chapter Preview */}
+                {!isActive && (
+                  <div className="absolute top-full mt-2 hidden group-hover:flex flex-col items-center pointer-events-none z-40">
+                    <span className="text-white text-[9px] font-mono tracking-widest uppercase whitespace-nowrap drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
+                      {chap.tag} {chap.title}
+                    </span>
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
