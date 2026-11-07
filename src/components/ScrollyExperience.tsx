@@ -13,6 +13,7 @@ if (typeof window !== 'undefined') {
 }
 
 export default function ScrollyExperience() {
+  const [isMounted, setIsMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
 
@@ -20,6 +21,12 @@ export default function ScrollyExperience() {
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
     // 1. Initialize Lenis Smooth Momentum Scrolling
     const lenis = new Lenis({
       duration: 1.2,
@@ -41,8 +48,8 @@ export default function ScrollyExperience() {
 
       setScrollProgress(clampedProg);
 
-      // Map progress to 5 chapters (0 to 4)
-      const rawChapter = Math.min(4, Math.floor(clampedProg * 5));
+      // Map progress to 7 chapters (0 to 6)
+      const rawChapter = Math.min(6, Math.floor(clampedProg * 7));
       setActiveChapter((prev) => (prev === rawChapter ? prev : rawChapter));
     };
 
@@ -81,21 +88,29 @@ export default function ScrollyExperience() {
       lenis.destroy();
       lenisRef.current = null;
     };
-  }, []);
+  }, [isMounted]);
 
   // Jump to specific chapter smoothly using Lenis
   const handleJumpToChapter = (chapterIndex: number) => {
     if (!containerRef.current || !lenisRef.current) return;
     const containerHeight = containerRef.current.offsetHeight - window.innerHeight;
-    const targetScroll = (chapterIndex / 5) * containerHeight;
+    const targetScroll = (chapterIndex / 7) * containerHeight;
     lenisRef.current.scrollTo(targetScroll, {
       duration: 1.6,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
   };
 
+  if (!isMounted) {
+    return (
+      <div className="relative w-full h-[1400vh] bg-black">
+        <div className="sticky top-0 left-0 w-full h-screen overflow-hidden bg-black" />
+      </div>
+    );
+  }
+
   return (
-    <div ref={containerRef} suppressHydrationWarning className="relative w-full h-[1000vh] bg-black">
+    <div ref={containerRef} className="relative w-full h-[1400vh] bg-black">
       {/* Fixed Sticky Viewport (100vh) */}
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden">
         {/* Cinematic Video Backgrounds (Scroll-driven Scrubbing Engine) */}

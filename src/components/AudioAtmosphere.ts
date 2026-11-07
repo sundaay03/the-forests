@@ -107,6 +107,14 @@ class ProceduralSoundscape {
         this.droneOsc.frequency.linearRampToValueAtTime(36.7, now + 2.0); // D1
         this.filterNode.frequency.linearRampToValueAtTime(220, now + 2.0);
         break;
+      case 5: // Scene 6: The Human Toll (Heavy atmospheric smoke haze)
+        this.droneOsc.frequency.linearRampToValueAtTime(41.2, now + 1.5); // E1
+        this.filterNode.frequency.linearRampToValueAtTime(320, now + 1.5);
+        break;
+      case 6: // Scene 7: The Rebirth (Warm, harmonic renewal)
+        this.droneOsc.frequency.linearRampToValueAtTime(73.4, now + 2.0); // D2
+        this.filterNode.frequency.linearRampToValueAtTime(620, now + 2.0);
+        break;
     }
   }
 

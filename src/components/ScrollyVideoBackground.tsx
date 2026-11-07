@@ -18,11 +18,13 @@ interface SceneMeta {
 }
 
 const SCENE_DATA: SceneMeta[] = [
-  { id: 1, src: '/scene/scene1/1.webm', duration: 9.93, startProg: 0.0, playEndProg: 0.16, endProg: 0.2 },
-  { id: 2, src: '/scene/scene2/2.webm', duration: 9.93, startProg: 0.2, playEndProg: 0.36, endProg: 0.4 },
-  { id: 3, src: '/scene/scene3/3.webm', duration: 6.98, startProg: 0.4, playEndProg: 0.56, endProg: 0.6, isRealtime: true },
-  { id: 4, src: '/scene/scene4/4.webm', duration: 9.93, startProg: 0.6, playEndProg: 0.76, endProg: 0.8 },
-  { id: 5, src: '/scene/scene5/5.webm', duration: 9.71, startProg: 0.8, playEndProg: 0.96, endProg: 1.0 },
+  { id: 1, src: '/scene/scene1/1.webm', duration: 9.93, startProg: 0.000, playEndProg: 0.115, endProg: 0.143 },
+  { id: 2, src: '/scene/scene2/2.webm', duration: 9.93, startProg: 0.143, playEndProg: 0.258, endProg: 0.286 },
+  { id: 3, src: '/scene/scene3/3.webm', duration: 6.98, startProg: 0.286, playEndProg: 0.401, endProg: 0.429, isRealtime: true },
+  { id: 4, src: '/scene/scene4/4.webm', duration: 9.93, startProg: 0.429, playEndProg: 0.544, endProg: 0.571 },
+  { id: 5, src: '/scene/scene5/5.webm', duration: 9.93, startProg: 0.571, playEndProg: 0.686, endProg: 0.714 },
+  { id: 6, src: '/scene/scene6/6.webm', duration: 9.98, startProg: 0.714, playEndProg: 0.829, endProg: 0.857 },
+  { id: 7, src: '/scene/scene7/7.webm', duration: 9.93, startProg: 0.857, playEndProg: 0.975, endProg: 1.000 },
 ];
 
 export default function ScrollyVideoBackground({
@@ -32,8 +34,8 @@ export default function ScrollyVideoBackground({
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const scrollProgRef = useRef(scrollProgress);
   scrollProgRef.current = scrollProgress;
-  const lerpTimesRef = useRef<number[]>([0, 0, 0, 0, 0]);
-  const desiredTimesRef = useRef<number[]>([0, 0, 0, 0, 0]);
+  const lerpTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0]);
+  const desiredTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0]);
 
   // 1. Dedicated Realtime Playback Controller for Scene 3 (THE INFERNO)
   // Ensures Video 3 plays continuously at normal speed, looping forever, even when not scrolling
@@ -251,6 +253,10 @@ export default function ScrollyVideoBackground({
                     ? 'contrast(1.25) brightness(0.95)'
                     : index === 4
                     ? 'contrast(1.1) saturate(0.55) brightness(0.85)'
+                    : index === 5
+                    ? 'contrast(1.15) saturate(0.9) brightness(0.95)'
+                    : index === 6
+                    ? 'contrast(1.08) saturate(1.2) brightness(1.02)'
                     : 'contrast(1.05) saturate(1.05)',
               }}
             />

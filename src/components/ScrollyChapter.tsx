@@ -14,8 +14,8 @@ export default function ScrollyChapter({
   // Live containment counter for Scene 4
   const [containment, setContainment] = useState(0);
 
-  // Scene 1 Video Playback Time (mapped from scrollProgress 0.0 to 0.135 across 9.93s duration)
-  const s1Time = Math.min(9.93, Math.max(0, (scrollProgress / 0.135) * 9.93));
+  // Scene 1 Video Playback Time (mapped from scrollProgress 0.0 to 0.09 across 9.93s duration)
+  const s1Time = Math.min(9.93, Math.max(0, (scrollProgress / 0.09) * 9.93));
 
   // Scene 1: "THE FOREST" title and subtitle fade out away between detik 4 and 5
   let s1TitleOpacity = 1;
@@ -48,21 +48,21 @@ export default function ScrollyChapter({
     s1AboutOpacity = Math.max(0, Math.min(1, enterRatio));
     s1AboutTranslateY = (1 - s1AboutOpacity) * 24;
     s1AboutBlur = (1 - s1AboutOpacity) * 4;
-  } else if (scrollProgress < 0.128) {
+  } else if (scrollProgress < 0.095) {
     // Stays fully visible throughout Scene 1 until the video concludes
     s1AboutOpacity = 1;
     s1AboutTranslateY = 0;
     s1AboutBlur = 0;
   } else {
-    // Fades out away before transition to Scene 2 (scrollProgress 0.128 to 0.142)
-    const exitRatio = Math.min(1, Math.max(0, (scrollProgress - 0.128) / 0.014));
+    // Fades out away before transition to Scene 2 (scrollProgress 0.095 to 0.115)
+    const exitRatio = Math.min(1, Math.max(0, (scrollProgress - 0.095) / 0.02));
     s1AboutOpacity = Math.max(0, 1 - exitRatio);
     s1AboutTranslateY = -exitRatio * 35; // floats upward as it fades away
     s1AboutBlur = exitRatio * 8;
   }
 
-  // Local progress inside Scene 3 (0.333 to 0.500 mapped to 0.0 -> 1.0)
-  const s3Prog = Math.max(0, Math.min(1, (scrollProgress - 0.333) / 0.167));
+  // Local progress inside Scene 3 (0.286 to 0.429 mapped to 0.0 -> 1.0)
+  const s3Prog = Math.max(0, Math.min(1, (scrollProgress - 0.286) / 0.143));
 
   useEffect(() => {
     if (activeChapter === 3) {
@@ -285,6 +285,14 @@ export default function ScrollyChapter({
             : 'opacity-0 scale-95'
         }`}
       >
+        <span
+          className={`text-[11px] sm:text-xs font-mono tracking-[0.35em] uppercase text-neutral-400 mb-4 transition-all duration-700 delay-100 ${
+            activeChapter === 4 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'
+          }`}
+        >
+          ACT V • THE ASHES
+        </span>
+
         {/* Letter-by-letter opacity fade mimicking settling ash */}
         <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-neutral-200 flex flex-wrap justify-center py-2">
           {'WHAT REMAINS'.split('').map((char, i) => (
@@ -310,7 +318,81 @@ export default function ScrollyChapter({
             activeChapter === 4 ? 'opacity-85 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
-          Rebirth begins in the cold soil.
+          Where ancient canopies stood, silence and ash.
+        </p>
+      </div>
+
+      {/* ===================== SCENE 6: THE HUMAN TOLL ===================== */}
+      <div
+        className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-1000 ease-out px-4 pointer-events-none ${
+          activeChapter === 5
+            ? 'opacity-100 scale-100'
+            : 'opacity-0 scale-95'
+        }`}
+      >
+        <span
+          className={`text-[11px] sm:text-xs font-mono tracking-[0.35em] uppercase text-amber-400 mb-4 transition-all duration-700 delay-100 ${
+            activeChapter === 5 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'
+          }`}
+        >
+          ACT VI • THE HUMAN TOLL
+        </span>
+
+        {/* Headline with cinematic tracking and smoke blur-to-sharp */}
+        <h1
+          className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-white py-2 transform transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            activeChapter === 5
+              ? 'opacity-100 scale-100 filter-none'
+              : 'opacity-0 scale-95 blur-md'
+          }`}
+        >
+          <span className="text-amber-400">CHOKING</span> HORIZON
+        </h1>
+
+        {/* Subtitle */}
+        <p
+          className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-300 tracking-wide max-w-xl transition-all duration-1000 delay-300 ${
+            activeChapter === 5 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}
+        >
+          Toxic smoke knows no boundaries. Every breath becomes a struggle for survival.
+        </p>
+      </div>
+
+      {/* ===================== SCENE 7: THE REBIRTH ===================== */}
+      <div
+        className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-1000 ease-out px-4 pointer-events-none ${
+          activeChapter === 6
+            ? 'opacity-100 scale-100'
+            : 'opacity-0 scale-95'
+        }`}
+      >
+        <span
+          className={`text-[11px] sm:text-xs font-mono tracking-[0.35em] uppercase text-emerald-400 mb-4 transition-all duration-700 delay-100 ${
+            activeChapter === 6 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'
+          }`}
+        >
+          ACT VII • THE REBIRTH
+        </span>
+
+        {/* Headline with glowing emerald aura */}
+        <h1
+          className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[0.05em] text-white py-2 transition-all duration-1000 ease-out drop-shadow-[0_0_40px_rgba(16,185,129,0.5)] ${
+            activeChapter === 6
+              ? 'opacity-100 translate-y-0 scale-100'
+              : 'opacity-0 translate-y-6 scale-95'
+          }`}
+        >
+          <span className="text-emerald-400">NEW</span> ROOTS
+        </h1>
+
+        {/* Subtitle */}
+        <p
+          className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-200 tracking-wide max-w-xl transition-all duration-1000 delay-300 ${
+            activeChapter === 6 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}
+        >
+          From the ashes of yesterday, human hands plant the seeds of tomorrow.
         </p>
       </div>
     </div>
