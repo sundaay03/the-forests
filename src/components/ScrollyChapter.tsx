@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import IndonesiaGallery from './IndonesiaGallery';
+import BurnTransition from './BurnTransition';
 
 interface ScrollyChapterProps {
   activeChapter: number;
@@ -89,6 +90,16 @@ export default function ScrollyChapter({
   const s3ExitOpacity = s3Prog > 0.65 ? Math.max(0, 1 - (s3Prog - 0.65) / 0.28) : 1;
   const s3OverallOpacity = activeChapter === 2 ? s3EnterOpacity * s3ExitOpacity : 0;
   const s3TranslateY = s3Prog > 0.65 ? -(s3Prog - 0.65) * 80 : 0;
+
+  // Global Burn / Erosion Transition Progress between Scene 2 and Scene 3
+  // Scene 2 photos finish before scrollProgress = 0.245 (s2Prog ≈ 0.70)
+  // Transition starts at 0.246, peaks at 0.286 (Scene 3 entrance), and dissolves smoothly by 0.305
+  let globalBurnProgress = 0;
+  if (scrollProgress >= 0.246 && scrollProgress <= 0.286) {
+    globalBurnProgress = (scrollProgress - 0.246) / (0.286 - 0.246);
+  } else if (scrollProgress > 0.286 && scrollProgress <= 0.305) {
+    globalBurnProgress = Math.max(0, 1 - (scrollProgress - 0.286) / (0.305 - 0.286));
+  }
 
   return (
     <div className="relative z-20 flex flex-col items-center justify-center min-h-screen px-6 text-center select-none pointer-events-none w-full">
@@ -192,6 +203,9 @@ export default function ScrollyChapter({
         activeChapter={activeChapter}
         scrollProgress={scrollProgress}
       />
+
+      {/* ===================== TRANSISI TERBAKAR / TERKIKIS (DISSOLVE / EROSION) ===================== */}
+      <BurnTransition progress={globalBurnProgress} />
 
       {/* ===================== SCENE 3: THE INFERNO (SCROLL CHOREOGRAPHED OBJECTS) ===================== */}
       <div

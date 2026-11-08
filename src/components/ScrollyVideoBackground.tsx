@@ -39,11 +39,13 @@ export default function ScrollyVideoBackground({
 
   // 1. Dedicated Realtime Playback Controller for Scene 3 (THE INFERNO)
   // Ensures Video 3 plays continuously at normal speed, looping forever, even when not scrolling
+  const isFireActive = activeChapter === 2 || scrollProgress >= 0.245;
+
   useEffect(() => {
     const video3 = videoRefs.current[2];
     if (!video3) return;
 
-    if (activeChapter === 2) {
+    if (isFireActive) {
       video3.muted = true;
       video3.loop = true;
       video3.playsInline = true;
@@ -57,7 +59,7 @@ export default function ScrollyVideoBackground({
         video3.pause();
       }
     }
-  }, [activeChapter]);
+  }, [isFireActive]);
 
   // 2. Prime scrubbing videos on mount (Scenes 1, 2, 4, 5) & setup non-blocking seek coalescing
   useEffect(() => {
