@@ -346,7 +346,7 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 6: THE HUMAN TOLL ===================== */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 flex items-center justify-start px-8 sm:px-14 md:px-20 lg:px-24 pointer-events-none"
         style={{
           opacity: s6Opacity,
           transform: `translateY(${s6TranslateY}px)`,
@@ -354,7 +354,7 @@ export default function ScrollyChapter({
           transition: 'opacity 0.2s ease-out, filter 0.2s ease-out, transform 0.2s ease-out',
         }}
       >
-        <div className="absolute left-8 sm:left-14 md:left-20 lg:left-24 top-14 sm:top-18 md:top-20 text-left max-w-xl md:max-w-2xl flex flex-col gap-3 sm:gap-4 pointer-events-auto">
+        <div className="text-left max-w-xl md:max-w-2xl flex flex-col gap-3 sm:gap-4 pointer-events-auto">
           {/* Headline with cinematic tracking and smoke blur-to-sharp */}
           <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-[0.92] py-1 drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
             <span className="block">HEALTH</span>
