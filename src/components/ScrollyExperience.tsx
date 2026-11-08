@@ -46,10 +46,13 @@ export default function ScrollyExperience() {
       if (Math.abs(clampedProg - lastProg) < 0.00005) return;
       lastProg = clampedProg;
 
-      setScrollProgress(clampedProg);
+      // Scale progress by (8 / 7) so Scenes 1–7 preserve their exact 0.0 -> 1.0 checkpoints
+      // while Scene 8 (Contact) occupies 1.000 -> 1.143
+      const scaledProg = clampedProg * (8 / 7);
+      setScrollProgress(scaledProg);
 
-      // Map progress to 7 chapters (0 to 6)
-      const rawChapter = Math.min(6, Math.floor(clampedProg * 7));
+      // Map progress to 8 chapters (0 to 7)
+      const rawChapter = Math.min(7, Math.floor(clampedProg * 8));
       setActiveChapter((prev) => (prev === rawChapter ? prev : rawChapter));
     };
 
@@ -94,7 +97,8 @@ export default function ScrollyExperience() {
   const handleJumpToChapter = (chapterIndex: number) => {
     if (!containerRef.current || !lenisRef.current) return;
     const containerHeight = containerRef.current.offsetHeight - window.innerHeight;
-    const targetScroll = (chapterIndex / 7) * containerHeight;
+    const targetRatio = chapterIndex === 7 ? 7.25 / 8 : chapterIndex / 8;
+    const targetScroll = targetRatio * containerHeight;
     lenisRef.current.scrollTo(targetScroll, {
       duration: 1.6,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -103,14 +107,14 @@ export default function ScrollyExperience() {
 
   if (!isMounted) {
     return (
-      <div className="relative w-full h-[2000vh] bg-black">
+      <div className="relative w-full h-[2300vh] bg-black">
         <div className="sticky top-0 left-0 w-full h-screen overflow-hidden bg-black" />
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="relative w-full h-[2000vh] bg-black">
+    <div ref={containerRef} className="relative w-full h-[2300vh] bg-black">
       {/* Fixed Sticky Viewport (100vh) */}
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden">
         {/* Cinematic Video Backgrounds (Scroll-driven Scrubbing Engine) */}

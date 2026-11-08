@@ -25,6 +25,7 @@ const SCENE_DATA: SceneMeta[] = [
   { id: 5, src: '/scene/scene5/5.webm', duration: 9.93, startProg: 0.571, playEndProg: 0.686, endProg: 0.714 },
   { id: 6, src: '/scene/scene6/6.webm', duration: 9.98, startProg: 0.714, playEndProg: 0.829, endProg: 0.857 },
   { id: 7, src: '/scene/scene7/7.webm', duration: 9.93, startProg: 0.857, playEndProg: 0.975, endProg: 1.000 },
+  { id: 8, src: '/scene/scene8/8.webm', duration: 10.0, startProg: 1.000, playEndProg: 1.115, endProg: 1.143, isRealtime: true },
 ];
 
 export default function ScrollyVideoBackground({
@@ -34,23 +35,24 @@ export default function ScrollyVideoBackground({
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const scrollProgRef = useRef(scrollProgress);
   scrollProgRef.current = scrollProgress;
-  const lerpTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0]);
-  const desiredTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0]);
+  const lerpTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
+  const desiredTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
 
-  // 1. Dedicated Realtime Playback Controller for Scene 3 (THE INFERNO)
-  // Ensures Video 3 plays continuously at normal speed, looping forever, even when user is stationary
+  // 1. Dedicated Realtime Playback Controller for Scene 3 (THE INFERNO) & Scene 8 (THE CONTACT)
+  // Ensures Video 3 and Video 8 play continuously at normal speed, looping forever, even when user is stationary
   const isFireActive = activeChapter === 2 || (scrollProgress >= 0.245 && scrollProgress <= 0.445);
+  const isContactActive = activeChapter === 7 || scrollProgress >= 0.92;
 
-  const playVideo3 = () => {
-    const video3 = videoRefs.current[2];
-    if (!video3) return;
-    video3.muted = true;
-    video3.defaultMuted = true;
-    video3.loop = true;
-    video3.playsInline = true;
-    video3.playbackRate = 1.0;
-    if (video3.paused) {
-      const playPromise = video3.play();
+  const playRealtimeVideo = (index: number) => {
+    const video = videoRefs.current[index];
+    if (!video) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.playbackRate = 1.0;
+    if (video.paused) {
+      const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise.catch(() => {});
       }
@@ -59,16 +61,23 @@ export default function ScrollyVideoBackground({
 
   useEffect(() => {
     const video3 = videoRefs.current[2];
-    if (!video3) return;
-
-    if (isFireActive) {
-      playVideo3();
-    } else {
-      if (!video3.paused && (scrollProgress < 0.20 || scrollProgress > 0.48)) {
+    if (video3) {
+      if (isFireActive) {
+        playRealtimeVideo(2);
+      } else if (!video3.paused && (scrollProgress < 0.20 || scrollProgress > 0.48)) {
         video3.pause();
       }
     }
-  }, [isFireActive, scrollProgress]);
+
+    const video8 = videoRefs.current[7];
+    if (video8) {
+      if (isContactActive) {
+        playRealtimeVideo(7);
+      } else if (!video8.paused && scrollProgress < 0.88) {
+        video8.pause();
+      }
+    }
+  }, [isFireActive, isContactActive, scrollProgress]);
 
   // 2. Prime scrubbing videos on mount (Scenes 1, 2, 4, 5) & setup non-blocking seek coalescing
   useEffect(() => {
@@ -98,7 +107,9 @@ export default function ScrollyVideoBackground({
       if (SCENE_DATA[index].isRealtime) {
         video.loop = true;
         const playRealtime = () => {
-          if (scrollProgRef.current >= 0.22 && scrollProgRef.current <= 0.46) {
+          const curProg = scrollProgRef.current;
+          const s = SCENE_DATA[index];
+          if (curProg >= s.startProg - 0.08 && curProg <= s.endProg + 0.06) {
             video.play().catch(() => {});
           }
         };
@@ -134,16 +145,20 @@ export default function ScrollyVideoBackground({
       }
     });
 
-    // Interaction unlocker to satisfy strict browser autoplay requirements (Scene 3)
+    // Interaction unlocker to satisfy strict browser autoplay requirements (Scene 3 & Scene 8)
     const handleUserInteraction = () => {
-      const v3 = videoRefs.current[2];
-      if (v3) {
-        v3.muted = true;
-        v3.defaultMuted = true;
-        if (scrollProgRef.current >= 0.22 && scrollProgRef.current <= 0.46) {
-          v3.play().catch(() => {});
+      SCENE_DATA.forEach((s, idx) => {
+        if (!s.isRealtime) return;
+        const v = videoRefs.current[idx];
+        if (v) {
+          v.muted = true;
+          v.defaultMuted = true;
+          const curProg = scrollProgRef.current;
+          if (curProg >= s.startProg - 0.08 && curProg <= s.endProg + 0.06) {
+            v.play().catch(() => {});
+          }
         }
-      }
+      });
     };
     ['pointerdown', 'touchstart', 'scroll', 'wheel', 'keydown'].forEach((evt) => {
       window.addEventListener(evt, handleUserInteraction, { passive: true });
@@ -272,6 +287,41 @@ export default function ScrollyVideoBackground({
 
         const clampedOpacity = Math.max(0, Math.min(1, opacity));
 
+        // Portal Suction Warp Transform between end of Scene 7 (index 6) and start of Scene 8 (index 7)
+        let videoTransform = 'translateZ(0) scale(1.01)';
+        let videoFilter =
+          index === 2
+            ? 'contrast(1.15) saturate(1.2)'
+            : index === 3
+            ? 'contrast(1.25) brightness(0.95)'
+            : index === 4
+            ? 'contrast(1.1) saturate(0.55) brightness(0.85)'
+            : index === 5
+            ? 'contrast(1.15) saturate(0.9) brightness(0.95)'
+            : index === 6
+            ? 'contrast(1.08) saturate(1.2) brightness(1.02)'
+            : 'contrast(1.05) saturate(1.05)';
+
+        if (index === 6 && prog > 0.945) {
+          // Scene 7 gets sucked into the portal center at the end of Scene 7
+          const suctionRatio = Math.max(0, Math.min(1, (prog - 0.945) / (1.0 - 0.945)));
+          const suctionEase = Math.pow(suctionRatio, 2.1);
+          const scale = 1.01 + suctionEase * 1.85;
+          const rotate = suctionEase * 14;
+          const blur = suctionEase * 7;
+          videoTransform = `translateZ(0) scale(${scale.toFixed(3)}) rotate(${rotate.toFixed(2)}deg)`;
+          videoFilter = `contrast(${(1.08 + suctionEase * 0.45).toFixed(2)}) saturate(${(1.2 + suctionEase * 0.5).toFixed(2)}) brightness(${(1.02 + suctionEase * 0.35).toFixed(2)}) blur(${blur.toFixed(1)}px)`;
+        } else if (index === 7 && prog < 1.035) {
+          // Scene 8 emerges out from the portal vortex at the start of Scene 8
+          const emergeRatio = Math.max(0, Math.min(1, (1.035 - prog) / (1.035 - 0.975)));
+          const emergeEase = Math.pow(emergeRatio, 1.85);
+          const scale = 1.01 + emergeEase * 0.85;
+          const rotate = -emergeEase * 11;
+          const blur = emergeEase * 7;
+          videoTransform = `translateZ(0) scale(${scale.toFixed(3)}) rotate(${rotate.toFixed(2)}deg)`;
+          videoFilter = `contrast(1.08) saturate(1.12) brightness(${(1.0 + emergeEase * 0.35).toFixed(2)}) blur(${blur.toFixed(1)}px)`;
+        }
+
         return (
           <div
             key={scene.id}
@@ -322,20 +372,9 @@ export default function ScrollyVideoBackground({
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
-                transform: 'translateZ(0) scale(1.01)',
-                willChange: 'transform',
-                filter:
-                  index === 2
-                    ? 'contrast(1.15) saturate(1.2)'
-                    : index === 3
-                    ? 'contrast(1.25) brightness(0.95)'
-                    : index === 4
-                    ? 'contrast(1.1) saturate(0.55) brightness(0.85)'
-                    : index === 5
-                    ? 'contrast(1.15) saturate(0.9) brightness(0.95)'
-                    : index === 6
-                    ? 'contrast(1.08) saturate(1.2) brightness(1.02)'
-                    : 'contrast(1.05) saturate(1.05)',
+                transform: videoTransform,
+                willChange: 'transform, filter',
+                filter: videoFilter,
               }}
             />
           </div>

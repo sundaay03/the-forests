@@ -5,6 +5,7 @@ import IndonesiaGallery from './IndonesiaGallery';
 import BurnTransition from './BurnTransition';
 import BurnGallery from './BurnGallery';
 import HealthImpacts from './HealthImpacts';
+import PortalTransition from './PortalTransition';
 
 interface ScrollyChapterProps {
   activeChapter: number;
@@ -128,6 +129,31 @@ export default function ScrollyChapter({
   } else if (scrollProgress > 0.286 && scrollProgress <= 0.305) {
     globalBurnProgress = Math.max(0, 1 - (scrollProgress - 0.286) / (0.305 - 0.286));
   }
+
+  // Scene 7 (THE REBIRTH): local progress 0.857 to 1.000
+  // Gets sucked into the portal vortex at the end of Scene 7 (s7Prog > 0.64)
+  const s7Prog = Math.max(0, Math.min(1, (scrollProgress - 0.857) / 0.143));
+  const s7SuctionRaw = s7Prog > 0.64 ? Math.max(0, Math.min(1, (s7Prog - 0.64) / 0.32)) : 0;
+  const s7SuctionEase = s7SuctionRaw * s7SuctionRaw;
+  const s7Opacity = activeChapter === 6 ? Math.max(0, 1 - s7SuctionEase * 1.15) : 0;
+  const s7Scale = 1 - s7SuctionEase * 0.85;
+  const s7Rotate = -s7SuctionEase * 14;
+  const s7Blur = s7SuctionEase * 12;
+
+  // Global Portal Suction Transition between end of Scene 7 (0.945) and start of Scene 8 (1.038)
+  let globalPortalProgress = 0;
+  if (scrollProgress >= 0.945 && scrollProgress <= 1.038) {
+    globalPortalProgress = (scrollProgress - 0.945) / (1.038 - 0.945);
+  }
+
+  // Scene 8 (THE CONTACT): local progress 1.000 to 1.143
+  // Emerges smoothly out from the portal vortex after s8Prog = 0.14
+  const s8Prog = Math.max(0, Math.min(1, (scrollProgress - 1.0) / 0.143));
+  const s8EnterRaw = Math.max(0, Math.min(1, (s8Prog - 0.14) / 0.22));
+  const s8EnterEase = 1 - Math.pow(1 - s8EnterRaw, 2.5);
+  const s8Opacity = activeChapter === 7 ? s8EnterEase : 0;
+  const s8Scale = 0.84 + s8EnterEase * 0.16;
+  const s8Blur = (1 - s8EnterEase) * 12;
 
   return (
     <div className="relative z-20 flex flex-col items-center justify-center min-h-screen px-6 text-center select-none pointer-events-none w-full">
@@ -344,16 +370,17 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 7: THE REBIRTH ===================== */}
       <div
-        className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 ease-out px-4 pointer-events-none ${
-          activeChapter === 6
-            ? 'opacity-100 scale-100'
-            : 'opacity-0 scale-95'
-        }`}
+        className="absolute inset-0 flex flex-col items-center justify-center px-4 pointer-events-none"
+        style={{
+          opacity: s7Opacity,
+          transform: `scale(${s7Scale}) rotate(${s7Rotate}deg)`,
+          filter: s7Blur > 0.1 ? `blur(${s7Blur}px)` : 'none',
+          transition: 'opacity 0.15s ease-out, transform 0.15s ease-out, filter 0.15s ease-out',
+        }}
       >
-
         {/* Headline */}
         <h1
-          className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[0.05em] text-white py-2 transition-all duration-1000 ease-out ${
+          className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[0.05em] text-white py-2 transition-all duration-1000 ease-out text-cinematic-shadow ${
             activeChapter === 6
               ? 'opacity-100 translate-y-0 scale-100'
               : 'opacity-0 translate-y-6 scale-95'
@@ -364,12 +391,70 @@ export default function ScrollyChapter({
 
         {/* Subtitle */}
         <p
-          className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-200 tracking-wide max-w-xl transition-all duration-1000 delay-300 ${
+          className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-200 tracking-wide max-w-xl transition-all duration-1000 delay-300 subtitle-cinematic-shadow ${
             activeChapter === 6 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}
         >
           From the ashes of yesterday, human hands plant the seeds of tomorrow.
         </p>
+      </div>
+
+      {/* ===================== TRANSISI TERSEDOT KE PORTAL (SCENE 7 -> SCENE 8) ===================== */}
+      <PortalTransition progress={globalPortalProgress} />
+
+      {/* ===================== SCENE 8: THE CONTACT ===================== */}
+      <div
+        className={`absolute inset-0 flex flex-col items-center justify-center px-6 ${
+          activeChapter === 7 && s8Opacity > 0.2 ? 'pointer-events-auto' : 'pointer-events-none'
+        }`}
+        style={{
+          opacity: s8Opacity,
+          transform: `scale(${s8Scale})`,
+          filter: s8Blur > 0.1 ? `blur(${s8Blur}px)` : 'none',
+          transition: 'opacity 0.2s ease-out, transform 0.2s ease-out, filter 0.2s ease-out',
+        }}
+      >
+        <div className="relative flex flex-col items-center justify-center max-w-3xl mx-auto text-center">
+
+          {/* Headline */}
+          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.9] text-white text-cinematic-shadow">
+            CONTACT
+          </h1>
+
+          {/* Subtitle */}
+          <p className="mt-5 sm:mt-6 text-sm sm:text-base md:text-lg font-light text-white/90 tracking-wide max-w-xl leading-relaxed subtitle-cinematic-shadow">
+            Every voice, action, and collaboration helps protect Indonesia&apos;s ancient rainforests and restore what was lost.
+          </p>
+
+          {/* Interactive Contact Links / Action Pills */}
+          <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3.5 sm:gap-4">
+            <a
+              href="mailto:contact@theforest.id"
+              className="group relative flex items-center gap-3 px-6 py-3.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 hover:border-white/80 hover:bg-white/15 text-white text-xs sm:text-sm font-mono uppercase tracking-widest transition-all duration-300 hover:-translate-y-0.5 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+            >
+              <span className="h-2 w-2 rounded-full bg-white group-hover:animate-ping" />
+              <span>EMAIL US</span>
+            </a>
+
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 hover:border-white/50 hover:bg-white/10 text-white/90 hover:text-white text-xs sm:text-sm font-mono uppercase tracking-widest transition-all duration-300 hover:-translate-y-0.5 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+            >
+              <span>INSTAGRAM</span>
+            </a>
+
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 hover:border-white/50 hover:bg-white/10 text-white/90 hover:text-white text-xs sm:text-sm font-mono uppercase tracking-widest transition-all duration-300 hover:-translate-y-0.5 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+            >
+              <span>COLLABORATE</span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );

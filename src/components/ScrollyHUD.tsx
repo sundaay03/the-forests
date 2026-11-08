@@ -14,6 +14,7 @@ const CHAPTERS = [
   { id: 5, tag: '05', title: 'THE ASHES' },
   { id: 6, tag: '06', title: 'THE HUMAN TOLL' },
   { id: 7, tag: '07', title: 'THE REBIRTH' },
+  { id: 8, tag: '08', title: 'THE CONTACT' },
 ];
 
 export default function ScrollyHUD({
