@@ -299,35 +299,24 @@ export default function BurnGallery({
       {/* ===================== FULLSCREEN LIGHTBOX MODAL ===================== */}
       {selectedItem && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl pointer-events-auto transition-opacity duration-300"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 md:p-12 bg-black/90 backdrop-blur-2xl pointer-events-auto transition-opacity duration-300 cursor-pointer animate-fadeIn"
           onClick={() => setSelectedItem(null)}
         >
           <div
-            className="relative max-w-4xl w-full bg-neutral-950/95 border border-orange-500/40 rounded-3xl p-4 sm:p-6 shadow-[0_25px_80px_rgba(255,87,34,0.3)] flex flex-col items-center"
-            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-5xl lg:max-w-6xl h-[78vh] sm:h-[84vh] overflow-hidden rounded-3xl bg-neutral-950 border border-white/20 shadow-[0_25px_80px_rgba(0,0,0,0.85)] flex items-center justify-center"
+            onClick={() => setSelectedItem(null)}
           >
-            {/* Close button */}
-            <button
-              onClick={() => setSelectedItem(null)}
-              className="absolute top-4 right-4 sm:top-6 sm:right-6 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/25 text-white text-xs font-mono tracking-widest uppercase transition-colors cursor-pointer border border-white/20"
-            >
-              ✕ Close
-            </button>
-
-            {/* High-res Image Preview */}
-            <div className="relative w-full max-h-[75vh] aspect-[16/10] overflow-hidden rounded-2xl bg-black border border-white/10 mt-6 sm:mt-8">
-              <img
-                src={`/burn/${selectedItem.file}`}
-                alt={selectedItem.title}
-                onError={(e) => {
-                  const target = e.currentTarget;
-                  if (!target.src.includes('/api/burn/')) {
-                    target.src = `/api/burn/${selectedItem.file}`;
-                  }
-                }}
-                className="w-full h-full object-contain"
-              />
-            </div>
+            <img
+              src={`/burn/${selectedItem.file}`}
+              alt={selectedItem.title}
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (!target.src.includes('/api/burn/')) {
+                  target.src = `/api/burn/${selectedItem.file}`;
+                }
+              }}
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       )}
