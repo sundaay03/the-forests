@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import IndonesiaGallery from './IndonesiaGallery';
 import BurnTransition from './BurnTransition';
+import BurnGallery from './BurnGallery';
 
 interface ScrollyChapterProps {
   activeChapter: number;
@@ -83,13 +84,15 @@ export default function ScrollyChapter({
   }, [activeChapter]);
 
   // Scene 3 scroll-choreographed opacity and transform
-  // Stage 1 (0.0 to 0.20): Fade in & entrance
-  // Stage 2 (0.20 to 0.65): Center stage & telemetry reveal
-  // Stage 3 (0.65 to 0.95): Dissolve and lift into smoke as text finishes
-  const s3EnterOpacity = Math.min(1, s3Prog / 0.18);
-  const s3ExitOpacity = s3Prog > 0.65 ? Math.max(0, 1 - (s3Prog - 0.65) / 0.28) : 1;
-  const s3OverallOpacity = activeChapter === 2 ? s3EnterOpacity * s3ExitOpacity : 0;
-  const s3TranslateY = s3Prog > 0.65 ? -(s3Prog - 0.65) * 80 : 0;
+  // Stage 1 (0.0 to 0.28): "FOREST AND LAND FIRES" entrance and extended center stage
+  // Stage 2 (0.28 to 0.37): Title dissolves, lifts into smoke and disappears ("hilang sementara")
+  // Stage 3 (0.35 to 0.90): BurnGallery 3D Cover Flow photos appear moving from right to left
+  const s3TitleEnter = Math.min(1, s3Prog / 0.06);
+  const s3TitleExit = s3Prog > 0.28 ? Math.min(1, (s3Prog - 0.28) / 0.09) : 0;
+  const s3TitleOpacity = activeChapter === 2 ? s3TitleEnter * (1 - s3TitleExit) : 0;
+  const s3TitleTranslateY = -s3TitleExit * 45;
+  const s3TitleBlur = s3TitleExit * 10;
+  const s3TitleScale = 1 - s3TitleExit * 0.08;
 
   // Global Burn / Erosion Transition Progress between Scene 2 and Scene 3
   // Scene 2 photos finish before scrollProgress = 0.245 (s2Prog ≈ 0.70)
@@ -207,22 +210,27 @@ export default function ScrollyChapter({
       {/* ===================== TRANSISI TERBAKAR / TERKIKIS (DISSOLVE / EROSION) ===================== */}
       <BurnTransition progress={globalBurnProgress} />
 
-      {/* ===================== SCENE 3: THE INFERNO (SCROLL CHOREOGRAPHED OBJECTS) ===================== */}
+      {/* ===================== SCENE 3: THE INFERNO (CENTER TITLE: FOREST AND LAND FIRES) ===================== */}
       <div
         className="absolute inset-0 flex flex-col items-center justify-center px-4 pointer-events-none"
         style={{
-          opacity: s3OverallOpacity,
-          transform: `translateY(${s3TranslateY}px)`,
-          filter: s3Prog > 0.7 ? `blur(${(s3Prog - 0.7) * 20}px)` : 'none',
-          transition: 'opacity 0.15s ease-out, filter 0.2s ease-out',
+          opacity: s3TitleOpacity,
+          transform: `translateY(${s3TitleTranslateY}px) scale(${s3TitleScale})`,
+          filter: s3TitleBlur > 0 ? `blur(${s3TitleBlur}px)` : 'none',
+          transition: 'opacity 0.15s ease-out, transform 0.2s ease-out, filter 0.2s ease-out',
         }}
       >
-
         {/* Fast kinetic reveal with heat-shimmer & orange-amber text glow */}
         <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)]">
           FOREST AND LAND FIRES
         </h1>
       </div>
+
+      {/* ===================== SCENE 3: BURN GALLERY (3D COVER FLOW PHOTO STREAM) ===================== */}
+      <BurnGallery
+        activeChapter={activeChapter}
+        scrollProgress={scrollProgress}
+      />
 
       {/* ===================== SCENE 4: THE RESISTANCE ===================== */}
       <div

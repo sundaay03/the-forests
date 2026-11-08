@@ -39,27 +39,36 @@ export default function ScrollyVideoBackground({
 
   // 1. Dedicated Realtime Playback Controller for Scene 3 (THE INFERNO)
   // Ensures Video 3 plays continuously at normal speed, looping forever, even when not scrolling
-  const isFireActive = activeChapter === 2 || scrollProgress >= 0.245;
+  const isFireActive = activeChapter === 2 || (scrollProgress >= 0.245 && scrollProgress <= 0.445);
+
+  const playVideo3 = () => {
+    const video3 = videoRefs.current[2];
+    if (!video3) return;
+    video3.muted = true;
+    video3.defaultMuted = true;
+    video3.loop = true;
+    video3.playsInline = true;
+    video3.playbackRate = 1.0;
+    if (video3.paused) {
+      const playPromise = video3.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {});
+      }
+    }
+  };
 
   useEffect(() => {
     const video3 = videoRefs.current[2];
     if (!video3) return;
 
     if (isFireActive) {
-      video3.muted = true;
-      video3.loop = true;
-      video3.playsInline = true;
-      video3.playbackRate = 1.0;
-      const playPromise = video3.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {});
-      }
+      playVideo3();
     } else {
-      if (!video3.paused) {
+      if (!video3.paused && (scrollProgress < 0.20 || scrollProgress > 0.48)) {
         video3.pause();
       }
     }
-  }, [isFireActive]);
+  }, [isFireActive, scrollProgress]);
 
   // 2. Prime scrubbing videos on mount (Scenes 1, 2, 4, 5) & setup non-blocking seek coalescing
   useEffect(() => {
@@ -83,10 +92,19 @@ export default function ScrollyVideoBackground({
     videoRefs.current.forEach((video, index) => {
       if (!video) return;
       video.muted = true;
+      video.defaultMuted = true;
       video.playsInline = true;
 
       if (SCENE_DATA[index].isRealtime) {
         video.loop = true;
+        const playRealtime = () => {
+          if (scrollProgRef.current >= 0.22 && scrollProgRef.current <= 0.46) {
+            video.play().catch(() => {});
+          }
+        };
+        video.addEventListener('canplay', playRealtime, { once: true });
+        video.load();
+        cleanupListeners.push(() => video.removeEventListener('canplay', playRealtime));
         return;
       }
 
@@ -116,7 +134,23 @@ export default function ScrollyVideoBackground({
       }
     });
 
-    // 3. Continuous 120fps Lerp Scrubbing Loop for Scenes 1, 2, 4, 5
+    // Interaction unlocker to satisfy strict browser autoplay requirements
+    const handleUserInteraction = () => {
+      const v3 = videoRefs.current[2];
+      if (v3) {
+        v3.muted = true;
+        v3.defaultMuted = true;
+        if (scrollProgRef.current >= 0.22 && scrollProgRef.current <= 0.46) {
+          v3.play().catch(() => {});
+        }
+      }
+    };
+    ['pointerdown', 'touchstart', 'scroll', 'wheel', 'keydown'].forEach((evt) => {
+      window.addEventListener(evt, handleUserInteraction, { passive: true });
+      cleanupListeners.push(() => window.removeEventListener(evt, handleUserInteraction));
+    });
+
+    // 3. Continuous 120fps Lerp Scrubbing Loop for Scenes 1, 2, 4, 5 & Realtime Keeper for Scene 3
     let animId: number;
 
     const scrub = () => {
@@ -124,8 +158,28 @@ export default function ScrollyVideoBackground({
       const prog = scrollProgRef.current;
 
       SCENE_DATA.forEach((scene, index) => {
-        // Scene 3 runs independently in realtime; NEVER touch or seek it in scrub loop
-        if (scene.isRealtime) return;
+        // Scene 3 runs in realtime looping mode; ensure it is playing continuously whenever near active
+        if (scene.isRealtime) {
+          const isNearScene3 = prog >= scene.startProg - 0.06 && prog <= scene.endProg + 0.05;
+          const v = videoRefs.current[index];
+          if (v) {
+            if (isNearScene3) {
+              if (v.paused) {
+                v.muted = true;
+                v.defaultMuted = true;
+                v.loop = true;
+                v.playsInline = true;
+                const p = v.play();
+                if (p !== undefined) p.catch(() => {});
+              }
+            } else if (prog < scene.startProg - 0.10 || prog > scene.endProg + 0.10) {
+              if (!v.paused) {
+                v.pause();
+              }
+            }
+          }
+          return;
+        }
 
         // Performance optimization: Only seek videos that are currently visible or approaching
         const isNearActive =
@@ -233,6 +287,14 @@ export default function ScrollyVideoBackground({
             <video
               ref={(el) => {
                 videoRefs.current[index] = el;
+                if (el) {
+                  el.muted = true;
+                  el.defaultMuted = true;
+                  if (scene.isRealtime) {
+                    el.loop = true;
+                    el.playsInline = true;
+                  }
+                }
               }}
               suppressHydrationWarning
               src={scene.src}
@@ -241,6 +303,20 @@ export default function ScrollyVideoBackground({
               autoPlay={scene.isRealtime || false}
               loop={scene.isRealtime || false}
               preload="auto"
+              onLoadedMetadata={(e) => {
+                if (scene.isRealtime) {
+                  e.currentTarget.muted = true;
+                  e.currentTarget.defaultMuted = true;
+                  e.currentTarget.play().catch(() => {});
+                }
+              }}
+              onCanPlay={(e) => {
+                if (scene.isRealtime) {
+                  e.currentTarget.muted = true;
+                  e.currentTarget.defaultMuted = true;
+                  e.currentTarget.play().catch(() => {});
+                }
+              }}
               className="w-full h-full object-cover"
               style={{
                 width: '100%',
