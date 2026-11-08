@@ -87,20 +87,35 @@ export default function BurnGallery({
   const s3Prog = Math.max(0, Math.min(1, (scrollProgress - 0.286) / 0.143));
 
   // Gallery appearance timing inside Scene 3:
-  // - 0.00 to 0.35: "FOREST AND LAND FIRES" is front and center for longer duration.
-  // - 0.35 to 0.42: Title fades away, Burn Gallery fades & slides in from right to center.
-  // - 0.40 to 0.88: Full interactive Coverflow browsing moving cards from right to left as scroll advances.
-  // - 0.88 to 0.98: Gallery dissolves and lifts into smoke before Scene 4 begins.
+  // - 0.00 to 0.35: "FOREST AND LAND FIRES" is front and center.
+  // - 0.35 to 0.42: Burn Gallery fades & slides in from right to center.
+  // - 0.40 to 0.80: Full interactive Coverflow browsing moving cards from right to left.
+  // - 0.78 to 0.93: Title "EVERY EMBER BEARS ITS OWN SCAR" smoothly fades out.
+  // - 0.80 to 0.95: On reaching the last photo, cards smoothly sweep away off to the left before Scene 4.
   const enterProg = Math.max(0, Math.min(1, (s3Prog - 0.35) / 0.07));
-  const exitProg = s3Prog > 0.88 ? Math.max(0, Math.min(1, (s3Prog - 0.88) / 0.09)) : 0;
-  const overallOpacity = activeChapter === 2 ? enterProg * (1 - exitProg) : 0;
 
-  // Scroll-driven active index (advances from 0 to items.length - 1 as user scrolls from 0.40 to 0.88)
-  const scrollRatio = Math.max(0, Math.min(1, (s3Prog - 0.40) / 0.48));
+  // Scroll-driven active index (advances from 0 to items.length - 1 as user scrolls from 0.40 to 0.80)
+  const scrollRatio = Math.max(0, Math.min(1, (s3Prog - 0.40) / 0.40));
   const scrollIndex = scrollRatio * Math.max(0, items.length - 1);
 
   // Combine scroll-driven index with manual arrow/drag navigation
   const targetIndex = manualOffset !== null ? manualOffset : scrollIndex;
+
+  // Title dedicated fade-out as we approach Scene 4 (from 0.78 to 0.92)
+  const rawTitleExit = s3Prog > 0.78 ? Math.max(0, Math.min(1, (s3Prog - 0.78) / 0.13)) : 0;
+  const titleExitProg = rawTitleExit * rawTitleExit;
+  const titleOpacity = enterProg * (1 - titleExitProg);
+  const titleTranslateY = (1 - enterProg) * 20 - titleExitProg * 35;
+  const titleBlur = titleExitProg * 10;
+
+  // Cards sweeping off to the left transition (from 0.80 to 0.95)
+  const rawCardExit = s3Prog > 0.80 ? Math.max(0, Math.min(1, (s3Prog - 0.80) / 0.14)) : 0;
+  const cardExitProg = rawCardExit * rawCardExit * (3 - 2 * rawCardExit);
+  const cardsShiftLeftVw = -cardExitProg * 85; // slide across all the way off the left edge
+  const cardsOpacity = Math.max(0, 1 - cardExitProg * 1.25);
+
+  // Overall component opacity
+  const overallOpacity = activeChapter === 2 ? enterProg * (1 - cardExitProg) : 0;
 
   // Reset manual offset if user scrolls significantly (syncing back to scroll flow)
   const lastScrollProgRef = useRef(scrollProgress);
@@ -178,7 +193,6 @@ export default function BurnGallery({
       className="absolute inset-0 z-30 pointer-events-auto w-full h-full flex flex-col justify-between p-4 sm:p-8 md:p-12 overflow-hidden select-none transition-opacity duration-300"
       style={{
         opacity: overallOpacity,
-        transform: `translateY(${(1 - enterProg) * 25 - exitProg * 40}px)`,
       }}
       onMouseDown={(e) => handlePointerDown(e.clientX)}
       onMouseMove={(e) => handlePointerMove(e.clientX)}
@@ -194,7 +208,15 @@ export default function BurnGallery({
       />
 
       {/* ===================== TOP HEADER ===================== */}
-      <div className="relative z-20 w-full max-w-5xl mx-auto pt-12 sm:pt-16 md:pt-20 text-center flex flex-col items-center justify-center">
+      <div
+        className="relative z-20 w-full max-w-5xl mx-auto pt-12 sm:pt-16 md:pt-20 text-center flex flex-col items-center justify-center will-change-transform"
+        style={{
+          opacity: titleOpacity,
+          transform: `translateY(${titleTranslateY}px)`,
+          filter: titleBlur > 0 ? `blur(${titleBlur}px)` : 'none',
+          transition: 'opacity 0.2s ease-out, filter 0.2s ease-out',
+        }}
+      >
         {/* Editorial Title - Same typography & heat-shimmer as FOREST AND LAND FIRES */}
         <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
           EVERY EMBER BEARS ITS OWN SCAR
@@ -202,7 +224,14 @@ export default function BurnGallery({
       </div>
 
       {/* ===================== CENTER 3D COVERFLOW STAGE ===================== */}
-      <div className="relative z-10 w-full flex-1 flex items-center justify-center my-auto overflow-visible [perspective:1200px]">
+      <div
+        className="relative z-10 w-full flex-1 flex items-center justify-center my-auto overflow-visible [perspective:1200px] will-change-transform"
+        style={{
+          transform: `translateX(${cardsShiftLeftVw}vw)`,
+          opacity: cardsOpacity,
+          transition: 'transform 0.1s ease-out, opacity 0.15s ease-out',
+        }}
+      >
         <div className="relative w-full max-w-5xl h-[340px] sm:h-[420px] md:h-[480px] flex items-center justify-center pointer-events-none">
           {items.map((item, index) => {
             // Distance from currently focused card
