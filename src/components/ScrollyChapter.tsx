@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import IndonesiaGallery from './IndonesiaGallery';
 
 interface ScrollyChapterProps {
   activeChapter: number;
@@ -186,34 +187,11 @@ export default function ScrollyChapter({
         </div>
       </div>
 
-      {/* ===================== SCENE 2: THE CANOPY ===================== */}
-      <div
-        className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-700 ease-out px-4 pointer-events-none ${
-          activeChapter === 1
-            ? 'opacity-100 scale-100'
-            : 'opacity-0 scale-95'
-        }`}
-      >
-        {/* Split-word blur-to-sharp focus with horizontal tracking expansion */}
-        <h1
-          className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase leading-[0.9] text-white transform transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            activeChapter === 1
-              ? 'filter-none tracking-[0.12em] opacity-100'
-              : 'blur-md tracking-tighter opacity-0'
-          }`}
-        >
-          WONDERFULL OF INDONESIAN
-        </h1>
-
-        {/* Subtitle */}
-        <p
-          className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-200 tracking-wider max-w-xl transition-all duration-700 delay-500 ${
-            activeChapter === 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}
-        >
-          Billions of respirations sustaining the biosphere.
-        </p>
-      </div>
+      {/* ===================== SCENE 2: THE CANOPY (WONDERFUL OF INDONESIA & R2 GALLERY) ===================== */}
+      <IndonesiaGallery
+        activeChapter={activeChapter}
+        scrollProgress={scrollProgress}
+      />
 
       {/* ===================== SCENE 3: THE INFERNO (SCROLL CHOREOGRAPHED OBJECTS) ===================== */}
       <div
