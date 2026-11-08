@@ -155,7 +155,7 @@ export default function ScrollyChapter({
               className="absolute inset-0 -m-8 sm:-m-16 rounded-full pointer-events-none"
               style={{
                 background:
-                  'radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.5) 45%, rgba(0,0,0,0) 75%)',
+                  'radial-gradient(ellipse at center, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.06) 45%, rgba(0,0,0,0) 75%)',
                 filter: 'blur(35px)',
                 transform: 'translate3d(0, 0, 0)',
               }}
@@ -207,7 +207,7 @@ export default function ScrollyChapter({
               className="absolute inset-0 -m-8 sm:-m-12 rounded-full pointer-events-none"
               style={{
                 background:
-                  'radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0) 80%)',
+                  'radial-gradient(ellipse at center, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0) 80%)',
                 filter: 'blur(35px)',
                 transform: 'translate3d(0, 0, 0)',
               }}
