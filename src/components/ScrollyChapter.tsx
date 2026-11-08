@@ -346,7 +346,7 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 6: THE HUMAN TOLL ===================== */}
       <div
-        className="absolute inset-0 flex items-center justify-start pl-[8vw] sm:pl-[10vw] md:pl-[12vw] lg:pl-[14vw] pr-6 pointer-events-none"
+        className="absolute inset-0 flex items-center justify-start px-8 sm:px-14 md:px-20 lg:px-24 pointer-events-none"
         style={{
           opacity: s6Opacity,
           transform: `translateY(${s6TranslateY}px)`,

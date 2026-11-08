@@ -76,14 +76,15 @@ export default function HealthImpacts({ s6Prog }: HealthImpactsProps) {
               onClick={() => setHoveredId((prev) => (prev === item.id ? null : item.id))}
               className="group flex flex-col cursor-pointer select-none text-left transition-all duration-300"
             >
-              {/* Pure White Enlarged Title */}
-              <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:text-white group-hover:translate-x-1.5">
-                {item.title}
+              {/* Pure White Enlarged Title with Bullet Point */}
+              <h3 className="flex items-center gap-3 sm:gap-4 text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:text-white group-hover:translate-x-1.5">
+                <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white flex-shrink-0 shadow-[0_0_8px_rgba(255,255,255,0.9)] group-hover:scale-125 transition-all duration-300" />
+                <span>{item.title}</span>
               </h3>
 
               {/* Description (Hidden by default, reveals smoothly on hover in enlarged pure white text) */}
               <div
-                className={`overflow-hidden transition-all duration-300 ease-out ${
+                className={`overflow-hidden transition-all duration-300 ease-out pl-5 sm:pl-6.5 ${
                   isHovered
                     ? 'max-h-48 opacity-100 mt-2'
                     : 'max-h-0 opacity-0 mt-0 pointer-events-none'
