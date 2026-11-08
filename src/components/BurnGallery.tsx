@@ -209,7 +209,7 @@ export default function BurnGallery({
 
       {/* ===================== TOP HEADER ===================== */}
       <div
-        className="relative z-20 w-full max-w-5xl mx-auto pt-12 sm:pt-16 md:pt-20 text-center flex flex-col items-center justify-center will-change-transform"
+        className="relative z-20 w-full max-w-5xl mx-auto pt-16 sm:pt-24 md:pt-28 lg:pt-32 text-center flex flex-col items-center justify-center will-change-transform"
         style={{
           opacity: titleOpacity,
           transform: `translateY(${titleTranslateY}px)`,
@@ -219,7 +219,7 @@ export default function BurnGallery({
       >
         {/* Editorial Title - Same typography & heat-shimmer as FOREST AND LAND FIRES */}
         <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
-          EVERY EMBER BEARS ITS OWN SCAR
+          BURNING THE FUTURE
         </h2>
       </div>
 
