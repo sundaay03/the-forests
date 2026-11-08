@@ -237,11 +237,11 @@ export default function IndonesiaGallery({
       {/* ===================== FULLSCREEN LIGHTBOX MODAL ===================== */}
       {selectedItem && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 md:p-12 bg-black/90 backdrop-blur-2xl pointer-events-auto transition-opacity duration-300 cursor-pointer animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 md:p-12 bg-black/50 backdrop-blur-md pointer-events-auto transition-opacity duration-300 cursor-pointer animate-fadeIn"
           onClick={() => setSelectedItem(null)}
         >
           <div
-            className="relative w-full max-w-2xl sm:max-w-3xl md:max-w-4xl h-[56vh] sm:h-[64vh] overflow-hidden rounded-3xl bg-neutral-950/95 border border-white/20 shadow-[0_25px_80px_rgba(0,0,0,0.85)] flex items-center justify-center p-2.5 sm:p-3"
+            className="relative w-full max-w-2xl sm:max-w-3xl md:max-w-4xl h-[56vh] sm:h-[64vh] overflow-hidden rounded-3xl bg-black/50 backdrop-blur-md border border-white/20 shadow-[0_25px_80px_rgba(0,0,0,0.6)] flex items-center justify-center p-2.5 sm:p-3"
             onClick={() => setSelectedItem(null)}
           >
             <img
