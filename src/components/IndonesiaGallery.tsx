@@ -140,7 +140,7 @@ export default function IndonesiaGallery({
           }}
         >
           <span className="block whitespace-nowrap">WONDERFUL OF</span>
-          <span className="block text-emerald-100 whitespace-nowrap">INDONESIA</span>
+          <span className="block whitespace-nowrap">INDONESIA</span>
         </h1>
 
         {/* Subtitle */}
@@ -210,21 +210,24 @@ export default function IndonesiaGallery({
                 zIndex,
                 pointerEvents: isInteractive ? 'auto' : 'none',
               }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full aspect-[4/3] rounded-3xl p-2.5 sm:p-3 bg-black/40 backdrop-blur-md border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.55)] cursor-pointer transition-shadow duration-300 hover:border-emerald-400/80 hover:shadow-[0_25px_60px_rgba(16,185,129,0.35)] group will-change-transform"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full aspect-[4/3] group will-change-transform"
             >
-              <div className="relative w-full h-full overflow-hidden rounded-2xl bg-neutral-950">
-                <img
-                  src={`/gallery/${item.file}`}
-                  alt={item.title}
-                  loading="eager"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.src.includes('/api/gallery/')) {
-                      target.src = `/api/gallery/${item.file}`;
-                    }
-                  }}
-                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-106"
-                />
+              {/* Inner Card Frame with smooth hover float movement and clean neutral shadow */}
+              <div className="w-full h-full rounded-3xl p-2.5 sm:p-3 bg-black/40 backdrop-blur-md border border-white/20 hover:border-white/40 shadow-[0_20px_50px_rgba(0,0,0,0.55)] hover:shadow-[0_28px_65px_rgba(0,0,0,0.75)] cursor-pointer transition-all duration-500 ease-out transform group-hover:-translate-y-2 group-hover:scale-[1.03] group-hover:-rotate-1">
+                <div className="relative w-full h-full overflow-hidden rounded-2xl bg-neutral-950">
+                  <img
+                    src={`/gallery/${item.file}`}
+                    alt={item.title}
+                    loading="eager"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.src.includes('/api/gallery/')) {
+                        target.src = `/api/gallery/${item.file}`;
+                      }
+                    }}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  />
+                </div>
               </div>
             </div>
           );
