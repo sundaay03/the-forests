@@ -253,7 +253,7 @@ export default function IndonesiaGallery({
                   target.src = `/api/gallery/${selectedItem.file}`;
                 }
               }}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
         </div>
