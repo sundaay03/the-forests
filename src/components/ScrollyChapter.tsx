@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import IndonesiaGallery from './IndonesiaGallery';
 import BurnTransition from './BurnTransition';
 import BurnGallery from './BurnGallery';
+import HealthImpacts from './HealthImpacts';
 
 interface ScrollyChapterProps {
   activeChapter: number;
@@ -93,6 +94,30 @@ export default function ScrollyChapter({
   const s3TitleTranslateY = -s3TitleExit * 45;
   const s3TitleBlur = s3TitleExit * 10;
   const s3TitleScale = 1 - s3TitleExit * 0.08;
+
+  // Scene 4 (THE FRONTLINE): local progress 0.429 to 0.571
+  const s4Prog = Math.max(0, Math.min(1, (scrollProgress - 0.429) / 0.143));
+  const s4ExitProg = s4Prog > 0.48 ? Math.max(0, Math.min(1, (s4Prog - 0.48) / 0.22)) : 0;
+  const s4Opacity = activeChapter === 3 ? 1 - s4ExitProg : 0;
+  const s4TranslateY = -s4ExitProg * 35;
+  const s4Blur = s4ExitProg * 8;
+
+  // Scene 5 (THE ASHES): local progress 0.571 to 0.714
+  // Fast fade out starting at 0.48 so it is completely gone before Scene 6 crossfades in
+  const s5Prog = Math.max(0, Math.min(1, (scrollProgress - 0.571) / 0.143));
+  const s5ExitProg = s5Prog > 0.48 ? Math.max(0, Math.min(1, (s5Prog - 0.48) / 0.22)) : 0;
+  const s5Opacity = activeChapter === 4 ? 1 - s5ExitProg : 0;
+  const s5TranslateY = -s5ExitProg * 35;
+  const s5Blur = s5ExitProg * 8;
+
+  // Scene 6 (THE HUMAN TOLL): local progress 0.714 to 0.857
+  // Active viewing range for 3 pairs is 0.00 to 0.70.
+  // Fast fade out starting at 0.70 so it is completely gone before Scene 7 crossfades in at 0.829
+  const s6Prog = Math.max(0, Math.min(1, (scrollProgress - 0.714) / 0.143));
+  const s6ExitProg = s6Prog > 0.70 ? Math.max(0, Math.min(1, (s6Prog - 0.70) / 0.12)) : 0;
+  const s6Opacity = activeChapter === 5 ? 1 - s6ExitProg : 0;
+  const s6TranslateY = -s6ExitProg * 35;
+  const s6Blur = s6ExitProg * 8;
 
   // Global Burn / Erosion Transition Progress between Scene 2 and Scene 3
   // Scene 2 photos finish before scrollProgress = 0.245 (s2Prog ≈ 0.70)
@@ -234,11 +259,13 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 4: THE RESISTANCE ===================== */}
       <div
-        className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 ease-out px-4 pointer-events-none ${
-          activeChapter === 3
-            ? 'opacity-100 scale-100'
-            : 'opacity-0 scale-95'
-        }`}
+        className="absolute inset-0 flex flex-col items-center justify-center px-4 pointer-events-none"
+        style={{
+          opacity: s4Opacity,
+          transform: `translateY(${s4TranslateY}px)`,
+          filter: s4Blur > 0 ? `blur(${s4Blur}px)` : 'none',
+          transition: 'opacity 0.2s ease-out, filter 0.2s ease-out, transform 0.2s ease-out',
+        }}
       >
         <div
           className={`flex items-center gap-3 mb-4 transition-all duration-500 delay-100 ${
@@ -279,25 +306,26 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 5: THE ASHES ===================== */}
       <div
-        className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-1000 ease-out px-4 pointer-events-none ${
-          activeChapter === 4
-            ? 'opacity-100 scale-100'
-            : 'opacity-0 scale-95'
-        }`}
+        className="absolute inset-0 flex flex-col items-center justify-center px-4 pointer-events-none"
+        style={{
+          opacity: s5Opacity,
+          transform: `translateY(${s5TranslateY}px)`,
+          filter: s5Blur > 0 ? `blur(${s5Blur}px)` : 'none',
+          transition: 'opacity 0.2s ease-out, filter 0.2s ease-out, transform 0.2s ease-out',
+        }}
       >
-
         {/* Letter-by-letter opacity fade mimicking settling ash */}
         <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-neutral-200 flex flex-wrap justify-center py-2">
           {'WHAT REMAINS'.split('').map((char, i) => (
             <span
               key={i}
               style={{
-                transitionDelay: `${150 + i * 70}ms`,
+                transitionDelay: `${100 + i * 40}ms`,
               }}
-              className={`inline-block transform transition-all duration-1000 ease-out ${
-                activeChapter === 4
+              className={`inline-block transform transition-all duration-700 ease-out ${
+                activeChapter === 4 && s5ExitProg < 0.1
                   ? 'opacity-100 filter-none translate-y-0'
-                  : 'opacity-0 blur-sm -translate-y-3'
+                  : 'opacity-0 blur-sm -translate-y-2'
               }`}
             >
               {char === ' ' ? '\u00A0' : char}
@@ -307,9 +335,10 @@ export default function ScrollyChapter({
 
         {/* Subtitle */}
         <p
-          className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-400 tracking-widest max-w-xl italic transition-all duration-1000 delay-700 ${
-            activeChapter === 4 ? 'opacity-85 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}
+          className="mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-400 tracking-widest max-w-xl italic transition-all duration-300"
+          style={{
+            opacity: s5ExitProg > 0.05 ? 0 : 0.85,
+          }}
         >
           Where ancient canopies stood, silence and ash.
         </p>
@@ -317,37 +346,29 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 6: THE HUMAN TOLL ===================== */}
       <div
-        className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-1000 ease-out px-4 pointer-events-none ${
-          activeChapter === 5
-            ? 'opacity-100 scale-100'
-            : 'opacity-0 scale-95'
-        }`}
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          opacity: s6Opacity,
+          transform: `translateY(${s6TranslateY}px)`,
+          filter: s6Blur > 0 ? `blur(${s6Blur}px)` : 'none',
+          transition: 'opacity 0.2s ease-out, filter 0.2s ease-out, transform 0.2s ease-out',
+        }}
       >
+        <div className="absolute left-8 sm:left-14 md:left-20 lg:left-24 top-14 sm:top-18 md:top-20 text-left max-w-xl md:max-w-2xl flex flex-col gap-3 sm:gap-4 pointer-events-auto">
+          {/* Headline with cinematic tracking and smoke blur-to-sharp */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-[0.92] py-1 drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+            <span className="block">HEALTH</span>
+            <span className="block">IMPACTS</span>
+          </h1>
 
-        {/* Headline with cinematic tracking and smoke blur-to-sharp */}
-        <h1
-          className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-white py-2 transform transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            activeChapter === 5
-              ? 'opacity-100 scale-100 filter-none'
-              : 'opacity-0 scale-95 blur-md'
-          }`}
-        >
-          <span className="text-amber-400">CHOKING</span> HORIZON
-        </h1>
-
-        {/* Subtitle */}
-        <p
-          className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-300 tracking-wide max-w-xl transition-all duration-1000 delay-300 ${
-            activeChapter === 5 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}
-        >
-          Toxic smoke knows no boundaries. Every breath becomes a struggle for survival.
-        </p>
+          {/* Subtitles: 3 at a time, scroll/group driven, with hover reveal for descriptions */}
+          <HealthImpacts s6Prog={s6Prog} />
+        </div>
       </div>
 
       {/* ===================== SCENE 7: THE REBIRTH ===================== */}
       <div
-        className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-1000 ease-out px-4 pointer-events-none ${
+        className={`absolute inset-0 flex flex-col items-center justify-center transition-all duration-500 ease-out px-4 pointer-events-none ${
           activeChapter === 6
             ? 'opacity-100 scale-100'
             : 'opacity-0 scale-95'

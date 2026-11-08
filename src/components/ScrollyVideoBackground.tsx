@@ -38,7 +38,7 @@ export default function ScrollyVideoBackground({
   const desiredTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0]);
 
   // 1. Dedicated Realtime Playback Controller for Scene 3 (THE INFERNO)
-  // Ensures Video 3 plays continuously at normal speed, looping forever, even when not scrolling
+  // Ensures Video 3 plays continuously at normal speed, looping forever, even when user is stationary
   const isFireActive = activeChapter === 2 || (scrollProgress >= 0.245 && scrollProgress <= 0.445);
 
   const playVideo3 = () => {
@@ -134,7 +134,7 @@ export default function ScrollyVideoBackground({
       }
     });
 
-    // Interaction unlocker to satisfy strict browser autoplay requirements
+    // Interaction unlocker to satisfy strict browser autoplay requirements (Scene 3)
     const handleUserInteraction = () => {
       const v3 = videoRefs.current[2];
       if (v3) {
@@ -150,7 +150,7 @@ export default function ScrollyVideoBackground({
       cleanupListeners.push(() => window.removeEventListener(evt, handleUserInteraction));
     });
 
-    // 3. Continuous 120fps Lerp Scrubbing Loop for Scenes 1, 2, 4, 5 & Realtime Keeper for Scene 3
+    // 3. Continuous 120fps Lerp Scrubbing Loop for Scenes 1, 2, 4, 5, 6, 7 & Realtime Keeper for Scene 3
     let animId: number;
 
     const scrub = () => {
