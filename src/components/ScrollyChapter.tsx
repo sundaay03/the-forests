@@ -85,11 +85,11 @@ export default function ScrollyChapter({
   }, [activeChapter]);
 
   // Scene 3 scroll-choreographed opacity and transform
-  // Stage 1 (0.0 to 0.28): "FOREST AND LAND FIRES" entrance and extended center stage
-  // Stage 2 (0.28 to 0.37): Title dissolves, lifts into smoke and disappears ("hilang sementara")
-  // Stage 3 (0.35 to 0.90): BurnGallery 3D Cover Flow photos appear moving from right to left
+  // Stage 1 (0.00 to 0.18): "FOREST AND LAND FIRES" entrance and center stage
+  // Stage 2 (0.18 to 0.26): Title dissolves, lifts into smoke and is 100% gone by 0.26
+  // Stage 3 (0.29 onwards): BurnGallery 3D Cover Flow photos & "BURNING THE FUTURE" enter from right
   const s3TitleEnter = Math.min(1, s3Prog / 0.06);
-  const s3TitleExit = s3Prog > 0.28 ? Math.min(1, (s3Prog - 0.28) / 0.09) : 0;
+  const s3TitleExit = s3Prog > 0.18 ? Math.min(1, (s3Prog - 0.18) / 0.08) : 0;
   const s3TitleOpacity = activeChapter === 2 ? s3TitleEnter * (1 - s3TitleExit) : 0;
   const s3TitleTranslateY = -s3TitleExit * 45;
   const s3TitleBlur = s3TitleExit * 10;

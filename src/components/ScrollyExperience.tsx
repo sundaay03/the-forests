@@ -103,14 +103,14 @@ export default function ScrollyExperience() {
 
   if (!isMounted) {
     return (
-      <div className="relative w-full h-[1400vh] bg-black">
+      <div className="relative w-full h-[2000vh] bg-black">
         <div className="sticky top-0 left-0 w-full h-screen overflow-hidden bg-black" />
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="relative w-full h-[1400vh] bg-black">
+    <div ref={containerRef} className="relative w-full h-[2000vh] bg-black">
       {/* Fixed Sticky Viewport (100vh) */}
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden">
         {/* Cinematic Video Backgrounds (Scroll-driven Scrubbing Engine) */}

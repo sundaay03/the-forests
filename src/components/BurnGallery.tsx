@@ -87,35 +87,77 @@ export default function BurnGallery({
   const s3Prog = Math.max(0, Math.min(1, (scrollProgress - 0.286) / 0.143));
 
   // Gallery appearance timing inside Scene 3:
-  // - 0.00 to 0.35: "FOREST AND LAND FIRES" is front and center.
-  // - 0.35 to 0.42: Burn Gallery fades & slides in from right to center.
-  // - 0.40 to 0.80: Full interactive Coverflow browsing moving cards from right to left.
-  // - 0.78 to 0.93: Title "EVERY EMBER BEARS ITS OWN SCAR" smoothly fades out.
-  // - 0.80 to 0.95: On reaching the last photo, cards smoothly sweep away off to the left before Scene 4.
-  const enterProg = Math.max(0, Math.min(1, (s3Prog - 0.35) / 0.07));
+  // - 0.00 to 0.26: "FOREST AND LAND FIRES" is front and center, then dissolves completely by 0.26.
+  // - 0.26 to 0.29: Clean atmospheric fire pause (zero text on screen).
+  // - 0.29 to 0.38: "FOREST AND LAND FIRES" is 100% GONE.
+  //                 Now "BURNING THE FUTURE" animates in from top,
+  //                 AND the photo cards glide in together from the far right corner (+75vw -> 0vw).
+  // - 0.38 to 0.86: Calm, unhurried 3D Coverflow browsing traversing all 13 photos (index 0 to 12).
+  // - 0.86 to 0.94: Extra 1 to 2 scrolls allowing the last photo (card #13) to continue gliding to the LEFT side.
+  // - 0.88 to 0.96: Title "BURNING THE FUTURE" softly fades out.
+  // - 0.94 to 1.00: Smooth dissolve into Scene 4 after the last photo has traveled to the left.
+  const enterProg = Math.max(0, Math.min(1, (s3Prog - 0.29) / 0.09));
+  const enterEase = 1 - Math.pow(1 - enterProg, 2.5);
 
-  // Scroll-driven active index (advances from 0 to items.length - 1 as user scrolls from 0.40 to 0.80)
-  const scrollRatio = Math.max(0, Math.min(1, (s3Prog - 0.40) / 0.40));
-  const scrollIndex = scrollRatio * Math.max(0, items.length - 1);
+  // Cards start from the far right corner (+75vw) and glide in to center
+  const cardsEnterShiftVw = (1 - enterEase) * 75;
+
+  // Scroll-driven active index:
+  // Starts strictly after cards and title have arrived in center (0.38 onwards).
+  // Runway spans to 0.94 and includes +2.0 steps past the last item (index 12 -> 14)
+  // so the user gets 1 to 2 extra scrolls to glide the last image to the left before exiting!
+  const scrollRatio = Math.max(0, Math.min(1, (s3Prog - 0.38) / 0.56));
+  const totalScrollSteps = Math.max(0, items.length - 1) + 2.0;
+  const scrollIndex = scrollRatio * totalScrollSteps;
 
   // Combine scroll-driven index with manual arrow/drag navigation
   const targetIndex = manualOffset !== null ? manualOffset : scrollIndex;
 
-  // Title dedicated fade-out as we approach Scene 4 (from 0.78 to 0.92)
-  const rawTitleExit = s3Prog > 0.78 ? Math.max(0, Math.min(1, (s3Prog - 0.78) / 0.13)) : 0;
-  const titleExitProg = rawTitleExit * rawTitleExit;
-  const titleOpacity = enterProg * (1 - titleExitProg);
-  const titleTranslateY = (1 - enterProg) * 20 - titleExitProg * 35;
-  const titleBlur = titleExitProg * 10;
+  // Deeply cushioned smooth momentum lerp for ultra-calm card transitions
+  const [smoothIndex, setSmoothIndex] = useState(0);
+  const targetIndexRef = useRef(targetIndex);
+  targetIndexRef.current = targetIndex;
 
-  // Cards sweeping off to the left transition (from 0.80 to 0.95)
-  const rawCardExit = s3Prog > 0.80 ? Math.max(0, Math.min(1, (s3Prog - 0.80) / 0.14)) : 0;
+  useEffect(() => {
+    let animId: number;
+    const lerpLoop = () => {
+      setSmoothIndex((prev) => {
+        const diff = targetIndexRef.current - prev;
+        if (Math.abs(diff) < 0.0005) return targetIndexRef.current;
+        return prev + diff * 0.05; // calm, silky, responsive momentum
+      });
+      animId = requestAnimationFrame(lerpLoop);
+    };
+    animId = requestAnimationFrame(lerpLoop);
+    return () => cancelAnimationFrame(animId);
+  }, []);
+
+  // Title entrance animation (drops down, scales up, deblurs)
+  const titleEnterEase = 1 - Math.pow(1 - enterProg, 2.5);
+  const titleEnterTranslateY = (1 - titleEnterEase) * -40;
+  const titleEnterScale = 0.90 + titleEnterEase * 0.10;
+  const titleEnterBlur = (1 - titleEnterEase) * 14;
+
+  // Title dedicated fade-out as we approach Scene 4 (from 0.88 to 0.96)
+  const rawTitleExit = s3Prog > 0.88 ? Math.max(0, Math.min(1, (s3Prog - 0.88) / 0.08)) : 0;
+  const titleExitProg = rawTitleExit * rawTitleExit;
+  const titleOpacity = Math.min(1, enterProg * 1.6) * (1 - titleExitProg);
+  const titleTranslateY = titleEnterTranslateY - titleExitProg * 40;
+  const titleBlur = titleEnterBlur + titleExitProg * 12;
+  const titleScale = titleEnterScale - titleExitProg * 0.08;
+
+  // Cards sweeping off to the left transition (from 0.94 to 1.00)
+  // Only activates after the last card has moved past center to the left!
+  const rawCardExit = s3Prog > 0.94 ? Math.max(0, Math.min(1, (s3Prog - 0.94) / 0.06)) : 0;
   const cardExitProg = rawCardExit * rawCardExit * (3 - 2 * rawCardExit);
-  const cardsShiftLeftVw = -cardExitProg * 85; // slide across all the way off the left edge
-  const cardsOpacity = Math.max(0, 1 - cardExitProg * 1.25);
+  const cardsExitShiftVw = -cardExitProg * 35; // gentle natural leftward drift
+
+  // Total horizontal shift: entrance from right corner (+75vw -> 0) + exit drift (0 -> -35vw)
+  const cardsTotalShiftVw = cardsEnterShiftVw + cardsExitShiftVw;
+  const cardsOpacity = Math.min(1, enterProg * 1.5) * Math.max(0, 1 - cardExitProg * 1.25);
 
   // Overall component opacity
-  const overallOpacity = activeChapter === 2 ? enterProg * (1 - cardExitProg) : 0;
+  const overallOpacity = activeChapter === 2 ? Math.min(1, enterProg * 1.5) * (1 - cardExitProg) : 0;
 
   // Reset manual offset if user scrolls significantly (syncing back to scroll flow)
   const lastScrollProgRef = useRef(scrollProgress);
@@ -212,9 +254,9 @@ export default function BurnGallery({
         className="relative z-20 w-full max-w-5xl mx-auto pt-16 sm:pt-24 md:pt-28 lg:pt-32 text-center flex flex-col items-center justify-center will-change-transform"
         style={{
           opacity: titleOpacity,
-          transform: `translateY(${titleTranslateY}px)`,
-          filter: titleBlur > 0 ? `blur(${titleBlur}px)` : 'none',
-          transition: 'opacity 0.2s ease-out, filter 0.2s ease-out',
+          transform: `translateY(${titleTranslateY}px) scale(${titleScale})`,
+          filter: titleBlur > 0.1 ? `blur(${titleBlur}px)` : 'none',
+          transition: 'opacity 0.15s ease-out, filter 0.15s ease-out',
         }}
       >
         {/* Editorial Title - Same typography & heat-shimmer as FOREST AND LAND FIRES */}
@@ -227,15 +269,15 @@ export default function BurnGallery({
       <div
         className="relative z-10 w-full flex-1 flex items-center justify-center my-auto overflow-visible [perspective:1200px] will-change-transform"
         style={{
-          transform: `translateX(${cardsShiftLeftVw}vw)`,
+          transform: `translateX(${cardsTotalShiftVw}vw)`,
           opacity: cardsOpacity,
           transition: 'transform 0.1s ease-out, opacity 0.15s ease-out',
         }}
       >
         <div className="relative w-full max-w-5xl h-[340px] sm:h-[420px] md:h-[480px] flex items-center justify-center pointer-events-none">
           {items.map((item, index) => {
-            // Distance from currently focused card
-            const effectiveActive = targetIndex + dragOffset / 320;
+            // Distance from currently focused card using smooth momentum index
+            const effectiveActive = smoothIndex + dragOffset / 320;
             const offset = index - effectiveActive;
             const absOffset = Math.abs(offset);
 
