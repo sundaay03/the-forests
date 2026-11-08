@@ -149,20 +149,8 @@ export default function ScrollyChapter({
           }}
         >
           <div className="relative flex flex-col items-center justify-center">
-            {/* Cinematic Ambient Dark Shadow behind text (feathered soft radial shadow, no box borders) */}
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 -m-8 sm:-m-16 rounded-full pointer-events-none"
-              style={{
-                background:
-                  'radial-gradient(ellipse at center, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.06) 45%, rgba(0,0,0,0) 75%)',
-                filter: 'blur(35px)',
-                transform: 'translate3d(0, 0, 0)',
-              }}
-            />
-
             {/* Headline with Vertical Mask Slide-up & Letter Stagger */}
-            <h1 className="relative text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.88] text-white flex flex-wrap justify-center overflow-hidden py-3 sm:py-5 text-cinematic-shadow">
+            <h1 className="relative text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.88] text-white flex flex-wrap justify-center py-3 sm:py-5 text-cinematic-shadow">
               {'THE FOREST'.split('').map((char, i) => (
                 <span
                   key={i}
@@ -201,18 +189,6 @@ export default function ScrollyChapter({
           }}
         >
           <div className="relative flex flex-col items-center justify-center w-full">
-            {/* Cinematic Ambient Dark Shadow behind About */}
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 -m-8 sm:-m-12 rounded-full pointer-events-none"
-              style={{
-                background:
-                  'radial-gradient(ellipse at center, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.05) 50%, rgba(0,0,0,0) 80%)',
-                filter: 'blur(35px)',
-                transform: 'translate3d(0, 0, 0)',
-              }}
-            />
-
             {/* Headline */}
             <h2 className="relative text-5xl sm:text-7xl md:text-8xl font-black uppercase tracking-tight text-white text-cinematic-shadow">
               ABOUT
