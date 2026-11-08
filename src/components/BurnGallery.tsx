@@ -303,7 +303,7 @@ export default function BurnGallery({
           onClick={() => setSelectedItem(null)}
         >
           <div
-            className="relative w-full max-w-5xl lg:max-w-6xl h-[78vh] sm:h-[84vh] overflow-hidden rounded-3xl bg-neutral-950 border border-white/20 shadow-[0_25px_80px_rgba(0,0,0,0.85)] flex items-center justify-center"
+            className="relative w-full max-w-2xl sm:max-w-3xl md:max-w-4xl h-[56vh] sm:h-[64vh] overflow-hidden rounded-3xl bg-neutral-950/95 border border-white/20 shadow-[0_25px_80px_rgba(0,0,0,0.85)] flex items-center justify-center p-2.5 sm:p-3"
             onClick={() => setSelectedItem(null)}
           >
             <img
@@ -315,7 +315,7 @@ export default function BurnGallery({
                   target.src = `/api/burn/${selectedItem.file}`;
                 }
               }}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain rounded-2xl"
             />
           </div>
         </div>
