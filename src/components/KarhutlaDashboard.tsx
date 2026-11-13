@@ -19,13 +19,21 @@ interface Glass3DCardProps {
   children: ReactNode;
   isActive: boolean;
   delayMs?: number;
+  translateY?: number;
+  opacity?: number;
 }
 
 /**
  * Reusable 3D Glassmorphism card shell with perspective tilt, dynamic light
  * reflection, frosted dark-forest glass surface, and reddish-orange edge glow.
  */
-function Glass3DCard({ children, isActive, delayMs = 0 }: Glass3DCardProps) {
+function Glass3DCard({
+  children,
+  isActive,
+  delayMs = 0,
+  translateY = 0,
+  opacity = 1,
+}: Glass3DCardProps) {
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, gx: 50, gy: 20, hovered: false });
 
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
@@ -49,15 +57,19 @@ function Glass3DCard({ children, isActive, delayMs = 0 }: Glass3DCardProps) {
 
   return (
     <div
-      className={`relative h-full [perspective:1200px] transition-all duration-700 ease-out ${
-        isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-      }`}
-      style={{ transitionDelay: `${delayMs}ms` }}
+      className="relative h-full [perspective:1200px] will-change-transform"
+      style={{
+        transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)`,
+        opacity,
+        pointerEvents: isActive && opacity > 0.85 ? 'auto' : 'none',
+        transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out',
+        transitionDelay: `${delayMs}ms`,
+      }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
       <div
-        className="relative h-full flex flex-col justify-between rounded-3xl p-5 sm:p-6 md:p-7 backdrop-blur-2xl border border-white/15 overflow-hidden text-left will-change-transform"
+        className="relative h-full flex flex-col justify-between rounded-3xl p-5 sm:p-6 md:p-7 backdrop-blur-2xl border border-white/15 overflow-hidden text-left font-sans will-change-transform"
         style={{
           background:
             'linear-gradient(145deg, rgba(11, 24, 18, 0.80) 0%, rgba(8, 14, 12, 0.88) 55%, rgba(28, 12, 8, 0.84) 100%)',
@@ -138,23 +150,41 @@ function Icon3DBadge({
 
 interface KarhutlaDashboardProps {
   isActive: boolean;
+  cardsProgress?: number; // 0.0 (hidden off-screen) to 1.0 (settled)
 }
 
-export default function KarhutlaDashboard({ isActive }: KarhutlaDashboardProps) {
+export default function KarhutlaDashboard({
+  isActive,
+  cardsProgress = 1,
+}: KarhutlaDashboardProps) {
+  const p = isActive ? Math.max(0, Math.min(1, cardsProgress)) : 0;
+  const ease = 1 - Math.pow(1 - p, 2.5);
+
+  // Card kiri (Total Forest Fires) muncul dari bawah (+200px -> 0px)
+  const leftTranslateY = (1 - ease) * 200;
+  const leftOpacity = p <= 0.01 ? 0 : Math.min(1, p * 1.5);
+
+  // Card kanan (Forest Fire Victims) muncul dari atas (-200px -> 0px)
+  const rightTranslateY = (1 - ease) * -200;
+  const rightOpacity = p <= 0.01 ? 0 : Math.min(1, p * 1.5);
+
   return (
     <div
-      className={`w-full max-w-5xl mx-auto mt-5 sm:mt-7 grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 items-stretch ${
-        isActive ? 'pointer-events-auto' : 'pointer-events-none'
+      className={`w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 items-stretch ${
+        isActive && p > 0.85 ? 'pointer-events-auto' : 'pointer-events-none'
       }`}
     >
-      {/* ===================== CARD 1: TOTAL FOREST FIRES ===================== */}
-      <Glass3DCard isActive={isActive} delayMs={120}>
+      {/* ===================== CARD 1: TOTAL FOREST FIRES (From Below) ===================== */}
+      <Glass3DCard
+        isActive={isActive}
+        translateY={leftTranslateY}
+        opacity={leftOpacity}
+      >
         <div>
-          <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-white">
+          <div className="mb-4 sm:mb-5">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight text-white">
               Total Forest Fires
             </h2>
-            <span className="h-2 w-2 rounded-full bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.9)]" />
           </div>
 
           {/* Regional Ranking List */}
@@ -165,14 +195,14 @@ export default function KarhutlaDashboard({ isActive }: KarhutlaDashboardProps) 
                 className="flex items-center justify-between gap-3 py-2.5 sm:py-3 first:pt-1 last:pb-1"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="shrink-0 w-6 h-6 rounded-lg bg-white/5 border border-white/15 text-[11px] sm:text-xs font-mono font-semibold text-orange-400 flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]">
+                  <span className="shrink-0 w-6 h-6 rounded-lg bg-white/5 border border-white/15 text-[11px] sm:text-xs font-bold text-orange-400 flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]">
                     {entry.rank}
                   </span>
                   <span className="text-xs sm:text-sm md:text-[15px] font-medium text-neutral-100 leading-snug">
                     {entry.region}
                   </span>
                 </div>
-                <span className="shrink-0 text-xs sm:text-sm md:text-[15px] font-mono font-semibold text-white/95 tabular-nums whitespace-nowrap">
+                <span className="shrink-0 text-xs sm:text-sm md:text-[15px] font-semibold text-white/95 tabular-nums whitespace-nowrap">
                   {entry.area}
                 </span>
               </li>
@@ -182,7 +212,7 @@ export default function KarhutlaDashboard({ isActive }: KarhutlaDashboardProps) 
 
         {/* National Total Highlight */}
         <div className="pt-4 border-t border-white/15 flex flex-col sm:flex-row sm:items-end justify-between gap-1.5">
-          <span className="text-[11px] sm:text-xs font-mono font-semibold uppercase tracking-[0.22em] text-neutral-300">
+          <span className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.2em] text-neutral-300">
             NATIONAL TOTAL
           </span>
           <span className="text-2xl sm:text-3xl md:text-[34px] font-black tracking-tight tabular-nums leading-none bg-gradient-to-r from-orange-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(255,87,34,0.4)]">
@@ -191,19 +221,22 @@ export default function KarhutlaDashboard({ isActive }: KarhutlaDashboardProps) 
         </div>
       </Glass3DCard>
 
-      {/* ===================== CARD 2: FOREST FIRE VICTIMS ===================== */}
-      <Glass3DCard isActive={isActive} delayMs={220}>
+      {/* ===================== CARD 2: FOREST FIRE VICTIMS (From Above) ===================== */}
+      <Glass3DCard
+        isActive={isActive}
+        translateY={rightTranslateY}
+        opacity={rightOpacity}
+      >
         <div className="flex flex-col justify-between h-full gap-4">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-white">
+          <div>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight text-white">
               Forest Fire Victims
             </h2>
-            <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.9)]" />
           </div>
 
           {/* Category 1: Direct Human Casualties */}
           <div className="space-y-3">
-            <p className="text-[11px] sm:text-xs font-mono font-semibold uppercase tracking-[0.18em] text-red-400/95">
+            <p className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-red-400/95">
               1. Direct Human Casualties
             </p>
 
@@ -295,7 +328,7 @@ export default function KarhutlaDashboard({ isActive }: KarhutlaDashboardProps) 
 
           {/* Category 2: Health Impacts from Haze */}
           <div className="space-y-3">
-            <p className="text-[11px] sm:text-xs font-mono font-semibold uppercase tracking-[0.18em] text-orange-400/95">
+            <p className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-orange-400/95">
               2. Health Impacts from Haze
             </p>
 

@@ -10,7 +10,7 @@ const CHAPTERS = [
   { id: 1, tag: '01', title: 'THE GATEWAY' },
   { id: 2, tag: '02', title: 'THE CANOPY' },
   { id: 3, tag: '03', title: 'THE INFERNO' },
-  { id: 4, tag: '04', title: 'THE FRONTLINE' },
+  { id: 4, tag: '04', title: 'STATISTIC' },
   { id: 5, tag: '05', title: 'THE ASHES' },
   { id: 6, tag: '06', title: 'THE HUMAN TOLL' },
   { id: 7, tag: '07', title: 'THE REBIRTH' },

@@ -77,10 +77,23 @@ export default function ScrollyChapter({
   const s3TitleBlur = s3TitleExit * 10;
   const s3TitleScale = 1 - s3TitleExit * 0.08;
 
-  // Scene 4 (THE FRONTLINE): local progress 0.429 to 0.571
+  // Scene 4 (STATISTIC): local progress 0.429 to 0.571
   const s4Prog = Math.max(0, Math.min(1, (scrollProgress - 0.429) / 0.143));
-  const s4ExitProg = s4Prog > 0.62 ? Math.max(0, Math.min(1, (s4Prog - 0.62) / 0.18)) : 0;
-  const s4Opacity = activeChapter === 3 ? 1 - s4ExitProg : 0;
+  // Stage 1 (0.00 to 0.16): "STATISTIC" title enters and stays centered on screen
+  const s4TitleEnter = Math.min(1, s4Prog / 0.08);
+  // Stage 2 (0.16 to 0.26): Title dissolves and is 100% GONE before cards appear
+  const s4TitleExit = s4Prog > 0.16 ? Math.min(1, (s4Prog - 0.16) / 0.10) : 0;
+  const s4TitleOpacity = activeChapter === 3 ? s4TitleEnter * (1 - s4TitleExit) : 0;
+  const s4TitleTranslateY = -s4TitleExit * 28;
+  const s4TitleBlur = s4TitleExit * 8;
+  const s4TitleScale = 1.06 - s4TitleExit * 0.06;
+
+  // Stage 3 (0.29 to 0.45): Cards enter ONLY AFTER title has completely disappeared
+  const s4CardsEnter = Math.max(0, Math.min(1, (s4Prog - 0.29) / 0.16));
+
+  // Stage 4 (0.80 to 1.00): Scene 4 exits into Scene 5
+  const s4ExitProg = s4Prog > 0.80 ? Math.max(0, Math.min(1, (s4Prog - 0.80) / 0.20)) : 0;
+  const s4SceneOpacity = activeChapter === 3 ? 1 - s4ExitProg : 0;
   const s4TranslateY = -s4ExitProg * 35;
   const s4Blur = s4ExitProg * 8;
 
@@ -240,35 +253,42 @@ export default function ScrollyChapter({
         scrollProgress={scrollProgress}
       />
 
-      {/* ===================== SCENE 4: THE RESISTANCE ===================== */}
+      {/* ===================== SCENE 4: STATISTIC ===================== */}
       <div
-        className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 pt-20 sm:pt-24 pb-6 pointer-events-none"
+        className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 pointer-events-none"
         style={{
-          opacity: s4Opacity,
+          opacity: s4SceneOpacity,
           transform: `translateY(${s4TranslateY}px)`,
           filter: s4Blur > 0 ? `blur(${s4Blur}px)` : 'none',
           transition: 'opacity 0.2s ease-out, filter 0.2s ease-out, transform 0.2s ease-out',
         }}
       >
+        {/* Phase 1: Center Title "STATISTIC" (appears first in center, dissolves when cards arrive) */}
         <div
-          className={`flex items-center gap-3 mb-2.5 sm:mb-3 transition-all duration-500 delay-100 ${
-            activeChapter === 3 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'
-          }`}
+          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none will-change-transform"
+          style={{
+            opacity: s4TitleOpacity,
+            transform: `translateY(${s4TitleTranslateY}px) scale(${s4TitleScale})`,
+            filter: s4TitleBlur > 0.1 ? `blur(${s4TitleBlur}px)` : 'none',
+            transition: 'opacity 0.15s ease-out, transform 0.15s ease-out, filter 0.15s ease-out',
+          }}
         >
-          <span className="h-2.5 w-2.5 rounded-full bg-red-600 animate-ping" />
+          <div className="flex items-center gap-3 mb-3">
+            <span className="h-2.5 w-2.5 rounded-full bg-red-600 animate-ping" />
+          </div>
+
+          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-wider text-white text-cinematic-shadow">
+            STATISTIC
+          </h1>
         </div>
 
-        {/* High-contrast Red/White Stencil Typography */}
-        <h1
-          className={`text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-wider text-white border-y-2 border-red-600/80 py-1.5 sm:py-2.5 px-5 sm:px-6 animate-emergency-beacon bg-black/40 backdrop-blur-sm transition-all duration-500 ${
-            activeChapter === 3 ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
-          }`}
-        >
-          <span className="text-red-500">THE</span> FRONTLINE
-        </h1>
-
-        {/* 2-Card 3D Glassmorphism KARHUTLA Data Dashboard */}
-        <KarhutlaDashboard isActive={activeChapter === 3 && s4ExitProg < 0.35} />
+        {/* Phase 2: 2-Card 3D Glassmorphism KARHUTLA Data Dashboard centered */}
+        <div className="relative z-10 w-full flex items-center justify-center">
+          <KarhutlaDashboard
+            isActive={activeChapter === 3 && s4ExitProg < 0.35}
+            cardsProgress={s4CardsEnter}
+          />
+        </div>
       </div>
 
       {/* ===================== SCENE 5: THE ASHES ===================== */}
