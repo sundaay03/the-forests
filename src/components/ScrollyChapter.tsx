@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import IndonesiaGallery from './IndonesiaGallery';
 import BurnTransition from './BurnTransition';
 import BurnGallery from './BurnGallery';
 import HealthImpacts from './HealthImpacts';
 import PortalTransition from './PortalTransition';
+import KarhutlaDashboard from './KarhutlaDashboard';
 
 interface ScrollyChapterProps {
   activeChapter: number;
@@ -16,9 +16,6 @@ export default function ScrollyChapter({
   activeChapter,
   scrollProgress = 0,
 }: ScrollyChapterProps) {
-  // Live containment counter for Scene 4
-  const [containment, setContainment] = useState(0);
-
   // Scene 1 Video Playback Time (mapped from scrollProgress 0.0 to 0.09 across 9.93s duration)
   const s1Time = Math.min(9.93, Math.max(0, (scrollProgress / 0.09) * 9.93));
 
@@ -69,22 +66,6 @@ export default function ScrollyChapter({
   // Local progress inside Scene 3 (0.286 to 0.429 mapped to 0.0 -> 1.0)
   const s3Prog = Math.max(0, Math.min(1, (scrollProgress - 0.286) / 0.143));
 
-  useEffect(() => {
-    if (activeChapter === 3) {
-      setContainment(0);
-      const interval = setInterval(() => {
-        setContainment((prev) => {
-          if (prev >= 42) {
-            clearInterval(interval);
-            return 42;
-          }
-          return prev + 3;
-        });
-      }, 50);
-      return () => clearInterval(interval);
-    }
-  }, [activeChapter]);
-
   // Scene 3 scroll-choreographed opacity and transform
   // Stage 1 (0.00 to 0.18): "FOREST AND LAND FIRES" entrance and center stage
   // Stage 2 (0.18 to 0.26): Title dissolves, lifts into smoke and is 100% gone by 0.26
@@ -98,7 +79,7 @@ export default function ScrollyChapter({
 
   // Scene 4 (THE FRONTLINE): local progress 0.429 to 0.571
   const s4Prog = Math.max(0, Math.min(1, (scrollProgress - 0.429) / 0.143));
-  const s4ExitProg = s4Prog > 0.48 ? Math.max(0, Math.min(1, (s4Prog - 0.48) / 0.22)) : 0;
+  const s4ExitProg = s4Prog > 0.62 ? Math.max(0, Math.min(1, (s4Prog - 0.62) / 0.18)) : 0;
   const s4Opacity = activeChapter === 3 ? 1 - s4ExitProg : 0;
   const s4TranslateY = -s4ExitProg * 35;
   const s4Blur = s4ExitProg * 8;
@@ -261,7 +242,7 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 4: THE RESISTANCE ===================== */}
       <div
-        className="absolute inset-0 flex flex-col items-center justify-center px-4 pointer-events-none"
+        className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 pt-20 sm:pt-24 pb-6 pointer-events-none"
         style={{
           opacity: s4Opacity,
           transform: `translateY(${s4TranslateY}px)`,
@@ -270,7 +251,7 @@ export default function ScrollyChapter({
         }}
       >
         <div
-          className={`flex items-center gap-3 mb-4 transition-all duration-500 delay-100 ${
+          className={`flex items-center gap-3 mb-2.5 sm:mb-3 transition-all duration-500 delay-100 ${
             activeChapter === 3 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'
           }`}
         >
@@ -279,31 +260,15 @@ export default function ScrollyChapter({
 
         {/* High-contrast Red/White Stencil Typography */}
         <h1
-          className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-wider text-white border-y-2 border-red-600/80 py-2 sm:py-4 px-6 animate-emergency-beacon bg-black/40 backdrop-blur-sm transition-all duration-500 ${
+          className={`text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-wider text-white border-y-2 border-red-600/80 py-1.5 sm:py-2.5 px-5 sm:px-6 animate-emergency-beacon bg-black/40 backdrop-blur-sm transition-all duration-500 ${
             activeChapter === 3 ? 'opacity-100 scale-100' : 'opacity-0 scale-90'
           }`}
         >
           <span className="text-red-500">THE</span> FRONTLINE
         </h1>
 
-        {/* Animated Numeric Containment Counter */}
-        <div
-          className={`mt-6 flex items-center gap-3 font-mono text-xs sm:text-sm tracking-widest text-red-400 bg-red-950/40 border border-red-800/60 rounded-full px-5 py-2 transition-all duration-500 delay-200 ${
-            activeChapter === 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}
-        >
-          <span>FIRE CONTAINMENT STATUS:</span>
-          <span className="text-white font-bold text-base">{containment}%</span>
-        </div>
-
-        {/* Subtitle */}
-        <p
-          className={`mt-4 sm:mt-6 text-sm sm:text-lg font-mono text-neutral-300 tracking-wide max-w-lg transition-all duration-500 delay-300 ${
-            activeChapter === 3 ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          Holding the perimeter in the dark.
-        </p>
+        {/* 2-Card 3D Glassmorphism KARHUTLA Data Dashboard */}
+        <KarhutlaDashboard isActive={activeChapter === 3 && s4ExitProg < 0.35} />
       </div>
 
       {/* ===================== SCENE 5: THE ASHES ===================== */}
