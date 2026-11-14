@@ -1,433 +1,410 @@
 'use client';
 
-import { useState, type ReactNode, type MouseEvent } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface RegionalFireEntry {
   rank: number;
   region: string;
   area: string;
+  percent: string;
 }
 
 const REGIONAL_FIRES: RegionalFireEntry[] = [
-  { rank: 1, region: 'Papua', area: '313,777 ha' },
-  { rank: 2, region: 'Bali, Nusa Tenggara, and Maluku', area: '297,732 ha' },
-  { rank: 3, region: 'Kalimantan', area: '258,149 ha' },
-  { rank: 4, region: 'Sumatra, Java, and Sulawesi', area: '233,474 ha' },
+  { rank: 1, region: 'Papua', area: '313,777 ha', percent: '28.4%' },
+  { rank: 2, region: 'Bali, Nusa Tenggara, and Maluku', area: '297,732 ha', percent: '27.0%' },
+  { rank: 3, region: 'Kalimantan', area: '258,149 ha', percent: '23.4%' },
+  { rank: 4, region: 'Sumatra, Java, and Sulawesi', area: '233,474 ha', percent: '21.2%' },
 ];
-
-interface Glass3DCardProps {
-  children: ReactNode;
-  isActive: boolean;
-  delayMs?: number;
-  translateY?: number;
-  opacity?: number;
-}
-
-/**
- * Reusable 3D Glassmorphism card shell with perspective tilt, dynamic light
- * reflection, frosted dark-forest glass surface, and reddish-orange edge glow.
- */
-function Glass3DCard({
-  children,
-  isActive,
-  delayMs = 0,
-  translateY = 0,
-  opacity = 1,
-}: Glass3DCardProps) {
-  const [tilt, setTilt] = useState({ rx: 0, ry: 0, gx: 50, gy: 20, hovered: false });
-
-  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const px = (e.clientX - rect.left) / rect.width;
-    const py = (e.clientY - rect.top) / rect.height;
-    const ry = (px - 0.5) * 9;
-    const rx = (0.5 - py) * 9;
-    setTilt({
-      rx,
-      ry,
-      gx: px * 100,
-      gy: py * 100,
-      hovered: true,
-    });
-  };
-
-  const handleMouseLeave = () => {
-    setTilt({ rx: 0, ry: 0, gx: 50, gy: 20, hovered: false });
-  };
-
-  return (
-    <div
-      className="relative h-full [perspective:1200px] will-change-transform"
-      style={{
-        transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)`,
-        opacity,
-        pointerEvents: isActive && opacity > 0.85 ? 'auto' : 'none',
-        transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out',
-        transitionDelay: `${delayMs}ms`,
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div
-        className="relative h-full flex flex-col justify-between rounded-3xl p-5 sm:p-6 md:p-7 backdrop-blur-2xl border border-white/15 overflow-hidden text-left font-sans will-change-transform"
-        style={{
-          background:
-            'linear-gradient(145deg, rgba(11, 24, 18, 0.80) 0%, rgba(8, 14, 12, 0.88) 55%, rgba(28, 12, 8, 0.84) 100%)',
-          transform: tilt.hovered
-            ? `rotateX(${tilt.rx.toFixed(2)}deg) rotateY(${tilt.ry.toFixed(2)}deg) translateY(-4px) translateZ(12px)`
-            : 'rotateX(1.5deg) rotateY(0deg) translateZ(0px)',
-          transition: tilt.hovered
-            ? 'transform 0.12s ease-out, box-shadow 0.3s ease-out'
-            : 'transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.55s ease-out',
-          boxShadow: tilt.hovered
-            ? '0 30px 70px -12px rgba(0, 0, 0, 0.9), 0 0 42px -8px rgba(255, 87, 34, 0.34), inset 0 1px 0 0 rgba(255, 255, 255, 0.32), inset 1px 0 0 0 rgba(255, 255, 255, 0.16)'
-            : '0 22px 55px -12px rgba(0, 0, 0, 0.85), 0 0 30px -10px rgba(255, 87, 34, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.24), inset 1px 0 0 0 rgba(255, 255, 255, 0.10)',
-        }}
-      >
-        {/* Top glowing edge highlight */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-8 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-orange-400/75 to-transparent"
-        />
-
-        {/* Subtle resting glass specular sheen */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(125deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.025) 36%, transparent 62%)',
-          }}
-        />
-
-        {/* Interactive cursor light reflection across glass */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 transition-opacity duration-300"
-          style={{
-            opacity: tilt.hovered ? 1 : 0.35,
-            background: `radial-gradient(circle 280px at ${tilt.gx}% ${tilt.gy}%, rgba(255, 112, 67, 0.14), rgba(255, 255, 255, 0.05) 40%, transparent 75%)`,
-          }}
-        />
-
-        {/* Bottom-right ambient ember reflection */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-16 -right-16 w-48 h-48 rounded-full bg-orange-600/15 blur-3xl"
-        />
-
-        <div className="relative z-10 h-full flex flex-col justify-between gap-4 sm:gap-5">
-          {children}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Minimalist 3D visual icon wrapper with elevated glass capsule & red/orange glow.
- */
-function Icon3DBadge({
-  children,
-  accent = 'red',
-}: {
-  children: ReactNode;
-  accent?: 'red' | 'orange';
-}) {
-  const glow =
-    accent === 'red'
-      ? 'shadow-[0_10px_24px_-4px_rgba(239,68,68,0.45),inset_0_1px_1px_rgba(255,255,255,0.35)] border-red-400/35 bg-gradient-to-br from-red-500/30 via-red-900/40 to-black/60'
-      : 'shadow-[0_10px_24px_-4px_rgba(249,115,22,0.45),inset_0_1px_1px_rgba(255,255,255,0.35)] border-orange-400/35 bg-gradient-to-br from-orange-500/30 via-orange-900/40 to-black/60';
-
-  return (
-    <div
-      className={`shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-2xl border backdrop-blur-md flex items-center justify-center ${glow}`}
-    >
-      {children}
-    </div>
-  );
-}
 
 interface KarhutlaDashboardProps {
   isActive: boolean;
-  cardsProgress?: number; // 0.0 (hidden off-screen) to 1.0 (settled)
+  cardsProgress?: number; // 0.0 to 1.0
 }
 
 export default function KarhutlaDashboard({
   isActive,
   cardsProgress = 1,
 }: KarhutlaDashboardProps) {
+  const [activeModal, setActiveModal] = useState<'burned' | 'casualties' | 'health' | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!activeModal) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveModal(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeModal]);
+
   const p = isActive ? Math.max(0, Math.min(1, cardsProgress)) : 0;
   const ease = 1 - Math.pow(1 - p, 2.5);
 
-  // Card kiri (Total Forest Fires) muncul dari bawah (+200px -> 0px)
-  const leftTranslateY = (1 - ease) * 200;
-  const leftOpacity = p <= 0.01 ? 0 : Math.min(1, p * 1.5);
-
-  // Card kanan (Forest Fire Victims) muncul dari atas (-200px -> 0px)
-  const rightTranslateY = (1 - ease) * -200;
-  const rightOpacity = p <= 0.01 ? 0 : Math.min(1, p * 1.5);
+  const translateY = (1 - ease) * 40;
+  const opacity = p <= 0.01 ? 0 : Math.min(1, p * 1.4);
 
   return (
     <div
-      className={`w-full max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 lg:gap-8 items-stretch ${
-        isActive && p > 0.85 ? 'pointer-events-auto' : 'pointer-events-none'
-      }`}
+      className="w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center justify-center transition-all duration-300"
+      style={{
+        transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)`,
+        opacity,
+        pointerEvents: isActive && opacity > 0.05 ? 'auto' : 'none',
+      }}
     >
-      {/* ===================== CARD 1: TOTAL FOREST FIRES (From Below) ===================== */}
-      <Glass3DCard
-        isActive={isActive}
-        translateY={leftTranslateY}
-        opacity={leftOpacity}
+      {/* ===================== DASHBOARD CONTENT (BLURRED WHEN MODAL IS ACTIVE) ===================== */}
+      <div
+        className="w-full flex flex-col items-center justify-center transition-all duration-300"
+        style={{
+          filter: activeModal ? 'blur(5px)' : 'none',
+          opacity: activeModal ? 0.65 : 1,
+          transform: activeModal ? 'scale(0.99)' : 'none',
+          transition: 'filter 0.3s ease-out, opacity 0.3s ease-out, transform 0.3s ease-out',
+          pointerEvents: activeModal ? 'none' : 'auto',
+        }}
       >
-        <div>
-          <div className="mb-4 sm:mb-5">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight text-white">
-              Total Forest Fires
-            </h2>
-          </div>
-
-          {/* Regional Ranking List */}
-          <ul className="divide-y divide-white/10">
-            {REGIONAL_FIRES.map((entry) => (
-              <li
-                key={entry.rank}
-                className="flex items-center justify-between gap-3 py-2.5 sm:py-3 first:pt-1 last:pb-1"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="shrink-0 w-6 h-6 rounded-lg bg-white/5 border border-white/15 text-[11px] sm:text-xs font-bold text-orange-400 flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]">
-                    {entry.rank}
-                  </span>
-                  <span className="text-xs sm:text-sm md:text-[15px] font-medium text-neutral-100 leading-snug">
-                    {entry.region}
-                  </span>
-                </div>
-                <span className="shrink-0 text-xs sm:text-sm md:text-[15px] font-semibold text-white/95 tabular-nums whitespace-nowrap">
-                  {entry.area}
-                </span>
-              </li>
-            ))}
-          </ul>
+        {/* ===================== SECTION HEADER (Matches Scene 3 BURNING THE FUTURE typography) ===================== */}
+        <div className="text-center mb-6 sm:mb-8 md:mb-10 max-w-4xl sm:max-w-5xl mx-auto flex flex-col items-center justify-center">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
+            HOW MUCH MORE FOREST MUST WE LOSE?
+          </h2>
         </div>
 
-        {/* National Total Highlight */}
-        <div className="pt-4 border-t border-white/15 flex flex-col sm:flex-row sm:items-end justify-between gap-1.5">
-          <span className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.2em] text-neutral-300">
-            NATIONAL TOTAL
-          </span>
-          <span className="text-2xl sm:text-3xl md:text-[34px] font-black tracking-tight tabular-nums leading-none bg-gradient-to-r from-orange-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(255,87,34,0.4)]">
-            1,103,132 ha
-          </span>
-        </div>
-      </Glass3DCard>
+        {/* ===================== 3-CARD GRID (Matches Image 2) ===================== */}
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 items-stretch">
+        {/* ---------------- CARD 1: BURNED LAND AREA ---------------- */}
+        <div
+          onClick={() => setActiveModal('burned')}
+          className="group relative rounded-2xl bg-[#0e1219]/90 border border-white/10 hover:border-white/35 hover:bg-[#070a10]/95 p-5 sm:p-6 flex flex-col h-full backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 shadow-[0_12px_35px_-10px_rgba(0,0,0,0.85)] hover:shadow-[0_24px_55px_-12px_rgba(0,0,0,0.95)] cursor-pointer"
+        >
+          {/* Top Visual Box (Data Flow Diagram - Blue Aura) */}
+          <div className="relative w-full h-44 sm:h-48 rounded-xl overflow-hidden mb-5 border border-white/10 group-hover:border-white/25 bg-gradient-to-br from-[#0c2448] via-[#091830] to-[#07101f] p-3 flex flex-col items-center justify-center transition-all duration-300">
+            {/* Ambient Radial Flare */}
+            <div
+              aria-hidden="true"
+              className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-36 bg-blue-500/20 rounded-full blur-2xl pointer-events-none"
+            />
 
-      {/* ===================== CARD 2: FOREST FIRE VICTIMS (From Above) ===================== */}
-      <Glass3DCard
-        isActive={isActive}
-        translateY={rightTranslateY}
-        opacity={rightOpacity}
-      >
-        <div className="flex flex-col justify-between h-full gap-4">
-          <div>
-            <h2 className="text-lg sm:text-xl md:text-2xl font-extrabold tracking-tight text-white">
-              Forest Fire Victims
-            </h2>
-          </div>
+            {/* Inner White Container (Diagram like Card 1 in reference) */}
+            <div className="relative z-10 w-full bg-white rounded-xl p-2.5 sm:p-3 shadow-lg group-hover:shadow-2xl flex flex-col justify-between h-full text-neutral-800 transition-all duration-300">
+              {/* Header inside graphic */}
+              <div className="flex items-center justify-between border-b border-neutral-100 pb-1 text-[9px] sm:text-[10px] font-bold text-neutral-400 tracking-wider uppercase">
+                <span>REGIONAL NETWORK</span>
+                <span className="text-blue-600 font-extrabold">1,103,132 HA</span>
+              </div>
 
-          {/* Category 1: Direct Human Casualties */}
-          <div className="space-y-3">
-            <p className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-red-400/95">
-              1. Direct Human Casualties
-            </p>
-
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              {/* 4 Deaths */}
-              <div className="flex items-center gap-3 rounded-2xl bg-white/[0.04] border border-white/10 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
-                <Icon3DBadge accent="red">
-                  {/* Minimalist 3D Human Alert / Casualty Icon */}
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="w-5 h-5 drop-shadow-[0_2px_6px_rgba(239,68,68,0.8)]"
-                    fill="none"
-                  >
-                    <defs>
-                      <linearGradient id="casualtyGrad" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor="#fecaca" />
-                        <stop offset="55%" stopColor="#ef4444" />
-                        <stop offset="100%" stopColor="#991b1b" />
-                      </linearGradient>
-                    </defs>
-                    <circle cx="12" cy="7" r="3.4" fill="url(#casualtyGrad)" />
-                    <path
-                      d="M5.5 19.5c0-3.5 2.9-6 6.5-6s6.5 2.5 6.5 6"
-                      stroke="url(#casualtyGrad)"
-                      strokeWidth="2.4"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </Icon3DBadge>
-                <div className="min-w-0">
-                  <div className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-none">
-                    4
+              {/* Node connectivity diagram */}
+              <div className="grid grid-cols-3 items-center gap-1.5 my-auto text-[9px] sm:text-[10px]">
+                {/* Left Col */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="bg-neutral-50 border border-neutral-200 rounded px-1.5 py-1 text-center font-semibold text-neutral-700 truncate shadow-xs">
+                    Papua <span className="block text-[8px] text-neutral-400 font-normal">313.7k ha</span>
                   </div>
-                  <div className="mt-1 text-xs sm:text-sm font-medium text-neutral-300">
-                    Deaths
+                  <div className="bg-neutral-50 border border-neutral-200 rounded px-1.5 py-1 text-center font-semibold text-neutral-700 truncate shadow-xs">
+                    Kalimantan <span className="block text-[8px] text-neutral-400 font-normal">258.1k ha</span>
+                  </div>
+                </div>
+
+                {/* Center Core Node */}
+                <div className="flex flex-col items-center justify-center">
+                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-blue-600 text-white flex flex-col items-center justify-center shadow-md shadow-blue-500/30">
+                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white" aria-hidden="true">
+                      <path d="M12 2c.5 3 3.5 5 3.5 8.5 0 3.6-2.9 6.5-6.5 6.5S2.5 14.1 2.5 10.5C2.5 8 4 6 5.5 4.5c.3 1.5 1.5 2.5 2.5 2.5 1.7 0 2.5-1.5 2.5-3 0-.7.5-1.5 1.5-2Z" />
+                    </svg>
+                    <span className="text-[7.5px] font-black tracking-tight leading-none mt-0.5">TOTAL</span>
+                  </div>
+                </div>
+
+                {/* Right Col */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="bg-neutral-50 border border-neutral-200 rounded px-1.5 py-1 text-center font-semibold text-neutral-700 truncate shadow-xs">
+                    Bali &amp; Maluku <span className="block text-[8px] text-neutral-400 font-normal">297.7k ha</span>
+                  </div>
+                  <div className="bg-neutral-50 border border-neutral-200 rounded px-1.5 py-1 text-center font-semibold text-neutral-700 truncate shadow-xs">
+                    Sumatra <span className="block text-[8px] text-neutral-400 font-normal">233.4k ha</span>
                   </div>
                 </div>
               </div>
 
-              {/* 347 Injuries */}
-              <div className="flex items-center gap-3 rounded-2xl bg-white/[0.04] border border-white/10 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
-                <Icon3DBadge accent="red">
-                  {/* Minimalist 3D Medical Cross / Aid Icon */}
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="w-5 h-5 drop-shadow-[0_2px_6px_rgba(239,68,68,0.8)]"
-                    fill="none"
-                  >
-                    <defs>
-                      <linearGradient id="medGrad" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor="#fee2e2" />
-                        <stop offset="50%" stopColor="#f87171" />
-                        <stop offset="100%" stopColor="#b91c1c" />
-                      </linearGradient>
-                    </defs>
-                    <rect
-                      x="3.5"
-                      y="3.5"
-                      width="17"
-                      height="17"
-                      rx="5"
-                      fill="url(#medGrad)"
-                      fillOpacity="0.22"
-                      stroke="url(#medGrad)"
-                      strokeWidth="1.6"
-                    />
-                    <path
-                      d="M12 7.5v9M7.5 12h9"
-                      stroke="url(#medGrad)"
-                      strokeWidth="2.6"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </Icon3DBadge>
-                <div className="min-w-0">
-                  <div className="text-2xl sm:text-3xl font-black text-white tabular-nums leading-none">
-                    347
-                  </div>
-                  <div className="mt-1 text-xs sm:text-sm font-medium text-neutral-300">
-                    Injuries
-                  </div>
-                </div>
+              {/* Bottom tag inside graphic */}
+              <div className="text-[8.5px] text-center text-neutral-400 font-medium">
+                National Karhutla Coverage 2023–2024
               </div>
             </div>
           </div>
 
-          {/* Subtle Category Separator */}
-          <div className="border-t border-white/15" />
+          {/* Card Meta Content */}
+          <div className="flex flex-col flex-grow">
+            <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 group-hover:text-neutral-300 transition-colors duration-200">
+              1,103,132 ha scorched across Indonesia
+            </h3>
 
-          {/* Category 2: Health Impacts from Haze */}
-          <div className="space-y-3">
-            <p className="text-xs sm:text-[13px] font-bold uppercase tracking-[0.18em] text-orange-400/95">
-              2. Health Impacts from Haze
+            <p className="text-xs sm:text-sm text-neutral-400 group-hover:text-neutral-300 transition-colors duration-200 font-normal leading-relaxed">
+              Papua, Bali-Nusa Tenggara, Kalimantan, and Sumatra recorded massive scorched acreage, ravaging pristine carbon-sink peatland.
             </p>
+          </div>
+        </div>
 
-            <div className="flex flex-col gap-2.5">
-              {/* 333,470 ARI Cases */}
-              <div className="flex items-center gap-3.5 rounded-2xl bg-white/[0.04] border border-white/10 p-3 sm:p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
-                <Icon3DBadge accent="orange">
-                  {/* Minimalist 3D Lungs Icon */}
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="w-5 h-5 drop-shadow-[0_2px_6px_rgba(249,115,22,0.8)]"
-                    fill="none"
-                  >
-                    <defs>
-                      <linearGradient id="lungsGrad" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor="#ffedd5" />
-                        <stop offset="50%" stopColor="#fb923c" />
-                        <stop offset="100%" stopColor="#c2410c" />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M12 4v6M12 10c-1.5 0-2.5 1-3 2"
-                      stroke="url(#lungsGrad)"
-                      strokeWidth="1.9"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M12 10c1.5 0 2.5 1 3 2"
-                      stroke="url(#lungsGrad)"
-                      strokeWidth="1.9"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M9.8 8.2C7.4 8.4 4.5 10.6 4.2 14.8c-.2 2.8 1.5 4.7 3.8 4.7 1.4 0 2.3-.7 2.5-2V9.8c0-1-.3-1.6-.7-1.6Z"
-                      fill="url(#lungsGrad)"
-                      fillOpacity="0.88"
-                    />
-                    <path
-                      d="M14.2 8.2c2.4.2 5.3 2.4 5.6 6.6.2 2.8-1.5 4.7-3.8 4.7-1.4 0-2.3-.7-2.5-2V9.8c0-1 .3-1.6.7-1.6Z"
-                      fill="url(#lungsGrad)"
-                      fillOpacity="0.88"
-                    />
-                  </svg>
-                </Icon3DBadge>
-                <div className="min-w-0">
-                  <div className="text-2xl sm:text-3xl font-black text-orange-400 tabular-nums leading-none">
-                    333,470
-                  </div>
-                  <div className="mt-1 text-xs sm:text-sm font-medium text-neutral-200 leading-snug">
-                    ARI (Acute Respiratory Infection) Cases
-                  </div>
+        {/* ---------------- CARD 2: DIRECT CASUALTIES ---------------- */}
+        <div
+          onClick={() => setActiveModal('casualties')}
+          className="group relative rounded-2xl bg-[#0e1219]/90 border border-white/10 hover:border-white/35 hover:bg-[#070a10]/95 p-5 sm:p-6 flex flex-col h-full backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 shadow-[0_12px_35px_-10px_rgba(0,0,0,0.85)] hover:shadow-[0_24px_55px_-12px_rgba(0,0,0,0.95)] cursor-pointer"
+        >
+          {/* Top Visual Box (Segmented Bar Chart - Cyan/Teal Aura) */}
+          <div className="relative w-full h-44 sm:h-48 rounded-xl overflow-hidden mb-5 border border-white/10 group-hover:border-white/25 bg-gradient-to-br from-[#063339] via-[#082228] to-[#071217] p-3 flex flex-col items-center justify-center transition-all duration-300">
+            {/* Ambient Radial Flare */}
+            <div
+              aria-hidden="true"
+              className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-36 bg-cyan-500/20 rounded-full blur-2xl pointer-events-none"
+            />
+
+            {/* Inner White Container (Bar chart layout like Card 2 in reference) */}
+            <div className="relative z-10 w-full bg-white rounded-xl p-2.5 sm:p-3 shadow-lg group-hover:shadow-2xl flex flex-col justify-between h-full text-neutral-800 transition-all duration-300">
+              {/* Top pills */}
+              <div className="flex items-center gap-1.5 overflow-hidden">
+                <span className="bg-neutral-100 text-neutral-600 rounded px-1.5 py-0.5 text-[8.5px] font-bold">Fatalities</span>
+                <span className="bg-neutral-100 text-neutral-600 rounded px-1.5 py-0.5 text-[8.5px] font-bold">Injuries</span>
+                <span className="bg-cyan-100 text-cyan-800 rounded px-1.5 py-0.5 text-[8.5px] font-bold">Responders</span>
+              </div>
+
+              {/* Data Callout */}
+              <div className="flex items-baseline justify-between px-1 my-1">
+                <div>
+                  <span className="text-xl sm:text-2xl font-black text-red-600 tabular-nums leading-none">4</span>
+                  <span className="text-[10px] font-semibold text-neutral-500 ml-1">Deaths</span>
+                </div>
+                <div>
+                  <span className="text-xl sm:text-2xl font-black text-cyan-700 tabular-nums leading-none">347</span>
+                  <span className="text-[10px] font-semibold text-neutral-500 ml-1">Injuries</span>
                 </div>
               </div>
 
-              {/* Vulnerable Groups */}
-              <div className="flex items-center gap-3.5 rounded-2xl bg-white/[0.04] border border-white/10 px-3.5 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]">
-                <Icon3DBadge accent="orange">
-                  {/* Minimalist 3D Protective Mask / Smoke Shield Icon */}
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="w-5 h-5 drop-shadow-[0_2px_6px_rgba(249,115,22,0.75)]"
-                    fill="none"
-                  >
-                    <defs>
-                      <linearGradient id="maskGrad" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0%" stopColor="#fed7aa" />
-                        <stop offset="60%" stopColor="#f97316" />
-                        <stop offset="100%" stopColor="#9a3412" />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M6 10.5c0-1.2 2.7-2 6-2s6 .8 6 2v3.3c0 2.7-2.7 4.7-6 4.7s-6-2-6-4.7v-3.3Z"
-                      fill="url(#maskGrad)"
-                      fillOpacity="0.88"
-                    />
-                    <path
-                      d="M6 11.2c-1.4 0-2.5.9-2.5 2s1.1 2 2.5 2M18 11.2c1.4 0 2.5.9 2.5 2s-1.1 2-2.5 2"
-                      stroke="url(#maskGrad)"
-                      strokeWidth="1.7"
-                      strokeLinecap="round"
-                    />
-                    <path
-                      d="M9.5 13.5h5"
-                      stroke="#fff7ed"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeOpacity="0.8"
-                    />
-                  </svg>
-                </Icon3DBadge>
-                <span className="text-xs sm:text-sm md:text-[15px] font-semibold text-neutral-100">
-                  Vulnerable Groups
-                </span>
+              {/* Segmented Vertical Bars (matching Card 2 reference) */}
+              <div className="flex items-end justify-between gap-1.5 h-14 pt-1 px-1 border-b border-neutral-200">
+                <div className="flex-1 bg-cyan-100 rounded-t h-[40%] flex flex-col justify-end">
+                  <div className="w-full bg-cyan-600 rounded-t h-[60%]" />
+                </div>
+                <div className="flex-1 bg-red-100 rounded-t h-[90%] flex flex-col justify-end">
+                  <div className="w-full bg-red-500 rounded-t h-[65%]" />
+                </div>
+                <div className="flex-1 bg-cyan-100 rounded-t h-[55%] flex flex-col justify-end">
+                  <div className="w-full bg-cyan-600 rounded-t h-[70%]" />
+                </div>
+                <div className="flex-1 bg-cyan-100 rounded-t h-[75%] flex flex-col justify-end">
+                  <div className="w-full bg-cyan-600 rounded-t h-[50%]" />
+                </div>
+                <div className="flex-1 bg-cyan-100 rounded-t h-[100%] flex flex-col justify-end">
+                  <div className="w-full bg-cyan-600 rounded-t h-[75%]" />
+                </div>
+                <div className="flex-1 bg-cyan-100 rounded-t h-[60%] flex flex-col justify-end">
+                  <div className="w-full bg-cyan-600 rounded-t h-[55%]" />
+                </div>
+              </div>
+
+              {/* Bottom label */}
+              <div className="text-[8.5px] text-center text-neutral-400 font-medium">
+                Frontline Field Casualty Reports
               </div>
             </div>
           </div>
+
+          {/* Card Meta Content */}
+          <div className="flex flex-col flex-grow">
+            <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 group-hover:text-neutral-300 transition-colors duration-200">
+              351 direct casualties on the fire front
+            </h3>
+
+            <p className="text-xs sm:text-sm text-neutral-400 group-hover:text-neutral-300 transition-colors duration-200 font-normal leading-relaxed">
+              4 fatalities and 347 injuries recorded among courageous ground firefighters, volunteer rangers, and local villagers holding perimeters.
+            </p>
+          </div>
         </div>
-      </Glass3DCard>
+
+        {/* ---------------- CARD 3: HEALTH IMPACTS FROM HAZE ---------------- */}
+        <div
+          onClick={() => setActiveModal('health')}
+          className="group relative rounded-2xl bg-[#0e1219]/90 border border-white/10 hover:border-white/35 hover:bg-[#070a10]/95 p-5 sm:p-6 flex flex-col h-full backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 shadow-[0_12px_35px_-10px_rgba(0,0,0,0.85)] hover:shadow-[0_24px_55px_-12px_rgba(0,0,0,0.95)] cursor-pointer"
+        >
+          {/* Top Visual Box (Thought Bubble & Waveform - Purple Aura) */}
+          <div className="relative w-full h-44 sm:h-48 rounded-xl overflow-hidden mb-5 border border-white/10 group-hover:border-white/25 bg-gradient-to-br from-[#2f104d] via-[#1c0c32] to-[#0e071c] p-3 flex flex-col items-center justify-center transition-all duration-300">
+            {/* Ambient Radial Flare */}
+            <div
+              aria-hidden="true"
+              className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-36 bg-purple-500/20 rounded-full blur-2xl pointer-events-none"
+            />
+
+            {/* Inner White Container (Waveform & prompt like Card 3 reference) */}
+            <div className="relative z-10 w-full bg-white rounded-xl p-2.5 sm:p-3 shadow-lg group-hover:shadow-2xl flex flex-col justify-between h-full text-neutral-800 transition-all duration-300">
+              {/* Thought Prompt Bubble on top right */}
+              <div className="flex items-center justify-between">
+                <span className="flex items-center gap-1 text-[9px] font-bold text-purple-700">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse" />
+                  Health Alert
+                </span>
+                <span className="bg-purple-50 text-purple-700 border border-purple-200 rounded-full px-2 py-0.5 text-[8px] font-semibold">
+                  How severe is the toxic haze?
+                </span>
+              </div>
+
+              {/* Main Headline Metric inside box */}
+              <div className="my-1">
+                <div className="text-base sm:text-lg font-black text-neutral-900 leading-none">
+                  333,470 <span className="text-[11px] font-bold text-purple-600 uppercase">ARI Cases</span>
+                </div>
+                <div className="text-[8.5px] text-neutral-500 font-medium leading-tight mt-0.5">
+                  PM2.5 haze blankets communities, triggering acute respiratory distress.
+                </div>
+              </div>
+
+              {/* Sensor Waveform Bars (like Card 3 waveform in reference) */}
+              <div className="flex items-end justify-between gap-1 h-9 pt-1 px-1 bg-neutral-50 rounded border border-neutral-100">
+                {[45, 60, 85, 40, 70, 95, 80, 65, 100, 75, 55, 90, 60, 45].map((h, i) => (
+                  <div
+                    key={i}
+                    style={{ height: `${h}%` }}
+                    className={`w-1 rounded-full ${
+                      i >= 5 && i <= 8 ? 'bg-purple-600' : 'bg-purple-300'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Bottom tag: Vulnerable Groups */}
+              <div className="flex items-center justify-between text-[8px] text-neutral-500 font-medium pt-0.5">
+                <span>Vulnerable Groups:</span>
+                <span className="font-bold text-red-600">Infants, Children &amp; Elderly</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card Meta Content */}
+          <div className="flex flex-col flex-grow">
+            <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 group-hover:text-neutral-300 transition-colors duration-200">
+              333,470 acute respiratory infection cases
+            </h3>
+
+            <p className="text-xs sm:text-sm text-neutral-400 group-hover:text-neutral-300 transition-colors duration-200 font-normal leading-relaxed">
+              Dangerous PM2.5 concentrations enveloped entire cities, triggering widespread respiratory distress among infants, children, and elderly citizens.
+            </p>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      {/* ===================== INTERACTIVE DETAIL MODAL (PORTALED TO BODY FOR FULL-VIEWPORT DEFOCUS) ===================== */}
+      {mounted && activeModal && createPortal(
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-fadeIn"
+          onClick={() => setActiveModal(null)}
+        >
+          <div
+            className="relative w-full max-w-lg rounded-3xl bg-[#090c12]/95 backdrop-blur-2xl border border-white/20 p-6 sm:p-7 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.95)] text-left"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Close Button */}
+            <button
+              onClick={() => setActiveModal(null)}
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-neutral-300 hover:text-white flex items-center justify-center transition-colors text-sm font-bold"
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+
+            {/* TAB 1: BURNED LAND AREA */}
+            {activeModal === 'burned' && (
+              <div>
+                <h3 className="text-2xl font-black text-white mb-1">
+                  1,103,132 ha Scorched
+                </h3>
+                <p className="text-xs text-neutral-400 mb-5">
+                  Detailed distribution of burned forest and land area across Indonesian regions.
+                </p>
+
+                <div className="divide-y divide-white/10 border-y border-white/10 mb-5">
+                  {REGIONAL_FIRES.map((entry) => (
+                    <div
+                      key={entry.rank}
+                      className="py-2.5 px-3 rounded-xl flex items-center justify-between transition-colors duration-200 hover:bg-black/50"
+                    >
+                      <span className="text-sm font-medium text-neutral-200">{entry.region}</span>
+                      <div className="text-right">
+                        <div className="text-sm font-bold text-white tabular-nums">{entry.area}</div>
+                        <div className="text-[11px] text-neutral-400 tabular-nums">{entry.percent}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between pt-1 font-bold text-sm">
+                  <span className="text-neutral-400 uppercase tracking-widest text-xs">National Total</span>
+                  <span className="text-xl font-black text-white tabular-nums">1,103,132 ha</span>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: CASUALTIES */}
+            {activeModal === 'casualties' && (
+              <div>
+                <h3 className="text-2xl font-black text-white mb-1">
+                  351 Frontline Casualties
+                </h3>
+                <p className="text-xs text-neutral-400 mb-5">
+                  Brave personnel and volunteers exposed to extreme fire fronts.
+                </p>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl bg-black/40 hover:bg-black/75 border border-white/15 hover:border-white/30 transition-all duration-200">
+                    <div className="text-3xl font-black text-red-400 tabular-nums">4</div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-red-200 mt-1">Deaths</div>
+                    <p className="text-[11px] text-neutral-400 mt-2">Fatal entrapments on volatile perimeters during sudden wind shifts.</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-black/40 hover:bg-black/75 border border-white/15 hover:border-white/30 transition-all duration-200">
+                    <div className="text-3xl font-black text-white tabular-nums">347</div>
+                    <div className="text-xs font-bold uppercase tracking-wider text-neutral-200 mt-1">Injuries</div>
+                    <p className="text-[11px] text-neutral-400 mt-2">Severe burns, smoke inhalation, heat exhaustion, and blunt trauma.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: HEALTH CRISIS */}
+            {activeModal === 'health' && (
+              <div>
+                <h3 className="text-2xl font-black text-white mb-1">
+                  333,470 ARI Cases
+                </h3>
+                <p className="text-xs text-neutral-400 mb-5">
+                  Acute Respiratory Infections triggered by toxic smoke particulates (PM2.5).
+                </p>
+
+                <div className="space-y-3">
+                  <div className="p-3.5 rounded-xl bg-black/40 hover:bg-black/75 border border-white/15 hover:border-white/30 transition-all duration-200">
+                    <div className="text-sm font-bold text-neutral-200">Acute Respiratory Infections (ISPA)</div>
+                    <div className="text-2xl font-black text-white mt-0.5 tabular-nums">333,470 cases</div>
+                    <p className="text-xs text-neutral-400 mt-1">Continuous inhalation of soot, carbon monoxide, and chemical irritants.</p>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-black/40 hover:bg-black/75 border border-white/15 hover:border-white/30 transition-all duration-200">
+                    <ul className="text-xs text-neutral-300 list-disc list-inside space-y-1.5">
+                      <li>Infants and toddlers with developing pulmonary systems</li>
+                      <li>Elderly individuals with existing cardiovascular conditions</li>
+                      <li>Asthma, COPD, and bronchitis sufferers</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
-

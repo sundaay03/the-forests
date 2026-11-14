@@ -79,19 +79,10 @@ export default function ScrollyChapter({
 
   // Scene 4 (STATISTIC): local progress 0.429 to 0.571
   const s4Prog = Math.max(0, Math.min(1, (scrollProgress - 0.429) / 0.143));
-  // Stage 1 (0.00 to 0.16): "STATISTIC" title enters and stays centered on screen
-  const s4TitleEnter = Math.min(1, s4Prog / 0.08);
-  // Stage 2 (0.16 to 0.26): Title dissolves and is 100% GONE before cards appear
-  const s4TitleExit = s4Prog > 0.16 ? Math.min(1, (s4Prog - 0.16) / 0.10) : 0;
-  const s4TitleOpacity = activeChapter === 3 ? s4TitleEnter * (1 - s4TitleExit) : 0;
-  const s4TitleTranslateY = -s4TitleExit * 28;
-  const s4TitleBlur = s4TitleExit * 8;
-  const s4TitleScale = 1.06 - s4TitleExit * 0.06;
+  // Smooth entrance for Header + 3 Cards (0.00 to 0.16)
+  const s4CardsEnter = Math.min(1, s4Prog / 0.16);
 
-  // Stage 3 (0.29 to 0.45): Cards enter ONLY AFTER title has completely disappeared
-  const s4CardsEnter = Math.max(0, Math.min(1, (s4Prog - 0.29) / 0.16));
-
-  // Stage 4 (0.80 to 1.00): Scene 4 exits into Scene 5
+  // Scene 4 exit into Scene 5 (0.80 to 1.00)
   const s4ExitProg = s4Prog > 0.80 ? Math.max(0, Math.min(1, (s4Prog - 0.80) / 0.20)) : 0;
   const s4SceneOpacity = activeChapter === 3 ? 1 - s4ExitProg : 0;
   const s4TranslateY = -s4ExitProg * 35;
@@ -255,7 +246,9 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 4: STATISTIC ===================== */}
       <div
-        className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 pointer-events-none"
+        className={`absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 z-20 ${
+          activeChapter === 3 && s4SceneOpacity > 0.1 ? 'pointer-events-auto' : 'pointer-events-none'
+        }`}
         style={{
           opacity: s4SceneOpacity,
           transform: `translateY(${s4TranslateY}px)`,
@@ -263,29 +256,10 @@ export default function ScrollyChapter({
           transition: 'opacity 0.2s ease-out, filter 0.2s ease-out, transform 0.2s ease-out',
         }}
       >
-        {/* Phase 1: Center Title "STATISTIC" (appears first in center, dissolves when cards arrive) */}
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none will-change-transform"
-          style={{
-            opacity: s4TitleOpacity,
-            transform: `translateY(${s4TitleTranslateY}px) scale(${s4TitleScale})`,
-            filter: s4TitleBlur > 0.1 ? `blur(${s4TitleBlur}px)` : 'none',
-            transition: 'opacity 0.15s ease-out, transform 0.15s ease-out, filter 0.15s ease-out',
-          }}
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <span className="h-2.5 w-2.5 rounded-full bg-red-600 animate-ping" />
-          </div>
-
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-wider text-white text-cinematic-shadow">
-            STATISTIC
-          </h1>
-        </div>
-
-        {/* Phase 2: 2-Card 3D Glassmorphism KARHUTLA Data Dashboard centered */}
-        <div className="relative z-10 w-full flex items-center justify-center">
+        {/* Modern 3-Card Insights Dashboard (Matches reference design) */}
+        <div className="relative z-10 w-full flex items-center justify-center pointer-events-auto">
           <KarhutlaDashboard
-            isActive={activeChapter === 3 && s4ExitProg < 0.35}
+            isActive={activeChapter === 3 && s4ExitProg < 0.75}
             cardsProgress={s4CardsEnter}
           />
         </div>
@@ -333,7 +307,9 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 6: THE HUMAN TOLL ===================== */}
       <div
-        className="absolute inset-0 flex items-center justify-start px-8 sm:px-14 md:px-20 lg:px-24 pointer-events-none"
+        className={`absolute inset-0 flex items-center justify-start px-8 sm:px-14 md:px-20 lg:px-24 ${
+          activeChapter === 5 && s6Opacity > 0.1 ? 'pointer-events-auto' : 'pointer-events-none'
+        }`}
         style={{
           opacity: s6Opacity,
           transform: `translateY(${s6TranslateY}px)`,
@@ -341,7 +317,11 @@ export default function ScrollyChapter({
           transition: 'opacity 0.2s ease-out, filter 0.2s ease-out, transform 0.2s ease-out',
         }}
       >
-        <div className="text-left max-w-xl md:max-w-2xl flex flex-col gap-3 sm:gap-4 pointer-events-auto">
+        <div
+          className={`text-left max-w-xl md:max-w-2xl flex flex-col gap-3 sm:gap-4 ${
+            activeChapter === 5 && s6Opacity > 0.1 ? 'pointer-events-auto' : 'pointer-events-none'
+          }`}
+        >
           {/* Headline with cinematic tracking and smoke blur-to-sharp */}
           <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-[0.92] py-1 drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
             <span className="block">HEALTH</span>
