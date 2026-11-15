@@ -399,10 +399,22 @@ export default function ScrollyChapter({
           <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3.5 sm:gap-4">
             <a
               href="mailto:sandi03riandi@gmail.com"
-              className="group relative flex items-center gap-3 px-6 py-3.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 hover:border-white/80 hover:bg-white/15 text-white text-xs sm:text-sm font-mono uppercase tracking-widest transition-all duration-300 hover:-translate-y-0.5 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
+              className="group relative flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 hover:border-white/80 hover:bg-white/15 text-white text-xs sm:text-sm font-mono uppercase tracking-widest transition-all duration-300 hover:-translate-y-0.5 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
             >
-              <span className="h-2 w-2 rounded-full bg-white group-hover:animate-ping" />
-              <span>Contac Us</span>
+              <span>Contact Us</span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                aria-hidden="true"
+              >
+                <path d="M7 17 17 7" />
+                <path d="M7 7h10v10" />
+              </svg>
             </a>
           </div>
         </div>
