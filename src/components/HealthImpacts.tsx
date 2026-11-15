@@ -47,6 +47,7 @@ interface HealthImpactsProps {
 
 export default function HealthImpacts({ s6Prog }: HealthImpactsProps) {
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
 
   // Divide the active viewing range (0.00 to 0.70) into 2 groups of 3 items:
   // Group 0: Items 1, 2, 3 (0.00 - 0.35)
@@ -58,6 +59,10 @@ export default function HealthImpacts({ s6Prog }: HealthImpactsProps) {
     scrollGroup * 3 + 3
   );
 
+  const toggleItem = (id: number) => {
+    setSelectedId((prev) => (prev === id ? null : id));
+  };
+
   return (
     <div className="w-full max-w-[360px] sm:max-w-[460px] md:max-w-[560px] lg:max-w-[620px] flex flex-col pointer-events-auto mt-2 sm:mt-3">
       {/* 3 Pure White Text Subtitles per group (no black boxes, no badges, no icons) */}
@@ -66,27 +71,29 @@ export default function HealthImpacts({ s6Prog }: HealthImpactsProps) {
         className="flex flex-col gap-4 sm:gap-5 transition-all duration-500 animate-fadeIn"
       >
         {currentGroupItems.map((item) => {
-          const isHovered = hoveredId === item.id;
+          const isOpen = hoveredId === item.id || selectedId === item.id;
 
           return (
             <div
               key={item.id}
               onMouseEnter={() => setHoveredId(item.id)}
               onMouseLeave={() => setHoveredId(null)}
-              onClick={() => setHoveredId((prev) => (prev === item.id ? null : item.id))}
+              onClick={() => toggleItem(item.id)}
               className="group flex flex-col cursor-pointer select-none text-left transition-all duration-300"
             >
               {/* Pure White Enlarged Title with Bullet Point */}
               <h3 className="flex items-center gap-3 sm:gap-4 text-lg sm:text-xl md:text-2xl lg:text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:text-white group-hover:translate-x-1.5">
-                <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white flex-shrink-0 shadow-[0_0_8px_rgba(255,255,255,0.9)] group-hover:scale-125 transition-all duration-300" />
+                <span className={`w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white flex-shrink-0 shadow-[0_0_8px_rgba(255,255,255,0.9)] transition-all duration-300 ${
+                  isOpen ? 'scale-125' : 'group-hover:scale-125'
+                }`} />
                 <span>{item.title}</span>
               </h3>
 
-              {/* Description (Hidden by default, reveals smoothly on hover in enlarged pure white text) */}
+              {/* Description (reveals smoothly on hover or click in enlarged pure white text) */}
               <div
                 className={`overflow-hidden transition-all duration-300 ease-out pl-5 sm:pl-6.5 ${
-                  isHovered
-                    ? 'max-h-48 opacity-100 mt-2'
+                  isOpen
+                    ? 'max-h-48 opacity-100 mt-2 pointer-events-auto'
                     : 'max-h-0 opacity-0 mt-0 pointer-events-none'
                 }`}
               >

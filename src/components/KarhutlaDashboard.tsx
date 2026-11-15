@@ -42,6 +42,13 @@ export default function KarhutlaDashboard({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeModal]);
 
+  // Automatically dismiss modal if user scrolls out of Scene 4
+  useEffect(() => {
+    if (!isActive && activeModal) {
+      setActiveModal(null);
+    }
+  }, [isActive, activeModal]);
+
   const p = isActive ? Math.max(0, Math.min(1, cardsProgress)) : 0;
   const ease = 1 - Math.pow(1 - p, 2.5);
 
@@ -65,7 +72,7 @@ export default function KarhutlaDashboard({
           opacity: activeModal ? 0.65 : 1,
           transform: activeModal ? 'scale(0.99)' : 'none',
           transition: 'filter 0.3s ease-out, opacity 0.3s ease-out, transform 0.3s ease-out',
-          pointerEvents: activeModal ? 'none' : 'auto',
+          pointerEvents: isActive && !activeModal ? 'auto' : 'none',
         }}
       >
         {/* ===================== SECTION HEADER (Matches Scene 3 BURNING THE FUTURE typography) ===================== */}

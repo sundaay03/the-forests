@@ -246,8 +246,8 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 4: STATISTIC ===================== */}
       <div
-        className={`absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 z-20 ${
-          activeChapter === 3 && s4SceneOpacity > 0.1 ? 'pointer-events-auto' : 'pointer-events-none'
+        className={`absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 transition-all duration-200 ${
+          activeChapter === 3 && s4SceneOpacity > 0.1 ? 'pointer-events-auto z-20' : 'pointer-events-none z-0'
         }`}
         style={{
           opacity: s4SceneOpacity,
@@ -257,7 +257,7 @@ export default function ScrollyChapter({
         }}
       >
         {/* Modern 3-Card Insights Dashboard (Matches reference design) */}
-        <div className="relative z-10 w-full flex items-center justify-center pointer-events-auto">
+        <div className={`relative z-10 w-full flex items-center justify-center ${activeChapter === 3 ? 'pointer-events-auto' : 'pointer-events-none'}`}>
           <KarhutlaDashboard
             isActive={activeChapter === 3 && s4ExitProg < 0.75}
             cardsProgress={s4CardsEnter}
@@ -307,8 +307,8 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 6: THE HUMAN TOLL ===================== */}
       <div
-        className={`absolute inset-0 flex items-center justify-start px-8 sm:px-14 md:px-20 lg:px-24 ${
-          activeChapter === 5 && s6Opacity > 0.1 ? 'pointer-events-auto' : 'pointer-events-none'
+        className={`absolute inset-0 flex items-center justify-start px-8 sm:px-14 md:px-20 lg:px-24 transition-all duration-200 ${
+          activeChapter === 5 && s6Opacity > 0.1 ? 'pointer-events-auto z-30' : 'pointer-events-none z-0'
         }`}
         style={{
           opacity: s6Opacity,
