@@ -247,7 +247,7 @@ export default function ScrollyVideoBackground({
         const currentLerp = lerpTimesRef.current[index] ?? 0;
         const diff = targetTime - currentLerp;
         const nextLerp =
-          Math.abs(diff) < 0.002 || Math.abs(diff) > 1.5
+          Math.abs(diff) < 0.002 || Math.abs(diff) > 0.6
             ? targetTime
             : currentLerp + diff * 0.28;
         lerpTimesRef.current[index] = nextLerp;

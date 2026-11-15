@@ -15,6 +15,19 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+// Exact scroll ratio (0.0 -> 1.0) landing squarely on each chapter's main showcase
+// (past incoming crossfades, burn/portal transition overlays, with headline/cards at full opacity).
+const CHAPTER_TARGET_RATIOS = [
+  0.000, // 01 THE GATEWAY    -> "THE FOREST" headline + 1.webm
+  0.138, // 02 THE CANOPY     -> "WONDERFUL OF INDONESIA" + 1st gallery photo + 2.webm
+  0.270, // 03 THE INFERNO    -> "FOREST AND LAND FIRES" (burn overlay cleared) + 3.webm
+  0.412, // 04 STATISTIC      -> Karhutla 3-card dashboard fully entered + 4.webm
+  0.525, // 05 THE ASHES      -> "WHAT REMAINS" + subtitle + 5.webm
+  0.648, // 06 THE HUMAN TOLL -> "HEALTH IMPACTS" + items 1-3 + 6.webm
+  0.788, // 07 THE REBIRTH    -> "REFOREST" + subtitle + 7.webm
+  0.935, // 08 THE CONTACT    -> "LET'S BUILD" (portal cleared) + 8new.webm
+] as const;
+
 export default function ScrollyExperience() {
   const [isMounted, setIsMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -24,6 +37,8 @@ export default function ScrollyExperience() {
   const updateMetricsRef = useRef<(prog: number) => void>(() => {});
 
   const [activeChapter, setActiveChapter] = useState(0);
+  const activeChapterRef = useRef(0);
+  activeChapterRef.current = activeChapter;
   const [scrollProgress, setScrollProgress] = useState(0);
   const [liquidTransition, setLiquidTransition] =
     useState<LiquidTransitionRequest | null>(null);
@@ -106,7 +121,8 @@ export default function ScrollyExperience() {
   const handleSwapChapter = useCallback((chapterIndex: number) => {
     if (!containerRef.current || !lenisRef.current) return;
     const containerHeight = containerRef.current.offsetHeight - window.innerHeight;
-    const targetRatio = chapterIndex === 7 ? 7.25 / 8 : chapterIndex / 8;
+    const safeIdx = Math.max(0, Math.min(CHAPTER_TARGET_RATIOS.length - 1, chapterIndex));
+    const targetRatio = CHAPTER_TARGET_RATIOS[safeIdx];
     const targetScroll = targetRatio * containerHeight;
 
     lenisRef.current.scrollTo(targetScroll, {
@@ -138,6 +154,7 @@ export default function ScrollyExperience() {
       transitionIdRef.current += 1;
       setLiquidTransition({
         id: transitionIdRef.current,
+        sourceChapter: activeChapterRef.current,
         targetChapter: chapterIndex,
         originX: origin?.x ?? defaultX,
         originY: origin?.y ?? defaultY,
