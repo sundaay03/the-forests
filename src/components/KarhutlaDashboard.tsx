@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 
 interface RegionalFireEntry {
@@ -17,14 +17,143 @@ const REGIONAL_FIRES: RegionalFireEntry[] = [
   { rank: 4, region: 'Sumatra, Java, and Sulawesi', area: '233,474 ha', percent: '21.2%' },
 ];
 
+interface BarDatum {
+  label: string;
+  value: number;
+  displayValue: string;
+}
+
+interface MonochromeBarChartProps {
+  unitLabel: string;
+  yMax: number;
+  yTicks: string[];
+  data: BarDatum[];
+}
+
+function MonochromeBarChart({
+  unitLabel,
+  yMax,
+  yTicks,
+  data,
+}: MonochromeBarChartProps) {
+  const isSingleBar = data.length === 1;
+
+  return (
+    <div className="relative z-10 w-full h-48 sm:h-52 rounded-xl overflow-hidden mb-5 border border-white/20 group-hover:border-white/40 bg-black/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.28),inset_0_-3px_10px_rgba(0,0,0,0.55),0_8px_20px_-6px_rgba(0,0,0,0.55)] p-3 sm:p-3.5 flex flex-col transition-all duration-300 select-none">
+      {/* Top-left Y-Axis Unit Label */}
+      <div className="text-[9.5px] sm:text-[10.5px] font-bold text-white tracking-tight text-left leading-none mb-2">
+        {unitLabel}
+      </div>
+
+      {/* Main Chart Plot Area (Y-Ticks + Grid/Bars) */}
+      <div className="relative flex-1 min-h-0 flex items-stretch">
+        {/* Left Y-Axis Labels */}
+        <div className="relative w-10 sm:w-11 shrink-0 pr-1.5 text-right">
+          {yTicks.map((tick, idx) => {
+            const topPct = (idx / (yTicks.length - 1)) * 100;
+            return (
+              <span
+                key={tick}
+                style={{ top: `${topPct}%` }}
+                className="absolute right-1.5 -translate-y-1/2 text-[8px] sm:text-[9px] font-medium text-neutral-300 tabular-nums leading-none"
+              >
+                {tick}
+              </span>
+            );
+          })}
+        </div>
+
+        {/* L-Frame Axes & Vertical Bars */}
+        <div className="relative flex-1 border-l-[1.5px] border-b-[1.5px] border-white/85">
+          {/* Horizontal Gridlines */}
+          {yTicks.slice(0, -1).map((tick, idx) => {
+            const topPct = (idx / (yTicks.length - 1)) * 100;
+            return (
+              <div
+                key={tick}
+                style={{ top: `${topPct}%` }}
+                className="absolute left-0 right-0 border-t border-white/12 pointer-events-none"
+              />
+            );
+          })}
+
+          {/* Vertical Pure White Bars + Top Value Labels */}
+          <div className="relative z-10 h-full w-full flex items-end justify-around px-2 sm:px-3 gap-2 sm:gap-3">
+            {data.map((item) => {
+              const rawPct = Math.max(0, Math.min(100, (item.value / yMax) * 100));
+              return (
+                <div
+                  key={item.label}
+                  className={`relative h-full flex items-end justify-center ${
+                    isSingleBar ? 'w-14 sm:w-16' : 'flex-1 max-w-[44px]'
+                  }`}
+                >
+                  <span
+                    style={{ bottom: `calc(${rawPct}% + 4px)` }}
+                    className="absolute left-1/2 -translate-x-1/2 text-[9px] sm:text-[10.5px] font-extrabold text-white tabular-nums leading-none whitespace-nowrap"
+                  >
+                    {item.displayValue}
+                  </span>
+                  <div
+                    style={{
+                      height: `${rawPct}%`,
+                      minHeight: item.value > 0 ? '3px' : '0px',
+                    }}
+                    className="w-full bg-white transition-all duration-300 group-hover:shadow-[0_0_16px_rgba(255,255,255,0.25)]"
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom X-Axis Category Labels */}
+      <div className="pl-10 sm:pl-11 pt-1.5">
+        <div className="flex items-start justify-around px-2 sm:px-3 gap-2 sm:gap-3">
+          {data.map((item) => (
+            <div
+              key={item.label}
+              className={`text-center text-[7.5px] sm:text-[8.5px] font-medium text-neutral-200 leading-[1.15] ${
+                isSingleBar ? 'w-32 sm:w-40' : 'flex-1'
+              }`}
+            >
+              {item.label}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface KarhutlaDashboardProps {
   isActive: boolean;
   cardsProgress?: number; // 0.0 to 1.0
+  exitProgress?: number; // 0.0 to 1.0
+}
+
+const cardGlassStyle: CSSProperties = {
+  backdropFilter: 'blur(22px) saturate(185%) brightness(1.04)',
+  WebkitBackdropFilter: 'blur(22px) saturate(185%) brightness(1.04)',
+};
+
+const cardGlassClassName =
+  'group relative overflow-hidden rounded-2xl bg-[linear-gradient(155deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.06)_42%,rgba(10,12,18,0.34)_100%)] hover:bg-[linear-gradient(155deg,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.09)_42%,rgba(10,12,18,0.28)_100%)] border border-white/30 hover:border-white/55 p-5 sm:p-6 flex flex-col h-full transition-[transform,border-color,box-shadow,background] duration-300 hover:-translate-y-2 shadow-[0_24px_50px_-12px_rgba(0,0,0,0.65),0_8px_20px_-6px_rgba(0,0,0,0.45),inset_0_1.5px_1.5px_rgba(255,255,255,0.65),inset_0_-2px_8px_rgba(0,0,0,0.35)] hover:shadow-[0_32px_65px_-12px_rgba(0,0,0,0.75),0_12px_28px_-6px_rgba(0,0,0,0.5),inset_0_2px_2px_rgba(255,255,255,0.85),inset_0_-2px_8px_rgba(0,0,0,0.30),0_0_28px_rgba(255,255,255,0.14)] cursor-pointer';
+
+function CardGlassSpecularOverlay() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(180deg,rgba(255,255,255,0.24)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_56%,rgba(255,255,255,0.08)_100%)]"
+    />
+  );
 }
 
 export default function KarhutlaDashboard({
   isActive,
   cardsProgress = 1,
+  exitProgress = 0,
 }: KarhutlaDashboardProps) {
   const [activeModal, setActiveModal] = useState<'burned' | 'casualties' | 'health' | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -42,265 +171,171 @@ export default function KarhutlaDashboard({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeModal]);
 
+  const canKeepModal = isActive && exitProgress < 0.75;
+
   // Automatically dismiss modal if user scrolls out of Scene 4
   useEffect(() => {
-    if (!isActive && activeModal) {
+    if (!canKeepModal && activeModal) {
       setActiveModal(null);
     }
-  }, [isActive, activeModal]);
+  }, [canKeepModal, activeModal]);
 
   const p = isActive ? Math.max(0, Math.min(1, cardsProgress)) : 0;
   const ease = 1 - Math.pow(1 - p, 2.5);
+  const enterOpacity = p <= 0.01 ? 0 : Math.min(1, p * 1.4);
+  const enterTranslateY = (1 - ease) * 40;
 
-  const translateY = (1 - ease) * 40;
-  const opacity = p <= 0.01 ? 0 : Math.min(1, p * 1.4);
+  const ex = Math.max(0, Math.min(1, exitProgress));
+  const exitOpacity = 1 - ex;
+  const exitTranslateY = -ex * 35;
+  const exitBlur = ex * 8;
+
+  const opacity = isActive ? enterOpacity * exitOpacity : 0;
+  const translateY = enterTranslateY + exitTranslateY;
+  const cardOpacity = activeModal ? opacity * 0.65 : opacity;
+  const contentBlur = activeModal ? Math.max(exitBlur, 5) : exitBlur;
+
+  const slotTransformStyle: CSSProperties = {
+    transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)${activeModal ? ' scale(0.99)' : ''}`,
+  };
+  const cardStyle: CSSProperties = {
+    ...cardGlassStyle,
+    opacity: cardOpacity,
+  };
+  const contentBlurStyle: CSSProperties = {
+    filter: contentBlur > 0.05 ? `blur(${contentBlur.toFixed(1)}px)` : 'none',
+  };
 
   return (
     <div
-      className="w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center justify-center transition-all duration-300"
+      className="w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center justify-center"
       style={{
-        transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)`,
-        opacity,
-        pointerEvents: isActive && opacity > 0.05 ? 'auto' : 'none',
+        visibility: opacity > 0.01 ? 'visible' : 'hidden',
+        pointerEvents: isActive && opacity > 0.05 && !activeModal ? 'auto' : 'none',
       }}
     >
-      {/* ===================== DASHBOARD CONTENT (BLURRED WHEN MODAL IS ACTIVE) ===================== */}
-      <div
-        className="w-full flex flex-col items-center justify-center transition-all duration-300"
-        style={{
-          filter: activeModal ? 'blur(5px)' : 'none',
-          opacity: activeModal ? 0.65 : 1,
-          transform: activeModal ? 'scale(0.99)' : 'none',
-          transition: 'filter 0.3s ease-out, opacity 0.3s ease-out, transform 0.3s ease-out',
-          pointerEvents: isActive && !activeModal ? 'auto' : 'none',
-        }}
-      >
+      {/* ===================== DASHBOARD CONTENT (NO ANCESTOR OPACITY/FILTER SO BACKDROP-FILTER STAYS ACTIVE) ===================== */}
+      <div className="w-full flex flex-col items-center justify-center">
         {/* ===================== SECTION HEADER (Matches Scene 3 BURNING THE FUTURE typography) ===================== */}
-        <div className="text-center mb-6 sm:mb-8 md:mb-10 max-w-4xl sm:max-w-5xl mx-auto flex flex-col items-center justify-center">
+        <div
+          className="text-center mb-6 sm:mb-8 md:mb-10 max-w-4xl sm:max-w-5xl mx-auto flex flex-col items-center justify-center"
+          style={{
+            ...slotTransformStyle,
+            ...contentBlurStyle,
+            opacity: cardOpacity,
+          }}
+        >
           <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
-            HOW MUCH MORE FOREST MUST WE LOSE?
+            STATISTICS
           </h2>
         </div>
 
-        {/* ===================== 3-CARD GRID (Matches Image 2) ===================== */}
+        {/* ===================== 3-CARD GRID (3D Liquid Glass) ===================== */}
         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 items-stretch">
-        {/* ---------------- CARD 1: BURNED LAND AREA ---------------- */}
-        <div
-          onClick={() => setActiveModal('burned')}
-          className="group relative rounded-2xl bg-[#0e1219]/90 border border-white/10 hover:border-white/35 hover:bg-[#070a10]/95 p-5 sm:p-6 flex flex-col h-full backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 shadow-[0_12px_35px_-10px_rgba(0,0,0,0.85)] hover:shadow-[0_24px_55px_-12px_rgba(0,0,0,0.95)] cursor-pointer"
-        >
-          {/* Top Visual Box (Data Flow Diagram - Blue Aura) */}
-          <div className="relative w-full h-44 sm:h-48 rounded-xl overflow-hidden mb-5 border border-white/10 group-hover:border-white/25 bg-gradient-to-br from-[#0c2448] via-[#091830] to-[#07101f] p-3 flex flex-col items-center justify-center transition-all duration-300">
-            {/* Ambient Radial Flare */}
+          {/* ---------------- CARD 1: BURNED LAND AREA ---------------- */}
+          <div style={slotTransformStyle} className="h-full">
             <div
-              aria-hidden="true"
-              className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-36 bg-blue-500/20 rounded-full blur-2xl pointer-events-none"
-            />
+              onClick={() => setActiveModal('burned')}
+              style={cardStyle}
+              className={cardGlassClassName}
+            >
+              <CardGlassSpecularOverlay />
+              <div style={contentBlurStyle} className="relative z-10 flex flex-col flex-grow">
+                {/* Top Visual Box (Monochrome Bar Chart) */}
+                <MonochromeBarChart
+                  unitLabel="Area (ha)"
+                  yMax={400000}
+                  yTicks={['400.000', '300.000', '200.000', '100.000', '0']}
+                  data={[
+                    { label: 'Papua', value: 313777, displayValue: '313.777' },
+                    { label: 'Bali, Nusa Tenggara, and Maluku', value: 297732, displayValue: '297.732' },
+                    { label: 'Kalimantan', value: 258149, displayValue: '258.149' },
+                    { label: 'Sumatra, Java, and Sulawesi', value: 233474, displayValue: '233.474' },
+                  ]}
+                />
 
-            {/* Inner White Container (Diagram like Card 1 in reference) */}
-            <div className="relative z-10 w-full bg-white rounded-xl p-2.5 sm:p-3 shadow-lg group-hover:shadow-2xl flex flex-col justify-between h-full text-neutral-800 transition-all duration-300">
-              {/* Header inside graphic */}
-              <div className="flex items-center justify-between border-b border-neutral-100 pb-1 text-[9px] sm:text-[10px] font-bold text-neutral-400 tracking-wider uppercase">
-                <span>REGIONAL NETWORK</span>
-                <span className="text-blue-600 font-extrabold">1,103,132 HA</span>
-              </div>
+                {/* Card Meta Content */}
+                <div className="flex flex-col flex-grow">
+                  <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] group-hover:text-white transition-colors duration-200">
+                    1,103,132 ha scorched across Indonesia
+                  </h3>
 
-              {/* Node connectivity diagram */}
-              <div className="grid grid-cols-3 items-center gap-1.5 my-auto text-[9px] sm:text-[10px]">
-                {/* Left Col */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="bg-neutral-50 border border-neutral-200 rounded px-1.5 py-1 text-center font-semibold text-neutral-700 truncate shadow-xs">
-                    Papua <span className="block text-[8px] text-neutral-400 font-normal">313.7k ha</span>
-                  </div>
-                  <div className="bg-neutral-50 border border-neutral-200 rounded px-1.5 py-1 text-center font-semibold text-neutral-700 truncate shadow-xs">
-                    Kalimantan <span className="block text-[8px] text-neutral-400 font-normal">258.1k ha</span>
-                  </div>
+                  <p className="text-xs sm:text-sm text-white/80 group-hover:text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] transition-colors duration-200 font-normal leading-relaxed">
+                    Papua, Bali-Nusa Tenggara, Kalimantan, and Sumatra recorded massive scorched acreage, ravaging pristine carbon-sink peatland.
+                  </p>
                 </div>
-
-                {/* Center Core Node */}
-                <div className="flex flex-col items-center justify-center">
-                  <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-blue-600 text-white flex flex-col items-center justify-center shadow-md shadow-blue-500/30">
-                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white" aria-hidden="true">
-                      <path d="M12 2c.5 3 3.5 5 3.5 8.5 0 3.6-2.9 6.5-6.5 6.5S2.5 14.1 2.5 10.5C2.5 8 4 6 5.5 4.5c.3 1.5 1.5 2.5 2.5 2.5 1.7 0 2.5-1.5 2.5-3 0-.7.5-1.5 1.5-2Z" />
-                    </svg>
-                    <span className="text-[7.5px] font-black tracking-tight leading-none mt-0.5">TOTAL</span>
-                  </div>
-                </div>
-
-                {/* Right Col */}
-                <div className="flex flex-col gap-1.5">
-                  <div className="bg-neutral-50 border border-neutral-200 rounded px-1.5 py-1 text-center font-semibold text-neutral-700 truncate shadow-xs">
-                    Bali &amp; Maluku <span className="block text-[8px] text-neutral-400 font-normal">297.7k ha</span>
-                  </div>
-                  <div className="bg-neutral-50 border border-neutral-200 rounded px-1.5 py-1 text-center font-semibold text-neutral-700 truncate shadow-xs">
-                    Sumatra <span className="block text-[8px] text-neutral-400 font-normal">233.4k ha</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bottom tag inside graphic */}
-              <div className="text-[8.5px] text-center text-neutral-400 font-medium">
-                National Karhutla Coverage 2023–2024
               </div>
             </div>
           </div>
 
-          {/* Card Meta Content */}
-          <div className="flex flex-col flex-grow">
-            <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 group-hover:text-neutral-300 transition-colors duration-200">
-              1,103,132 ha scorched across Indonesia
-            </h3>
-
-            <p className="text-xs sm:text-sm text-neutral-400 group-hover:text-neutral-300 transition-colors duration-200 font-normal leading-relaxed">
-              Papua, Bali-Nusa Tenggara, Kalimantan, and Sumatra recorded massive scorched acreage, ravaging pristine carbon-sink peatland.
-            </p>
-          </div>
-        </div>
-
-        {/* ---------------- CARD 2: DIRECT CASUALTIES ---------------- */}
-        <div
-          onClick={() => setActiveModal('casualties')}
-          className="group relative rounded-2xl bg-[#0e1219]/90 border border-white/10 hover:border-white/35 hover:bg-[#070a10]/95 p-5 sm:p-6 flex flex-col h-full backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 shadow-[0_12px_35px_-10px_rgba(0,0,0,0.85)] hover:shadow-[0_24px_55px_-12px_rgba(0,0,0,0.95)] cursor-pointer"
-        >
-          {/* Top Visual Box (Segmented Bar Chart - Cyan/Teal Aura) */}
-          <div className="relative w-full h-44 sm:h-48 rounded-xl overflow-hidden mb-5 border border-white/10 group-hover:border-white/25 bg-gradient-to-br from-[#063339] via-[#082228] to-[#071217] p-3 flex flex-col items-center justify-center transition-all duration-300">
-            {/* Ambient Radial Flare */}
+          {/* ---------------- CARD 2: DIRECT CASUALTIES ---------------- */}
+          <div style={slotTransformStyle} className="h-full">
             <div
-              aria-hidden="true"
-              className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-36 bg-cyan-500/20 rounded-full blur-2xl pointer-events-none"
-            />
+              onClick={() => setActiveModal('casualties')}
+              style={cardStyle}
+              className={cardGlassClassName}
+            >
+              <CardGlassSpecularOverlay />
+              <div style={contentBlurStyle} className="relative z-10 flex flex-col flex-grow">
+                {/* Top Visual Box (Monochrome Bar Chart) */}
+                <MonochromeBarChart
+                  unitLabel="People"
+                  yMax={400}
+                  yTicks={['400', '300', '200', '100', '0']}
+                  data={[
+                    { label: 'Total Casualties', value: 351, displayValue: '351' },
+                    { label: 'Injuries', value: 347, displayValue: '347' },
+                    { label: 'Fatalities', value: 4, displayValue: '4' },
+                  ]}
+                />
 
-            {/* Inner White Container (Bar chart layout like Card 2 in reference) */}
-            <div className="relative z-10 w-full bg-white rounded-xl p-2.5 sm:p-3 shadow-lg group-hover:shadow-2xl flex flex-col justify-between h-full text-neutral-800 transition-all duration-300">
-              {/* Top pills */}
-              <div className="flex items-center gap-1.5 overflow-hidden">
-                <span className="bg-neutral-100 text-neutral-600 rounded px-1.5 py-0.5 text-[8.5px] font-bold">Fatalities</span>
-                <span className="bg-neutral-100 text-neutral-600 rounded px-1.5 py-0.5 text-[8.5px] font-bold">Injuries</span>
-                <span className="bg-cyan-100 text-cyan-800 rounded px-1.5 py-0.5 text-[8.5px] font-bold">Responders</span>
-              </div>
+                {/* Card Meta Content */}
+                <div className="flex flex-col flex-grow">
+                  <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] group-hover:text-white transition-colors duration-200">
+                    351 direct casualties on the fire front
+                  </h3>
 
-              {/* Data Callout */}
-              <div className="flex items-baseline justify-between px-1 my-1">
-                <div>
-                  <span className="text-xl sm:text-2xl font-black text-red-600 tabular-nums leading-none">4</span>
-                  <span className="text-[10px] font-semibold text-neutral-500 ml-1">Deaths</span>
+                  <p className="text-xs sm:text-sm text-white/80 group-hover:text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] transition-colors duration-200 font-normal leading-relaxed">
+                    4 fatalities and 347 injuries recorded among courageous ground firefighters, volunteer rangers, and local villagers holding perimeters.
+                  </p>
                 </div>
-                <div>
-                  <span className="text-xl sm:text-2xl font-black text-cyan-700 tabular-nums leading-none">347</span>
-                  <span className="text-[10px] font-semibold text-neutral-500 ml-1">Injuries</span>
-                </div>
-              </div>
-
-              {/* Segmented Vertical Bars (matching Card 2 reference) */}
-              <div className="flex items-end justify-between gap-1.5 h-14 pt-1 px-1 border-b border-neutral-200">
-                <div className="flex-1 bg-cyan-100 rounded-t h-[40%] flex flex-col justify-end">
-                  <div className="w-full bg-cyan-600 rounded-t h-[60%]" />
-                </div>
-                <div className="flex-1 bg-red-100 rounded-t h-[90%] flex flex-col justify-end">
-                  <div className="w-full bg-red-500 rounded-t h-[65%]" />
-                </div>
-                <div className="flex-1 bg-cyan-100 rounded-t h-[55%] flex flex-col justify-end">
-                  <div className="w-full bg-cyan-600 rounded-t h-[70%]" />
-                </div>
-                <div className="flex-1 bg-cyan-100 rounded-t h-[75%] flex flex-col justify-end">
-                  <div className="w-full bg-cyan-600 rounded-t h-[50%]" />
-                </div>
-                <div className="flex-1 bg-cyan-100 rounded-t h-[100%] flex flex-col justify-end">
-                  <div className="w-full bg-cyan-600 rounded-t h-[75%]" />
-                </div>
-                <div className="flex-1 bg-cyan-100 rounded-t h-[60%] flex flex-col justify-end">
-                  <div className="w-full bg-cyan-600 rounded-t h-[55%]" />
-                </div>
-              </div>
-
-              {/* Bottom label */}
-              <div className="text-[8.5px] text-center text-neutral-400 font-medium">
-                Frontline Field Casualty Reports
               </div>
             </div>
           </div>
 
-          {/* Card Meta Content */}
-          <div className="flex flex-col flex-grow">
-            <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 group-hover:text-neutral-300 transition-colors duration-200">
-              351 direct casualties on the fire front
-            </h3>
-
-            <p className="text-xs sm:text-sm text-neutral-400 group-hover:text-neutral-300 transition-colors duration-200 font-normal leading-relaxed">
-              4 fatalities and 347 injuries recorded among courageous ground firefighters, volunteer rangers, and local villagers holding perimeters.
-            </p>
-          </div>
-        </div>
-
-        {/* ---------------- CARD 3: HEALTH IMPACTS FROM HAZE ---------------- */}
-        <div
-          onClick={() => setActiveModal('health')}
-          className="group relative rounded-2xl bg-[#0e1219]/90 border border-white/10 hover:border-white/35 hover:bg-[#070a10]/95 p-5 sm:p-6 flex flex-col h-full backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 shadow-[0_12px_35px_-10px_rgba(0,0,0,0.85)] hover:shadow-[0_24px_55px_-12px_rgba(0,0,0,0.95)] cursor-pointer"
-        >
-          {/* Top Visual Box (Thought Bubble & Waveform - Purple Aura) */}
-          <div className="relative w-full h-44 sm:h-48 rounded-xl overflow-hidden mb-5 border border-white/10 group-hover:border-white/25 bg-gradient-to-br from-[#2f104d] via-[#1c0c32] to-[#0e071c] p-3 flex flex-col items-center justify-center transition-all duration-300">
-            {/* Ambient Radial Flare */}
+          {/* ---------------- CARD 3: HEALTH IMPACTS FROM HAZE ---------------- */}
+          <div style={slotTransformStyle} className="h-full">
             <div
-              aria-hidden="true"
-              className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-36 bg-purple-500/20 rounded-full blur-2xl pointer-events-none"
-            />
+              onClick={() => setActiveModal('health')}
+              style={cardStyle}
+              className={cardGlassClassName}
+            >
+              <CardGlassSpecularOverlay />
+              <div style={contentBlurStyle} className="relative z-10 flex flex-col flex-grow">
+                {/* Top Visual Box (Monochrome Bar Chart) */}
+                <MonochromeBarChart
+                  unitLabel="Cases"
+                  yMax={400000}
+                  yTicks={['400.000', '300.000', '200.000', '100.000', '0']}
+                  data={[
+                    { label: 'Acute Respiratory Infections (ISPA)', value: 333470, displayValue: '333.470' },
+                  ]}
+                />
 
-            {/* Inner White Container (Waveform & prompt like Card 3 reference) */}
-            <div className="relative z-10 w-full bg-white rounded-xl p-2.5 sm:p-3 shadow-lg group-hover:shadow-2xl flex flex-col justify-between h-full text-neutral-800 transition-all duration-300">
-              {/* Thought Prompt Bubble on top right */}
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1 text-[9px] font-bold text-purple-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-pulse" />
-                  Health Alert
-                </span>
-                <span className="bg-purple-50 text-purple-700 border border-purple-200 rounded-full px-2 py-0.5 text-[8px] font-semibold">
-                  How severe is the toxic haze?
-                </span>
-              </div>
+                {/* Card Meta Content */}
+                <div className="flex flex-col flex-grow">
+                  <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] group-hover:text-white transition-colors duration-200">
+                    333,470 acute respiratory infection cases
+                  </h3>
 
-              {/* Main Headline Metric inside box */}
-              <div className="my-1">
-                <div className="text-base sm:text-lg font-black text-neutral-900 leading-none">
-                  333,470 <span className="text-[11px] font-bold text-purple-600 uppercase">ARI Cases</span>
+                  <p className="text-xs sm:text-sm text-white/80 group-hover:text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] transition-colors duration-200 font-normal leading-relaxed">
+                    Dangerous PM2.5 concentrations enveloped entire cities, triggering widespread respiratory distress among infants, children, and elderly citizens.
+                  </p>
                 </div>
-                <div className="text-[8.5px] text-neutral-500 font-medium leading-tight mt-0.5">
-                  PM2.5 haze blankets communities, triggering acute respiratory distress.
-                </div>
-              </div>
-
-              {/* Sensor Waveform Bars (like Card 3 waveform in reference) */}
-              <div className="flex items-end justify-between gap-1 h-9 pt-1 px-1 bg-neutral-50 rounded border border-neutral-100">
-                {[45, 60, 85, 40, 70, 95, 80, 65, 100, 75, 55, 90, 60, 45].map((h, i) => (
-                  <div
-                    key={i}
-                    style={{ height: `${h}%` }}
-                    className={`w-1 rounded-full ${
-                      i >= 5 && i <= 8 ? 'bg-purple-600' : 'bg-purple-300'
-                    }`}
-                  />
-                ))}
-              </div>
-
-              {/* Bottom tag: Vulnerable Groups */}
-              <div className="flex items-center justify-between text-[8px] text-neutral-500 font-medium pt-0.5">
-                <span>Vulnerable Groups:</span>
-                <span className="font-bold text-red-600">Infants, Children &amp; Elderly</span>
               </div>
             </div>
           </div>
-
-          {/* Card Meta Content */}
-          <div className="flex flex-col flex-grow">
-            <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 group-hover:text-neutral-300 transition-colors duration-200">
-              333,470 acute respiratory infection cases
-            </h3>
-
-            <p className="text-xs sm:text-sm text-neutral-400 group-hover:text-neutral-300 transition-colors duration-200 font-normal leading-relaxed">
-              Dangerous PM2.5 concentrations enveloped entire cities, triggering widespread respiratory distress among infants, children, and elderly citizens.
-            </p>
-          </div>
         </div>
-      </div>
       </div>
 
       {/* ===================== INTERACTIVE DETAIL MODAL (PORTALED TO BODY FOR FULL-VIEWPORT DEFOCUS) ===================== */}

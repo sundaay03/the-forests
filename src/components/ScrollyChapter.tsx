@@ -84,9 +84,6 @@ export default function ScrollyChapter({
 
   // Scene 4 exit into Scene 5 (0.80 to 1.00)
   const s4ExitProg = s4Prog > 0.80 ? Math.max(0, Math.min(1, (s4Prog - 0.80) / 0.20)) : 0;
-  const s4SceneOpacity = activeChapter === 3 ? 1 - s4ExitProg : 0;
-  const s4TranslateY = -s4ExitProg * 35;
-  const s4Blur = s4ExitProg * 8;
 
   // Scene 5 (THE ASHES): local progress 0.571 to 0.714
   // Fast fade out starting at 0.48 so it is completely gone before Scene 6 crossfades in
@@ -246,21 +243,20 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 4: STATISTIC ===================== */}
       <div
-        className={`absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 transition-all duration-200 ${
-          activeChapter === 3 && s4SceneOpacity > 0.1 ? 'pointer-events-auto z-20' : 'pointer-events-none z-0'
+        className={`absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 ${
+          activeChapter === 3 && s4ExitProg < 0.9
+            ? 'visible pointer-events-auto z-20'
+            : activeChapter === 3
+              ? 'visible pointer-events-none z-0'
+              : 'invisible pointer-events-none z-0'
         }`}
-        style={{
-          opacity: s4SceneOpacity,
-          transform: `translateY(${s4TranslateY}px)`,
-          filter: s4Blur > 0 ? `blur(${s4Blur}px)` : 'none',
-          transition: 'opacity 0.2s ease-out, filter 0.2s ease-out, transform 0.2s ease-out',
-        }}
       >
         {/* Modern 3-Card Insights Dashboard (Matches reference design) */}
-        <div className={`relative z-10 w-full flex items-center justify-center ${activeChapter === 3 ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+        <div className={`relative z-10 w-full flex items-center justify-center ${activeChapter === 3 && s4ExitProg < 0.75 ? 'pointer-events-auto' : 'pointer-events-none'}`}>
           <KarhutlaDashboard
-            isActive={activeChapter === 3 && s4ExitProg < 0.75}
+            isActive={activeChapter === 3}
             cardsProgress={s4CardsEnter}
+            exitProgress={s4ExitProg}
           />
         </div>
       </div>
