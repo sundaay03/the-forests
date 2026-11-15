@@ -37,6 +37,7 @@ export default function ScrollyVideoBackground({
   scrollProgRef.current = scrollProgress;
   const lerpTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
   const desiredTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
+  const seekStartTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
 
   // 1. Dedicated Realtime Playback Controller for Scene 3 (THE INFERNO) & Scene 8 (THE CONTACT)
   // Ensures Video 3 and Video 8 play continuously at normal speed, looping forever, even when user is stationary
@@ -79,18 +80,23 @@ export default function ScrollyVideoBackground({
     }
   }, [isFireActive, isContactActive, scrollProgress]);
 
-  // 2. Prime scrubbing videos on mount (Scenes 1, 2, 4, 5) & setup non-blocking seek coalescing
+  // 2. Prime scrubbing videos on mount (Scenes 1, 2, 4, 5, 6, 7) & setup deadlock-proof seek coalescing
   useEffect(() => {
     const cleanupListeners: (() => void)[] = [];
 
     const commitSeek = (index: number) => {
       const video = videoRefs.current[index];
       if (!video || SCENE_DATA[index].isRealtime) return;
-      if (video.readyState < 1 || video.seeking) return;
+      if (video.readyState < 1) return;
+
+      const now = performance.now();
+      // Never allow video.seeking to permanently deadlock scrubbing if a range seek stalls (> 160ms)
+      if (video.seeking && now - seekStartTimesRef.current[index] < 160) return;
 
       const target = desiredTimesRef.current[index] ?? 0;
       if (Math.abs(video.currentTime - target) > 0.008) {
         try {
+          seekStartTimesRef.current[index] = now;
           video.currentTime = target;
         } catch {
           // Ignore if seeking fails before metadata is ready
@@ -119,20 +125,26 @@ export default function ScrollyVideoBackground({
         return;
       }
 
-      const onSeeked = () => {
+      const onSeekedOrLoaded = () => {
+        seekStartTimesRef.current[index] = 0;
         commitSeek(index);
       };
-      video.addEventListener('seeked', onSeeked);
-      cleanupListeners.push(() => video.removeEventListener('seeked', onSeeked));
+      video.addEventListener('seeked', onSeekedOrLoaded);
+      video.addEventListener('loadeddata', onSeekedOrLoaded);
+      cleanupListeners.push(() => {
+        video.removeEventListener('seeked', onSeekedOrLoaded);
+        video.removeEventListener('loadeddata', onSeekedOrLoaded);
+      });
 
       const wakeUp = () => {
         const p = video.play();
         if (p !== undefined) {
           p.then(() => {
             video.pause();
-            video.currentTime = 0;
+            commitSeek(index);
           }).catch(() => {
             video.pause();
+            commitSeek(index);
           });
         }
       };
@@ -141,6 +153,7 @@ export default function ScrollyVideoBackground({
         wakeUp();
       } else {
         video.addEventListener('canplay', wakeUp, { once: true });
+        cleanupListeners.push(() => video.removeEventListener('canplay', wakeUp));
         video.load();
       }
     });
@@ -173,12 +186,12 @@ export default function ScrollyVideoBackground({
       const prog = scrollProgRef.current;
 
       SCENE_DATA.forEach((scene, index) => {
-        // Scene 3 runs in realtime looping mode; ensure it is playing continuously whenever near active
+        // Realtime looping mode for Scene 3 & Scene 8
         if (scene.isRealtime) {
-          const isNearScene3 = prog >= scene.startProg - 0.06 && prog <= scene.endProg + 0.05;
+          const isNearRealtime = prog >= scene.startProg - 0.06 && prog <= scene.endProg + 0.05;
           const v = videoRefs.current[index];
           if (v) {
-            if (isNearScene3) {
+            if (isNearRealtime) {
               if (v.paused) {
                 v.muted = true;
                 v.defaultMuted = true;
@@ -196,13 +209,23 @@ export default function ScrollyVideoBackground({
           return;
         }
 
-        // Performance optimization: Only seek videos that are currently visible or approaching
+        // Only seek videos that are currently visible or approaching
         const isNearActive =
           prog >= scene.startProg - 0.08 && prog <= scene.endProg + 0.08;
         if (!isNearActive) return;
 
         const video = videoRefs.current[index];
         if (!video) return;
+
+        // Recover if Chrome's initial concurrent connection pool stalled this video's load
+        if (video.readyState === 0 && video.networkState !== 2) {
+          video.load();
+        }
+
+        // Ensure paused so browser playback never overrides scroll-scrubbed position
+        if (!video.paused) {
+          video.pause();
+        }
 
         const duration =
           video.duration && !isNaN(video.duration) && video.duration > 0
@@ -220,16 +243,19 @@ export default function ScrollyVideoBackground({
           targetTime = ratio * duration;
         }
 
-        // Ultra-fluid lerp interpolation to eliminate micro-stutters
+        // Snap directly after large jumps (e.g. navbar transition), lerp smoothly during continuous scroll
         const currentLerp = lerpTimesRef.current[index] ?? 0;
         const diff = targetTime - currentLerp;
-        const nextLerp = Math.abs(diff) < 0.002 ? targetTime : currentLerp + diff * 0.28;
+        const nextLerp =
+          Math.abs(diff) < 0.002 || Math.abs(diff) > 1.5
+            ? targetTime
+            : currentLerp + diff * 0.28;
         lerpTimesRef.current[index] = nextLerp;
 
         const safeTime = Math.max(0, Math.min(nextLerp, duration - 0.01));
         desiredTimesRef.current[index] = safeTime;
 
-        // Non-blocking frame seek: never abort an in-flight VP9 decode
+        // Non-blocking frame seek with deadlock protection
         commitSeek(index);
       });
     };

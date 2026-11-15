@@ -1,12 +1,15 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ScrollyVideoBackground from './ScrollyVideoBackground';
 import ScrollyChapter from './ScrollyChapter';
 import ScrollyHUD from './ScrollyHUD';
+import NavbarLiquidTransition, {
+  type LiquidTransitionRequest,
+} from './NavbarLiquidTransition';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -16,9 +19,14 @@ export default function ScrollyExperience() {
   const [isMounted, setIsMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
+  const transitionLockRef = useRef(false);
+  const transitionIdRef = useRef(0);
+  const updateMetricsRef = useRef<(prog: number) => void>(() => {});
 
   const [activeChapter, setActiveChapter] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [liquidTransition, setLiquidTransition] =
+    useState<LiquidTransitionRequest | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -55,6 +63,7 @@ export default function ScrollyExperience() {
       const rawChapter = Math.min(7, Math.floor(clampedProg * 8));
       setActiveChapter((prev) => (prev === rawChapter ? prev : rawChapter));
     };
+    updateMetricsRef.current = updateScrollMetrics;
 
     // 2. Synchronize Lenis with State
     lenis.on('scroll', (e: { progress?: number; scroll?: number; limit?: number }) => {
@@ -93,17 +102,49 @@ export default function ScrollyExperience() {
     };
   }, [isMounted]);
 
-  // Jump to specific chapter smoothly using Lenis
-  const handleJumpToChapter = (chapterIndex: number) => {
+  // Executed behind 100% liquid coverage during Scene 3 of NavbarLiquidTransition
+  const handleSwapChapter = useCallback((chapterIndex: number) => {
     if (!containerRef.current || !lenisRef.current) return;
     const containerHeight = containerRef.current.offsetHeight - window.innerHeight;
     const targetRatio = chapterIndex === 7 ? 7.25 / 8 : chapterIndex / 8;
     const targetScroll = targetRatio * containerHeight;
+
     lenisRef.current.scrollTo(targetScroll, {
-      duration: 1.6,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      immediate: true,
+      force: true,
     });
-  };
+    window.scrollTo({
+      top: targetScroll,
+      behavior: 'instant' as ScrollBehavior,
+    });
+    updateMetricsRef.current(targetRatio);
+    ScrollTrigger.update();
+  }, []);
+
+  const handleTransitionComplete = useCallback(() => {
+    setLiquidTransition(null);
+    transitionLockRef.current = false;
+  }, []);
+
+  // Trigger Liquid Morphing Transition whenever a navbar button is clicked
+  const handleJumpToChapter = useCallback(
+    (chapterIndex: number, origin?: { x: number; y: number }) => {
+      if (transitionLockRef.current) return;
+      transitionLockRef.current = true;
+
+      const defaultX = typeof window !== 'undefined' ? window.innerWidth * 0.5 : 640;
+      const defaultY = 48;
+
+      transitionIdRef.current += 1;
+      setLiquidTransition({
+        id: transitionIdRef.current,
+        targetChapter: chapterIndex,
+        originX: origin?.x ?? defaultX,
+        originY: origin?.y ?? defaultY,
+      });
+    },
+    []
+  );
 
   if (!isMounted) {
     return (
@@ -127,6 +168,13 @@ export default function ScrollyExperience() {
         <ScrollyChapter
           activeChapter={activeChapter}
           scrollProgress={scrollProgress}
+        />
+
+        {/* Liquid Morphing Transition Overlay (Navbar Navigation) */}
+        <NavbarLiquidTransition
+          request={liquidTransition}
+          onSwapPage={handleSwapChapter}
+          onComplete={handleTransitionComplete}
         />
 
         {/* Fixed HUD Interface */}

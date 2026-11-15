@@ -5,7 +5,7 @@ import type { CSSProperties, ReactNode } from 'react';
 interface ScrollyHUDProps {
   activeChapter: number;
   scrollProgress?: number;
-  onJumpToChapter: (index: number) => void;
+  onJumpToChapter: (index: number, origin?: { x: number; y: number }) => void;
 }
 
 interface ChapterItem {
@@ -236,7 +236,13 @@ export default function ScrollyHUD({
             <button
               key={chap.id}
               type="button"
-              onClick={() => onJumpToChapter(idx)}
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                onJumpToChapter(idx, {
+                  x: rect.left + rect.width * 0.5,
+                  y: rect.top + rect.height * 0.5,
+                });
+              }}
               aria-label={`${chap.tag} ${chap.label}`}
               aria-current={isActive ? 'step' : undefined}
               className={`group relative z-10 flex items-center justify-center shrink-0 w-9 h-9 min-[430px]:w-10 min-[430px]:h-10 sm:w-[44px] sm:h-[44px] rounded-full cursor-pointer transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 ${
