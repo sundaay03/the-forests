@@ -25,7 +25,7 @@ const SCENE_DATA: SceneMeta[] = [
   { id: 5, src: '/scene/scene5/5.webm', duration: 9.93, startProg: 0.571, playEndProg: 0.686, endProg: 0.714 },
   { id: 6, src: '/scene/scene6/6.webm', duration: 9.98, startProg: 0.714, playEndProg: 0.829, endProg: 0.857 },
   { id: 7, src: '/scene/scene7/7.webm', duration: 9.93, startProg: 0.857, playEndProg: 0.975, endProg: 1.000 },
-  { id: 8, src: '/scene/scene8/8.webm', duration: 10.0, startProg: 1.000, playEndProg: 1.115, endProg: 1.143, isRealtime: true },
+  { id: 8, src: '/scene/scene8/8new.webm', duration: 10.0, startProg: 1.000, playEndProg: 1.115, endProg: 1.143, isRealtime: true },
 ];
 
 export default function ScrollyVideoBackground({

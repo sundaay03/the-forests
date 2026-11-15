@@ -379,7 +379,7 @@ export default function ScrollyChapter({
 
           {/* Headline */}
           <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.9] text-white text-cinematic-shadow">
-            CONTACT
+            LET'S BUILD
           </h1>
 
           {/* Subtitle */}
