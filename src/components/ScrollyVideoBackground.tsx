@@ -242,6 +242,12 @@ export default function ScrollyVideoBackground({
     };
   }, []);
 
+  const vpW = typeof window !== 'undefined' ? window.innerWidth : 1920;
+  const vpH = typeof window !== 'undefined' ? window.innerHeight : 1080;
+  const minDim = Math.min(vpW, vpH);
+  const maxCornerR = Math.hypot(vpW, vpH) * 0.56;
+  const isPortalWindow = scrollProgress >= 0.942 && scrollProgress <= 1.05;
+
   return (
     <div
       suppressHydrationWarning
@@ -262,13 +268,28 @@ export default function ScrollyVideoBackground({
             opacity = 0;
           }
         } else if (index === SCENE_DATA.length - 1) {
+          // Scene 8 stays hidden while Scene 7 gets sucked into the portal (prog < 0.992),
+          // then opens cleanly out from inside the liquid portal core (0.992 -> 1.045)
+          if (prog < 0.992) {
+            opacity = 0;
+          } else if (prog < 1.012) {
+            opacity = (prog - 0.992) / (1.012 - 0.992);
+          } else {
+            opacity = 1;
+          }
+        } else if (index === 6) {
+          // Scene 7 stays visible while shrinking into the liquid portal center (0.945 -> 0.995)
           const prevScene = SCENE_DATA[index - 1];
           if (prog < prevScene.playEndProg) {
             opacity = 0;
-          } else if (prog <= scene.startProg) {
+          } else if (prog < scene.startProg) {
             opacity = (prog - prevScene.playEndProg) / (scene.startProg - prevScene.playEndProg);
-          } else {
+          } else if (prog <= 0.982) {
             opacity = 1;
+          } else if (prog <= 0.996) {
+            opacity = 1 - (prog - 0.982) / (0.996 - 0.982);
+          } else {
+            opacity = 0;
           }
         } else {
           const prevScene = SCENE_DATA[index - 1];
@@ -287,8 +308,10 @@ export default function ScrollyVideoBackground({
 
         const clampedOpacity = Math.max(0, Math.min(1, opacity));
 
-        // Portal Suction Warp Transform between end of Scene 7 (index 6) and start of Scene 8 (index 7)
+        // Portal Suction Zoom Transform between end of Scene 7 (index 6) and start of Scene 8 (index 7)
+        // Background videos stay upright (zero rotation) and zoom cleanly into/out of the liquid portal
         let videoTransform = 'translateZ(0) scale(1.01)';
+        let wrapperClipPath = 'none';
         let videoFilter =
           index === 2
             ? 'contrast(1.15) saturate(1.2)'
@@ -302,25 +325,29 @@ export default function ScrollyVideoBackground({
             ? 'contrast(1.08) saturate(1.2) brightness(1.02)'
             : 'contrast(1.05) saturate(1.05)';
 
-        if (index === 6 && prog > 0.945) {
-          // Scene 7 gets sucked into the portal center at the end of Scene 7
-          const suctionRatio = Math.max(0, Math.min(1, (prog - 0.945) / (1.0 - 0.945)));
-          const suctionEase = Math.pow(suctionRatio, 2.1);
-          const scale = 1.01 + suctionEase * 1.85;
-          const rotate = suctionEase * 14;
-          const blur = suctionEase * 7;
-          videoTransform = `translateZ(0) scale(${scale.toFixed(3)}) rotate(${rotate.toFixed(2)}deg)`;
-          videoFilter = `contrast(${(1.08 + suctionEase * 0.45).toFixed(2)}) saturate(${(1.2 + suctionEase * 0.5).toFixed(2)}) brightness(${(1.02 + suctionEase * 0.35).toFixed(2)}) blur(${blur.toFixed(1)}px)`;
-        } else if (index === 7 && prog < 1.035) {
-          // Scene 8 emerges out from the portal vortex at the start of Scene 8
-          const emergeRatio = Math.max(0, Math.min(1, (1.035 - prog) / (1.035 - 0.975)));
-          const emergeEase = Math.pow(emergeRatio, 1.85);
-          const scale = 1.01 + emergeEase * 0.85;
-          const rotate = -emergeEase * 11;
-          const blur = emergeEase * 7;
-          videoTransform = `translateZ(0) scale(${scale.toFixed(3)}) rotate(${rotate.toFixed(2)}deg)`;
-          videoFilter = `contrast(1.08) saturate(1.12) brightness(${(1.0 + emergeEase * 0.35).toFixed(2)}) blur(${blur.toFixed(1)}px)`;
+        if (index === 6 && prog > 0.945 && prog <= 0.998) {
+          // Scene 7 stays upright (no rotation) and zooms forward straight into the center liquid portal
+          const suctionRatio = Math.max(0, Math.min(1, (prog - 0.945) / (0.995 - 0.945)));
+          const suctionEase = Math.pow(suctionRatio, 1.9);
+          const scale = 1.01 + suctionEase * 0.88;
+          const blur = suctionEase * 6;
+
+          videoTransform = `translateZ(0) scale(${scale.toFixed(3)})`;
+          videoFilter = `contrast(${(1.08 + suctionEase * 0.22).toFixed(2)}) saturate(${(1.2 + suctionEase * 0.25).toFixed(2)}) brightness(${(1.02 + suctionEase * 0.22).toFixed(2)}) blur(${blur.toFixed(1)}px)`;
+        } else if (index === 7 && prog >= 0.992 && prog < 1.045) {
+          // Scene 8 stays upright (no rotation) and opens cleanly inside the expanding circular liquid portal aperture
+          const emergeRatio = Math.max(0, Math.min(1, (prog - 0.995) / (1.045 - 0.995)));
+          const emergeEase = 1 - Math.pow(1 - emergeRatio, 2.2);
+          const apertureR = minDim * 0.05 + (maxCornerR - minDim * 0.05) * emergeEase;
+          const scale = 1.24 - emergeEase * 0.23;
+          const blur = (1 - emergeEase) * 5;
+
+          wrapperClipPath = `circle(${apertureR.toFixed(1)}px at 50% 50%)`;
+          videoTransform = `translateZ(0) scale(${scale.toFixed(3)})`;
+          videoFilter = `contrast(1.06) saturate(1.1) brightness(${(1.0 + (1 - emergeEase) * 0.22).toFixed(2)}) blur(${blur.toFixed(1)}px)`;
         }
+
+        const disableOpacityLag = (index === 6 || index === 7) && isPortalWindow;
 
         return (
           <div
@@ -330,8 +357,9 @@ export default function ScrollyVideoBackground({
             style={{
               opacity: clampedOpacity,
               zIndex: clampedOpacity > 0.01 ? 2 : 1,
-              transition: 'opacity 0.18s ease-out',
-              willChange: 'opacity',
+              clipPath: wrapperClipPath,
+              transition: disableOpacityLag ? 'none' : 'opacity 0.18s ease-out',
+              willChange: 'opacity, clip-path',
             }}
           >
             <video

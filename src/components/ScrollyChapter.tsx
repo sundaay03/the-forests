@@ -113,29 +113,31 @@ export default function ScrollyChapter({
   }
 
   // Scene 7 (THE REBIRTH): local progress 0.857 to 1.000
-  // Gets sucked into the portal vortex at the end of Scene 7 (s7Prog > 0.64)
-  const s7Prog = Math.max(0, Math.min(1, (scrollProgress - 0.857) / 0.143));
-  const s7SuctionRaw = s7Prog > 0.64 ? Math.max(0, Math.min(1, (s7Prog - 0.64) / 0.32)) : 0;
-  const s7SuctionEase = s7SuctionRaw * s7SuctionRaw;
-  const s7Opacity = activeChapter === 6 ? Math.max(0, 1 - s7SuctionEase * 1.15) : 0;
-  const s7Scale = 1 - s7SuctionEase * 0.85;
-  const s7Rotate = -s7SuctionEase * 14;
-  const s7Blur = s7SuctionEase * 12;
+  // Stays upright (no rotation) and zooms cleanly inward toward the liquid portal core (0.945 -> 0.992)
+  const s7SuctionRaw =
+    scrollProgress > 0.945
+      ? Math.max(0, Math.min(1, (scrollProgress - 0.945) / (0.992 - 0.945)))
+      : 0;
+  const s7SuctionEase = Math.pow(s7SuctionRaw, 1.85);
+  const s7Opacity = activeChapter === 6 ? Math.max(0, 1 - Math.pow(s7SuctionRaw, 2.0)) : 0;
+  const s7Scale = 1 + s7SuctionEase * 0.55;
+  const s7Rotate = 0;
+  const s7Blur = s7SuctionEase * 8;
 
-  // Global Portal Suction Transition between end of Scene 7 (0.945) and start of Scene 8 (1.038)
+  // Global Liquid Forest Portal Transition between Scene 7 (0.945) and Scene 8 (1.045), midpoint at 0.995
   let globalPortalProgress = 0;
-  if (scrollProgress >= 0.945 && scrollProgress <= 1.038) {
-    globalPortalProgress = (scrollProgress - 0.945) / (1.038 - 0.945);
+  if (scrollProgress >= 0.945 && scrollProgress <= 1.045) {
+    globalPortalProgress = (scrollProgress - 0.945) / (1.045 - 0.945);
   }
 
   // Scene 8 (THE CONTACT): local progress 1.000 to 1.143
-  // Emerges smoothly out from the portal vortex after s8Prog = 0.14
+  // Emerges smoothly outward from the liquid forest portal core (1.008 -> 1.045)
   const s8Prog = Math.max(0, Math.min(1, (scrollProgress - 1.0) / 0.143));
-  const s8EnterRaw = Math.max(0, Math.min(1, (s8Prog - 0.14) / 0.22));
-  const s8EnterEase = 1 - Math.pow(1 - s8EnterRaw, 2.5);
+  const s8EnterRaw = Math.max(0, Math.min(1, (s8Prog - 0.056) / 0.26));
+  const s8EnterEase = 1 - Math.pow(1 - s8EnterRaw, 2.4);
   const s8Opacity = activeChapter === 7 ? s8EnterEase : 0;
-  const s8Scale = 0.84 + s8EnterEase * 0.16;
-  const s8Blur = (1 - s8EnterEase) * 12;
+  const s8Scale = 0.42 + s8EnterEase * 0.58;
+  const s8Blur = (1 - s8EnterEase) * 8;
 
   return (
     <div className="relative z-20 flex flex-col items-center justify-center min-h-screen px-6 text-center select-none pointer-events-none w-full">
@@ -336,7 +338,10 @@ export default function ScrollyChapter({
           opacity: s7Opacity,
           transform: `scale(${s7Scale}) rotate(${s7Rotate}deg)`,
           filter: s7Blur > 0.1 ? `blur(${s7Blur}px)` : 'none',
-          transition: 'opacity 0.15s ease-out, transform 0.15s ease-out, filter 0.15s ease-out',
+          transition:
+            scrollProgress >= 0.945
+              ? 'none'
+              : 'opacity 0.15s ease-out, transform 0.15s ease-out, filter 0.15s ease-out',
         }}
       >
         {/* Headline */}
@@ -372,7 +377,10 @@ export default function ScrollyChapter({
           opacity: s8Opacity,
           transform: `scale(${s8Scale})`,
           filter: s8Blur > 0.1 ? `blur(${s8Blur}px)` : 'none',
-          transition: 'opacity 0.2s ease-out, transform 0.2s ease-out, filter 0.2s ease-out',
+          transition:
+            scrollProgress <= 1.046
+              ? 'none'
+              : 'opacity 0.2s ease-out, transform 0.2s ease-out, filter 0.2s ease-out',
         }}
       >
         <div className="relative flex flex-col items-center justify-center max-w-3xl mx-auto text-center">
@@ -390,29 +398,11 @@ export default function ScrollyChapter({
           {/* Interactive Contact Links / Action Pills */}
           <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3.5 sm:gap-4">
             <a
-              href="mailto:contact@theforest.id"
+              href="mailto:sandi03riandi@gmail.com"
               className="group relative flex items-center gap-3 px-6 py-3.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 hover:border-white/80 hover:bg-white/15 text-white text-xs sm:text-sm font-mono uppercase tracking-widest transition-all duration-300 hover:-translate-y-0.5 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
             >
               <span className="h-2 w-2 rounded-full bg-white group-hover:animate-ping" />
-              <span>EMAIL US</span>
-            </a>
-
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 hover:border-white/50 hover:bg-white/10 text-white/90 hover:text-white text-xs sm:text-sm font-mono uppercase tracking-widest transition-all duration-300 hover:-translate-y-0.5 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
-            >
-              <span>INSTAGRAM</span>
-            </a>
-
-            <a
-              href="https://github.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 hover:border-white/50 hover:bg-white/10 text-white/90 hover:text-white text-xs sm:text-sm font-mono uppercase tracking-widest transition-all duration-300 hover:-translate-y-0.5 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
-            >
-              <span>COLLABORATE</span>
+              <span>Contac Us</span>
             </a>
           </div>
         </div>
