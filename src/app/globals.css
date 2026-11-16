@@ -104,3 +104,22 @@ html.lenis, html.lenis body {
 .animate-fadeIn {
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@keyframes soundWave {
+  0%, 100% {
+    transform: scaleY(0.32);
+  }
+  45% {
+    transform: scaleY(1.15);
+  }
+  70% {
+    transform: scaleY(0.55);
+  }
+}
+
+.animate-sound-wave {
+  animation-name: soundWave;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  transform-origin: center;
+}

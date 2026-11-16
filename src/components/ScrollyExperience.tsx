@@ -7,6 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ScrollyVideoBackground from './ScrollyVideoBackground';
 import ScrollyChapter from './ScrollyChapter';
 import ScrollyHUD from './ScrollyHUD';
+import ScrollyBacksound from './ScrollyBacksound';
 import NavbarLiquidTransition, {
   type LiquidTransitionRequest,
 } from './NavbarLiquidTransition';
@@ -200,6 +201,9 @@ export default function ScrollyExperience() {
           scrollProgress={scrollProgress}
           onJumpToChapter={handleJumpToChapter}
         />
+
+        {/* Top-Right Backsound Controller & Toggle */}
+        <ScrollyBacksound activeChapter={activeChapter} />
       </div>
     </div>
   );
