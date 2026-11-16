@@ -160,7 +160,7 @@ export default function ScrollyChapter({
           <div className="relative flex flex-col items-center justify-center">
             {/* Headline with Vertical Mask Slide-up & Letter Stagger */}
             <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 0}>
-              <h1 className="relative text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.88] text-white flex flex-wrap justify-center py-3 sm:py-5 text-cinematic-shadow">
+              <h1 className="relative text-[2.5rem] min-[390px]:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.88] text-white flex flex-wrap justify-center py-3 sm:py-5 text-cinematic-shadow">
                 {'THE FOREST'.split('').map((char, i) => (
                   <span
                     key={i}
@@ -240,7 +240,7 @@ export default function ScrollyChapter({
       >
         {/* Fast kinetic reveal with heat-shimmer & orange-amber text glow */}
         <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 2}>
-          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)]">
+          <h1 className="text-4xl min-[400px]:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)]">
             FOREST AND LAND FIRES
           </h1>
         </CursorParallaxText>
@@ -268,6 +268,7 @@ export default function ScrollyChapter({
             isActive={activeChapter === 3}
             cardsProgress={s4CardsEnter}
             exitProgress={s4ExitProg}
+            localProgress={s4Prog}
           />
         </div>
       </div>
@@ -284,7 +285,7 @@ export default function ScrollyChapter({
       >
         {/* Letter-by-letter opacity fade mimicking settling ash */}
         <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 4}>
-          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-neutral-200 flex flex-wrap justify-center py-2">
+          <h1 className="text-[2.25rem] min-[390px]:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-neutral-200 flex flex-wrap justify-center py-2">
             {'WHAT REMAINS'.split('').map((char, i) => (
               <span
                 key={i}
@@ -318,7 +319,7 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 6: THE HUMAN TOLL ===================== */}
       <div
-        className={`absolute inset-0 flex items-center justify-start px-8 sm:px-14 md:px-20 lg:px-24 transition-all duration-200 ${
+        className={`absolute inset-0 flex items-center justify-start px-5 sm:px-14 md:px-20 lg:px-24 pt-16 sm:pt-0 transition-all duration-200 ${
           activeChapter === 5 && s6Opacity > 0.1
             ? 'visible pointer-events-auto z-30'
             : activeChapter === 5 && s6Opacity > 0.01
@@ -344,7 +345,7 @@ export default function ScrollyChapter({
             tilt={6}
             disabled={!(activeChapter === 5 && s6Opacity > 0.1)}
           >
-            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-[0.92] py-1 drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+            <h1 className="text-[2.25rem] min-[390px]:text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-[0.92] py-1 drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
               <span className="block">HEALTH</span>
               <span className="block">IMPACTS</span>
             </h1>
@@ -378,7 +379,7 @@ export default function ScrollyChapter({
         {/* Headline */}
         <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 6}>
           <h1
-            className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[0.05em] text-white py-2 transition-all duration-1000 ease-out text-cinematic-shadow ${
+            className={`text-[2.35rem] min-[400px]:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[0.05em] text-white py-2 transition-all duration-1000 ease-out text-cinematic-shadow ${
               activeChapter === 6
                 ? 'opacity-100 translate-y-0 scale-100'
                 : 'opacity-0 translate-y-6 scale-95'
@@ -426,7 +427,7 @@ export default function ScrollyChapter({
 
           {/* Headline */}
           <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 7}>
-            <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.9] text-white text-cinematic-shadow">
+            <h1 className="text-[2.5rem] min-[390px]:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.9] text-white text-cinematic-shadow">
               LET&apos;S BUILD
             </h1>
           </CursorParallaxText>

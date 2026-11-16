@@ -100,6 +100,7 @@ export default function IndonesiaGallery({
   const totalPhotos = items.length;
   // Compact photo window so all 10 photos finish completely before s2Prog = 0.68
   const photoWindow = 0.16;
+  const isCompactViewport = typeof window !== 'undefined' && window.innerWidth < 768;
 
   return (
     <div
@@ -109,13 +110,9 @@ export default function IndonesiaGallery({
         transition: 'opacity 0.15s ease-out',
       }}
     >
-      {/* ===================== LEFT SIDE CONTENT ===================== */}
-      {/* 
-        Positioned comfortably in the vertical middle-left (top-[52%] -translate-y-1/2)
-        with balanced typography so it never touches or cuts off against the top header
-      */}
+      {/* ===================== LEFT / TOP CONTENT (Stacks above photo stream on mobile) ===================== */}
       <div
-        className="absolute left-8 sm:left-14 md:left-20 lg:left-24 top-[52%] -translate-y-1/2 z-20 pointer-events-auto w-full max-w-md sm:max-w-lg md:max-w-xl text-left will-change-transform"
+        className="absolute left-5 right-5 top-[78px] sm:top-[92px] md:right-auto md:left-16 lg:left-24 md:top-[52%] md:-translate-y-1/2 z-20 pointer-events-auto max-w-xl md:max-w-md lg:max-w-xl text-center md:text-left mx-auto md:mx-0 will-change-transform"
         style={{
           opacity: textOpacity,
           filter: textBlur > 0 ? `blur(${textBlur}px)` : 'none',
@@ -125,7 +122,7 @@ export default function IndonesiaGallery({
         {/* Main Headline */}
         <CursorParallaxText shiftX={24} shiftY={16} tilt={6} disabled={activeChapter !== 1}>
           <h1
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.95] text-white transition-colors duration-300"
+            className="text-[1.75rem] min-[390px]:text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.95] text-white transition-colors duration-300"
             style={{
               textShadow:
                 burnProg > 0.05
@@ -142,15 +139,15 @@ export default function IndonesiaGallery({
                   : '#ffffff',
             }}
           >
-            <span className="block whitespace-nowrap">WONDERFUL OF</span>
-            <span className="block whitespace-nowrap">INDONESIA</span>
+            <span className="block sm:whitespace-nowrap">WONDERFUL OF</span>
+            <span className="block sm:whitespace-nowrap">INDONESIA</span>
           </h1>
         </CursorParallaxText>
 
         {/* Subtitle */}
         <CursorParallaxText shiftX={16} shiftY={10} tilt={4} disabled={activeChapter !== 1}>
           <p
-            className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg font-light text-neutral-200 tracking-wider leading-relaxed max-w-md transition-colors duration-300"
+            className="mt-2.5 sm:mt-4 md:mt-5 text-xs sm:text-sm md:text-lg font-light text-neutral-200 tracking-wider leading-relaxed max-w-md mx-auto md:mx-0 transition-colors duration-300"
             style={{
               textShadow:
                 burnProg > 0.05
@@ -164,18 +161,14 @@ export default function IndonesiaGallery({
 
         {/* Narrative Paragraph */}
         <CursorParallaxText shiftX={11} shiftY={7} tilt={2.5} disabled={activeChapter !== 1}>
-          <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-neutral-300/90 font-normal leading-relaxed max-w-md drop-shadow-[0_1px_4px_rgba(0,0,0,0.25)]">
+          <p className="mt-2 sm:mt-3 md:mt-4 text-[11px] sm:text-xs md:text-sm text-neutral-300/90 font-normal leading-relaxed max-w-md mx-auto md:mx-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.25)]">
             Indonesia&apos;s forest area covers 124,975,956 hectares, home to around 31,750 flora species and approximately 744,279 terrestrial and aquatic fauna species.
           </p>
         </CursorParallaxText>
       </div>
 
-      {/* ===================== RIGHT SIDE: ONE-BY-ONE PHOTO STREAM ===================== */}
-      {/* 
-        All 10 photos complete their full cycle between s2Prog = 0.04 and 0.68.
-        Zero lingering photos remain when the fire transition begins at s2Prog = 0.72.
-      */}
-      <div className="absolute right-6 sm:right-12 md:right-16 lg:right-24 top-1/2 -translate-y-1/2 z-30 w-[300px] sm:w-[400px] md:w-[480px] lg:w-[540px] h-[360px] sm:h-[420px] md:h-[480px] pointer-events-none">
+      {/* ===================== RIGHT / CENTER-BOTTOM PHOTO STREAM ===================== */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-[59%] -translate-y-1/2 sm:top-[58%] md:left-auto md:translate-x-0 md:right-12 lg:right-24 md:top-1/2 md:-translate-y-1/2 z-30 w-[min(86vw,340px)] sm:w-[400px] md:w-[440px] lg:w-[540px] h-[255px] sm:h-[300px] md:h-[440px] lg:h-[480px] pointer-events-none">
         {items.map((item, index) => {
           // Center scroll progress for this photo (spaced compactly from 0.08 to 0.58)
           const centerProg = 0.08 + (index / Math.max(1, totalPhotos - 1)) * 0.50;
@@ -187,11 +180,9 @@ export default function IndonesiaGallery({
 
           const clampedP = Math.max(0, Math.min(1, p));
 
-          // Vertical motion: from bottom (+36vh) to top (-36vh)
-          const translateY = (0.5 - clampedP) * 72; // in vh
-
-          // Horizontal motion: starts in bottom-right corner (+12vw), swings inwards (0vw), drifts to top-right corner (+12vw)
-          const translateX = Math.pow(clampedP - 0.5, 2) * 4 * 12; // in vw
+          // Keep mobile cards horizontally centered & gently animated vertically
+          const translateY = (0.5 - clampedP) * (isCompactViewport ? 20 : 72); // in vh
+          const translateX = isCompactViewport ? 0 : Math.pow(clampedP - 0.5, 2) * 4 * 12; // in vw
 
           // Scale: small at start (0.35) -> large in center (1.05) -> small at end (0.35)
           const scale = 0.35 + 4 * clampedP * (1 - clampedP) * 0.70;

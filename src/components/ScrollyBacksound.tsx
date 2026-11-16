@@ -225,16 +225,16 @@ export default function ScrollyBacksound({ activeChapter }: ScrollyBacksoundProp
   const showActiveUi = isEnabled && (isActuallyPlaying || !audioUnlockedRef.current);
 
   return (
-    <div className="fixed top-[76px] right-4 sm:top-6 sm:right-6 z-40 select-none pointer-events-auto">
+    <div className="fixed top-4 right-4 sm:top-6 sm:right-5 lg:right-6 z-40 select-none pointer-events-auto">
       <button
         type="button"
         onClick={handleToggleSound}
-        aria-label={showActiveUi ? 'Mute backsound' : 'Unmute backsound'}
+        aria-label={showActiveUi ? 'Mute backsound' : 'Play backsound'}
         aria-pressed={showActiveUi}
-        className="group flex items-center gap-3 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 rounded-full"
+        className="group flex items-center gap-2.5 sm:gap-3 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 rounded-full"
       >
-        {/* SOUND ON / OFF Label */}
-        <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-mono font-medium tracking-[0.2em] uppercase drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] transition-opacity duration-300">
+        {/* SOUND ON / OFF Label (shown beside bubble on mobile & desktop >= 1024px) */}
+        <span className="inline-flex sm:hidden lg:inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-mono font-medium tracking-[0.18em] sm:tracking-[0.2em] uppercase drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)] transition-opacity duration-300">
           <span className="text-white/55">SOUND</span>
           <span className={showActiveUi ? 'text-white' : 'text-white/45'}>
             {showActiveUi ? 'ON' : 'OFF'}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, type CSSProperties } from 'react';
+import { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import CursorTiltCard from './CursorTiltCard';
 import CursorParallaxText from './CursorParallaxText';
@@ -41,7 +41,7 @@ function MonochromeBarChart({
   const isSingleBar = data.length === 1;
 
   return (
-    <div className="relative z-10 w-full h-48 sm:h-52 rounded-xl overflow-hidden mb-5 border border-white/20 group-hover:border-white/40 bg-black/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.28),inset_0_-3px_10px_rgba(0,0,0,0.55),0_8px_20px_-6px_rgba(0,0,0,0.55)] p-3 sm:p-3.5 flex flex-col transition-all duration-300 select-none">
+    <div className="relative z-10 w-full h-36 sm:h-44 lg:h-52 rounded-xl overflow-hidden mb-3.5 sm:mb-4 lg:mb-5 border border-white/20 group-hover:border-white/40 bg-black/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.28),inset_0_-3px_10px_rgba(0,0,0,0.55),0_8px_20px_-6px_rgba(0,0,0,0.55)] p-2.5 sm:p-3 lg:p-3.5 flex flex-col transition-all duration-300 select-none">
       {/* Top-left Y-Axis Unit Label */}
       <div className="text-[9.5px] sm:text-[10.5px] font-bold text-white tracking-tight text-left leading-none mb-2">
         {unitLabel}
@@ -133,7 +133,62 @@ interface KarhutlaDashboardProps {
   isActive: boolean;
   cardsProgress?: number; // 0.0 to 1.0
   exitProgress?: number; // 0.0 to 1.0
+  localProgress?: number; // 0.0 to 1.0 across Scene 4
 }
+
+interface StatisticCardConfig {
+  id: 'burned' | 'casualties' | 'health';
+  unitLabel: string;
+  yMax: number;
+  yTicks: string[];
+  data: BarDatum[];
+  title: string;
+  description: string;
+}
+
+const STATISTIC_CARDS: StatisticCardConfig[] = [
+  {
+    id: 'burned',
+    unitLabel: 'Area (ha)',
+    yMax: 400000,
+    yTicks: ['400.000', '300.000', '200.000', '100.000', '0'],
+    data: [
+      { label: 'Papua', value: 313777, displayValue: '313.777' },
+      { label: 'Bali, Nusa Tenggara, and Maluku', value: 297732, displayValue: '297.732' },
+      { label: 'Kalimantan', value: 258149, displayValue: '258.149' },
+      { label: 'Sumatra, Java, and Sulawesi', value: 233474, displayValue: '233.474' },
+    ],
+    title: '1,103,132 ha scorched across Indonesia',
+    description:
+      'Papua, Bali-Nusa Tenggara, Kalimantan, and Sumatra recorded massive scorched acreage, ravaging pristine carbon-sink peatland.',
+  },
+  {
+    id: 'casualties',
+    unitLabel: 'People',
+    yMax: 400,
+    yTicks: ['400', '300', '200', '100', '0'],
+    data: [
+      { label: 'Total Casualties', value: 351, displayValue: '351' },
+      { label: 'Injuries', value: 347, displayValue: '347' },
+      { label: 'Fatalities', value: 4, displayValue: '4' },
+    ],
+    title: '351 direct casualties on the fire front',
+    description:
+      '4 fatalities and 347 injuries recorded among courageous ground firefighters, volunteer rangers, and local villagers holding perimeters.',
+  },
+  {
+    id: 'health',
+    unitLabel: 'Cases',
+    yMax: 400000,
+    yTicks: ['400.000', '300.000', '200.000', '100.000', '0'],
+    data: [
+      { label: 'Acute Respiratory Infections (ISPA)', value: 333470, displayValue: '333.470' },
+    ],
+    title: '333,470 acute respiratory infection cases',
+    description:
+      'Dangerous PM2.5 concentrations enveloped entire cities, triggering widespread respiratory distress among infants, children, and elderly citizens.',
+  },
+];
 
 const cardGlassStyle: CSSProperties = {
   backdropFilter: 'blur(22px) saturate(185%) brightness(1.04)',
@@ -141,7 +196,7 @@ const cardGlassStyle: CSSProperties = {
 };
 
 const cardGlassClassName =
-  'group relative overflow-hidden rounded-2xl bg-[linear-gradient(155deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.06)_42%,rgba(10,12,18,0.34)_100%)] hover:bg-[linear-gradient(155deg,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.09)_42%,rgba(10,12,18,0.28)_100%)] border border-white/30 hover:border-white/55 p-5 sm:p-6 flex flex-col h-full transition-[border-color,box-shadow,background] duration-300 shadow-[0_24px_50px_-12px_rgba(0,0,0,0.65),0_8px_20px_-6px_rgba(0,0,0,0.45),inset_0_1.5px_1.5px_rgba(255,255,255,0.65),inset_0_-2px_8px_rgba(0,0,0,0.35)] hover:shadow-[0_32px_65px_-12px_rgba(0,0,0,0.75),0_12px_28px_-6px_rgba(0,0,0,0.5),inset_0_2px_2px_rgba(255,255,255,0.85),inset_0_-2px_8px_rgba(0,0,0,0.30),0_0_28px_rgba(255,255,255,0.14)] cursor-pointer';
+  'group relative overflow-hidden rounded-2xl bg-[linear-gradient(155deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.06)_42%,rgba(10,12,18,0.34)_100%)] hover:bg-[linear-gradient(155deg,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.09)_42%,rgba(10,12,18,0.28)_100%)] border border-white/30 hover:border-white/55 p-4 sm:p-5 lg:p-6 flex flex-col h-full transition-[border-color,box-shadow,background] duration-300 shadow-[0_24px_50px_-12px_rgba(0,0,0,0.65),0_8px_20px_-6px_rgba(0,0,0,0.45),inset_0_1.5px_1.5px_rgba(255,255,255,0.65),inset_0_-2px_8px_rgba(0,0,0,0.35)] hover:shadow-[0_32px_65px_-12px_rgba(0,0,0,0.75),0_12px_28px_-6px_rgba(0,0,0,0.5),inset_0_2px_2px_rgba(255,255,255,0.85),inset_0_-2px_8px_rgba(0,0,0,0.30),0_0_28px_rgba(255,255,255,0.14)] cursor-pointer';
 
 function CardGlassSpecularOverlay() {
   return (
@@ -156,13 +211,27 @@ export default function KarhutlaDashboard({
   isActive,
   cardsProgress = 1,
   exitProgress = 0,
+  localProgress = 0.25,
 }: KarhutlaDashboardProps) {
   const [activeModal, setActiveModal] = useState<'burned' | 'casualties' | 'health' | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [manualMobileIndex, setManualMobileIndex] = useState<number | null>(null);
+  const lastLocalProgRef = useRef(localProgress);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Return to scroll-driven alternating cards whenever user scrolls
+  useEffect(() => {
+    if (Math.abs(localProgress - lastLocalProgRef.current) > 0.04) {
+      setManualMobileIndex(null);
+      lastLocalProgRef.current = localProgress;
+    }
+  }, [localProgress]);
+
+  const scrollMobileIndex = localProgress < 0.42 ? 0 : localProgress < 0.64 ? 1 : 2;
+  const activeMobileIndex = manualMobileIndex !== null ? manualMobileIndex : scrollMobileIndex;
 
   useEffect(() => {
     if (!activeModal) return;
@@ -210,7 +279,7 @@ export default function KarhutlaDashboard({
 
   return (
     <div
-      className="w-full max-w-6xl mx-auto px-4 sm:px-6 flex flex-col items-center justify-center"
+      className="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-12 sm:pt-14 lg:pt-0 flex flex-col items-center justify-center"
       style={{
         visibility: opacity > 0.01 ? 'visible' : 'hidden',
         pointerEvents: isActive && opacity > 0.05 && !activeModal ? 'auto' : 'none',
@@ -220,7 +289,7 @@ export default function KarhutlaDashboard({
       <div className="w-full flex flex-col items-center justify-center">
         {/* ===================== SECTION HEADER (Matches Scene 3 BURNING THE FUTURE typography) ===================== */}
         <div
-          className="text-center mb-6 sm:mb-8 md:mb-10 max-w-4xl sm:max-w-5xl mx-auto flex flex-col items-center justify-center"
+          className="text-center mb-4 sm:mb-6 lg:mb-10 max-w-4xl sm:max-w-5xl mx-auto flex flex-col items-center justify-center"
           style={{
             ...slotTransformStyle,
             ...contentBlurStyle,
@@ -239,122 +308,78 @@ export default function KarhutlaDashboard({
           </CursorParallaxText>
         </div>
 
-        {/* ===================== 3-CARD GRID (3D Liquid Glass) ===================== */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 items-stretch">
-          {/* ---------------- CARD 1: BURNED LAND AREA ---------------- */}
-          <div style={slotTransformStyle} className="h-full">
-            <CursorTiltCard
-              onClick={() => setActiveModal('burned')}
-              style={cardStyle}
-              className={cardGlassClassName}
-              maxTilt={8}
-              maxShift={6}
-              hoverScale={1.025}
-              disabled={!isActive || Boolean(activeModal)}
-            >
-              <CardGlassSpecularOverlay />
-              <div style={contentBlurStyle} className="relative z-10 flex flex-col flex-grow">
-                {/* Top Visual Box (Monochrome Bar Chart) */}
-                <MonochromeBarChart
-                  unitLabel="Area (ha)"
-                  yMax={400000}
-                  yTicks={['400.000', '300.000', '200.000', '100.000', '0']}
-                  data={[
-                    { label: 'Papua', value: 313777, displayValue: '313.777' },
-                    { label: 'Bali, Nusa Tenggara, and Maluku', value: 297732, displayValue: '297.732' },
-                    { label: 'Kalimantan', value: 258149, displayValue: '258.149' },
-                    { label: 'Sumatra, Java, and Sulawesi', value: 233474, displayValue: '233.474' },
-                  ]}
-                />
+        {/* ===================== 3-CARD GRID (Scroll-alternating stack on mobile/tablet, 3-column grid on lg+) ===================== */}
+        <div className="w-full max-w-[350px] sm:max-w-[390px] lg:max-w-none mx-auto grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6 items-stretch">
+          {STATISTIC_CARDS.map((card, idx) => {
+            const isMobileCurrent = idx === activeMobileIndex;
+            const mobilePositionClass = isMobileCurrent
+              ? 'opacity-100 translate-y-0 scale-100 z-20 pointer-events-auto'
+              : idx < activeMobileIndex
+                ? 'opacity-0 -translate-y-5 scale-95 z-10 pointer-events-none'
+                : 'opacity-0 translate-y-5 scale-95 z-10 pointer-events-none';
 
-                {/* Card Meta Content */}
-                <div className="flex flex-col flex-grow">
-                  <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] group-hover:text-white transition-colors duration-200">
-                    1,103,132 ha scorched across Indonesia
-                  </h3>
+            return (
+              <div
+                key={card.id}
+                style={slotTransformStyle}
+                className={`col-start-1 row-start-1 lg:col-auto lg:row-auto h-full transition-all duration-500 ease-out lg:opacity-100 lg:translate-y-0 lg:scale-100 lg:pointer-events-auto lg:z-auto lg:transition-none ${mobilePositionClass}`}
+              >
+                <CursorTiltCard
+                  onClick={() => setActiveModal(card.id)}
+                  style={cardStyle}
+                  className={cardGlassClassName}
+                  maxTilt={8}
+                  maxShift={6}
+                  hoverScale={1.025}
+                  disabled={!isActive || Boolean(activeModal)}
+                >
+                  <CardGlassSpecularOverlay />
+                  <div style={contentBlurStyle} className="relative z-10 flex flex-col flex-grow">
+                    {/* Top Visual Box (Monochrome Bar Chart) */}
+                    <MonochromeBarChart
+                      unitLabel={card.unitLabel}
+                      yMax={card.yMax}
+                      yTicks={card.yTicks}
+                      data={card.data}
+                    />
 
-                  <p className="text-xs sm:text-sm text-white/80 group-hover:text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] transition-colors duration-200 font-normal leading-relaxed">
-                    Papua, Bali-Nusa Tenggara, Kalimantan, and Sumatra recorded massive scorched acreage, ravaging pristine carbon-sink peatland.
-                  </p>
-                </div>
+                    {/* Card Meta Content */}
+                    <div className="flex flex-col flex-grow">
+                      <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] group-hover:text-white transition-colors duration-200">
+                        {card.title}
+                      </h3>
+
+                      <p className="text-xs sm:text-sm text-white/80 group-hover:text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] transition-colors duration-200 font-normal leading-relaxed">
+                        {card.description}
+                      </p>
+                    </div>
+                  </div>
+                </CursorTiltCard>
               </div>
-            </CursorTiltCard>
-          </div>
+            );
+          })}
+        </div>
 
-          {/* ---------------- CARD 2: DIRECT CASUALTIES ---------------- */}
-          <div style={slotTransformStyle} className="h-full">
-            <CursorTiltCard
-              onClick={() => setActiveModal('casualties')}
-              style={cardStyle}
-              className={cardGlassClassName}
-              maxTilt={8}
-              maxShift={6}
-              hoverScale={1.025}
-              disabled={!isActive || Boolean(activeModal)}
-            >
-              <CardGlassSpecularOverlay />
-              <div style={contentBlurStyle} className="relative z-10 flex flex-col flex-grow">
-                {/* Top Visual Box (Monochrome Bar Chart) */}
-                <MonochromeBarChart
-                  unitLabel="People"
-                  yMax={400}
-                  yTicks={['400', '300', '200', '100', '0']}
-                  data={[
-                    { label: 'Total Casualties', value: 351, displayValue: '351' },
-                    { label: 'Injuries', value: 347, displayValue: '347' },
-                    { label: 'Fatalities', value: 4, displayValue: '4' },
-                  ]}
+        {/* Mobile / Tablet Alternating Indicator Dots + Tap Hint */}
+        <div
+          className="mt-4 lg:hidden flex flex-col items-center gap-2"
+          style={{ opacity: cardOpacity }}
+        >
+          <div className="flex items-center gap-2">
+            {STATISTIC_CARDS.map((card, idx) => {
+              const isCurrent = idx === activeMobileIndex;
+              return (
+                <button
+                  key={card.id}
+                  type="button"
+                  onClick={() => setManualMobileIndex(idx)}
+                  aria-label={`Show statistic card ${idx + 1}`}
+                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                    isCurrent ? 'w-6 bg-white' : 'w-1.5 bg-white/35 hover:bg-white/60'
+                  }`}
                 />
-
-                {/* Card Meta Content */}
-                <div className="flex flex-col flex-grow">
-                  <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] group-hover:text-white transition-colors duration-200">
-                    351 direct casualties on the fire front
-                  </h3>
-
-                  <p className="text-xs sm:text-sm text-white/80 group-hover:text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] transition-colors duration-200 font-normal leading-relaxed">
-                    4 fatalities and 347 injuries recorded among courageous ground firefighters, volunteer rangers, and local villagers holding perimeters.
-                  </p>
-                </div>
-              </div>
-            </CursorTiltCard>
-          </div>
-
-          {/* ---------------- CARD 3: HEALTH IMPACTS FROM HAZE ---------------- */}
-          <div style={slotTransformStyle} className="h-full">
-            <CursorTiltCard
-              onClick={() => setActiveModal('health')}
-              style={cardStyle}
-              className={cardGlassClassName}
-              maxTilt={8}
-              maxShift={6}
-              hoverScale={1.025}
-              disabled={!isActive || Boolean(activeModal)}
-            >
-              <CardGlassSpecularOverlay />
-              <div style={contentBlurStyle} className="relative z-10 flex flex-col flex-grow">
-                {/* Top Visual Box (Monochrome Bar Chart) */}
-                <MonochromeBarChart
-                  unitLabel="Cases"
-                  yMax={400000}
-                  yTicks={['400.000', '300.000', '200.000', '100.000', '0']}
-                  data={[
-                    { label: 'Acute Respiratory Infections (ISPA)', value: 333470, displayValue: '333.470' },
-                  ]}
-                />
-
-                {/* Card Meta Content */}
-                <div className="flex flex-col flex-grow">
-                  <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] group-hover:text-white transition-colors duration-200">
-                    333,470 acute respiratory infection cases
-                  </h3>
-
-                  <p className="text-xs sm:text-sm text-white/80 group-hover:text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] transition-colors duration-200 font-normal leading-relaxed">
-                    Dangerous PM2.5 concentrations enveloped entire cities, triggering widespread respiratory distress among infants, children, and elderly citizens.
-                  </p>
-                </div>
-              </div>
-            </CursorTiltCard>
+              );
+            })}
           </div>
         </div>
       </div>

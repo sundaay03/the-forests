@@ -1,6 +1,6 @@
 'use client';
 
-import type { CSSProperties, ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 
 interface ScrollyHUDProps {
   activeChapter: number;
@@ -17,7 +17,7 @@ interface ChapterItem {
 }
 
 const iconClassName =
-  'w-4 h-4 min-[430px]:w-[18px] min-[430px]:h-[18px] sm:w-5 sm:h-5 transition-all duration-200 drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)]';
+  'w-3.5 h-3.5 min-[400px]:w-4 min-[400px]:h-4 min-[430px]:w-[18px] min-[430px]:h-[18px] sm:w-5 sm:h-5 transition-all duration-200 drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)]';
 
 const glassBackdropStyle: CSSProperties = {
   backdropFilter: 'blur(18px) saturate(180%) brightness(1.06)',
@@ -208,63 +208,171 @@ export default function ScrollyHUD({
   activeChapter,
   onJumpToChapter,
 }: ScrollyHUDProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMobileMenuOpen]);
+
+  const currentChap = CHAPTERS[activeChapter] ?? CHAPTERS[0];
+
   return (
-    <header className="fixed top-6 left-1/2 -translate-x-1/2 z-40 max-w-[calc(100vw-16px)] select-none pointer-events-auto">
-      <nav
-        aria-label="Chapter Navigation"
-        style={glassBackdropStyle}
-        className="relative flex flex-row items-center justify-center rounded-full px-2 py-1.5 min-[430px]:px-2.5 min-[430px]:py-2 sm:px-[12px] sm:py-[8px] gap-1.5 min-[430px]:gap-2 sm:gap-[12px] bg-white/[0.12] border border-white/30 shadow-[0_20px_44px_rgba(0,0,0,0.45),0_4px_14px_rgba(0,0,0,0.28),inset_0_1.5px_1.5px_rgba(255,255,255,0.65),inset_0_-2px_6px_rgba(0,0,0,0.22)]"
-      >
-        {/* Specular 3D Glass Curved Reflection Overlay */}
+    <>
+      {/* ===================== MOBILE: SINGLE GLASS BUBBLE + EXPANDABLE MENU (< sm) ===================== */}
+      {isMobileMenuOpen && (
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(180deg,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0.06)_38%,rgba(255,255,255,0)_65%,rgba(255,255,255,0.10)_100%)]"
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="fixed inset-0 z-30 bg-black/25 backdrop-blur-[2px] sm:hidden"
         />
+      )}
 
-        {CHAPTERS.map((chap, idx) => {
-          const isActive = activeChapter === idx;
-          const isFirst = idx === 0;
-          const isLast = idx === CHAPTERS.length - 1;
-
-          const tooltipHorizontalAlign = isFirst
-            ? 'left-0 sm:left-1/2 sm:-translate-x-1/2'
-            : isLast
-              ? 'right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2'
-              : 'left-1/2 -translate-x-1/2';
-
-          return (
-            <button
-              key={chap.id}
-              type="button"
-              onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                onJumpToChapter(idx, {
-                  x: rect.left + rect.width * 0.5,
-                  y: rect.top + rect.height * 0.5,
-                });
-              }}
-              aria-label={`${chap.tag} ${chap.label}`}
-              aria-current={isActive ? 'step' : undefined}
-              className={`group relative z-10 flex items-center justify-center shrink-0 w-9 h-9 min-[430px]:w-10 min-[430px]:h-10 sm:w-[44px] sm:h-[44px] rounded-full cursor-pointer transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 ${
-                isActive
-                  ? 'text-white border border-white/65 bg-[radial-gradient(circle_at_35%_25%,rgba(255,255,255,0.52)_0%,rgba(255,255,255,0.20)_55%,rgba(255,255,255,0.12)_100%)] shadow-[inset_0_2px_2px_rgba(255,255,255,0.85),inset_0_-2px_5px_rgba(0,0,0,0.25),0_6px_18px_rgba(0,0,0,0.32),0_0_18px_rgba(255,255,255,0.26)] scale-[1.07]'
-                  : 'text-white/85 border border-white/25 bg-[radial-gradient(circle_at_35%_25%,rgba(255,255,255,0.30)_0%,rgba(255,255,255,0.08)_55%,rgba(255,255,255,0.03)_100%)] shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.52),inset_0_-2px_4px_rgba(0,0,0,0.20),0_4px_10px_rgba(0,0,0,0.20)] hover:text-white hover:border-white/50 hover:bg-[radial-gradient(circle_at_35%_25%,rgba(255,255,255,0.44)_0%,rgba(255,255,255,0.15)_55%,rgba(255,255,255,0.08)_100%)] hover:shadow-[inset_0_2px_2px_rgba(255,255,255,0.72),inset_0_-2px_4px_rgba(0,0,0,0.22),0_6px_14px_rgba(0,0,0,0.28),0_0_14px_rgba(255,255,255,0.18)] hover:-translate-y-0.5 hover:scale-105'
-              }`}
-            >
-              {chap.icon}
-
-              {/* Floating 3D Glass Tooltip Below Icon */}
-              <span
-                role="tooltip"
-                style={tooltipGlassStyle}
-                className={`absolute top-full mt-2.5 ${tooltipHorizontalAlign} px-2.5 py-1 rounded-full bg-white/[0.14] border border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.55),0_8px_20px_rgba(0,0,0,0.45)] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] text-[10px] font-medium tracking-wider uppercase whitespace-nowrap pointer-events-none opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 group-focus-visible:opacity-100 group-focus-visible:translate-y-0 transition-all duration-200`}
+      <div className="fixed top-4 left-4 z-40 sm:hidden select-none pointer-events-auto">
+        <button
+          type="button"
+          onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+          style={glassBackdropStyle}
+          aria-label={isMobileMenuOpen ? 'Close navigation menu' : `Open navigation menu (${currentChap.label})`}
+          aria-expanded={isMobileMenuOpen}
+          className={`relative flex items-center justify-center w-11 h-11 rounded-full cursor-pointer transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 ${
+            isMobileMenuOpen
+              ? 'text-white bg-white/[0.22] border border-white/60 shadow-[0_18px_40px_rgba(0,0,0,0.55),inset_0_1.5px_1.5px_rgba(255,255,255,0.8),0_0_18px_rgba(255,255,255,0.22)] scale-105'
+              : 'text-white bg-white/[0.14] border border-white/35 shadow-[0_16px_36px_rgba(0,0,0,0.45),inset_0_1.5px_1.5px_rgba(255,255,255,0.65),inset_0_-2px_6px_rgba(0,0,0,0.22)] active:scale-95'
+          }`}
+        >
+          {/* Specular 3D Glass Curved Reflection Overlay */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(180deg,rgba(255,255,255,0.32)_0%,rgba(255,255,255,0.06)_42%,rgba(255,255,255,0.12)_100%)]"
+          />
+          <span className="relative z-10 flex items-center justify-center">
+            {isMobileMenuOpen ? (
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-5 h-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)]"
+                aria-hidden="true"
               >
-                {chap.label}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
-    </header>
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            ) : (
+              currentChap.icon
+            )}
+          </span>
+        </button>
+
+        {/* Expandable Glass Options List */}
+        {isMobileMenuOpen && (
+          <nav
+            aria-label="Mobile Chapter Navigation"
+            style={glassBackdropStyle}
+            className="mt-2.5 w-[230px] max-w-[calc(100vw-2rem)] rounded-3xl p-2 bg-black/50 border border-white/30 shadow-[0_24px_55px_rgba(0,0,0,0.65),inset_0_1.5px_1.5px_rgba(255,255,255,0.45),inset_0_-2px_8px_rgba(0,0,0,0.3)] flex flex-col gap-1 animate-fadeIn"
+          >
+            {CHAPTERS.map((chap, idx) => {
+              const isActive = activeChapter === idx;
+              return (
+                <button
+                  key={chap.id}
+                  type="button"
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setIsMobileMenuOpen(false);
+                    onJumpToChapter(idx, {
+                      x: rect.left + rect.width * 0.5,
+                      y: rect.top + rect.height * 0.5,
+                    });
+                  }}
+                  aria-current={isActive ? 'step' : undefined}
+                  className={`flex items-center gap-3 w-full px-3 py-2 rounded-2xl text-left transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? 'bg-white/[0.20] border border-white/50 text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.55)]'
+                      : 'bg-transparent border border-transparent text-white/80 hover:bg-white/[0.10] hover:text-white'
+                  }`}
+                >
+                  <span className="flex items-center justify-center shrink-0 w-7 h-7 rounded-full bg-white/[0.12] border border-white/25">
+                    {chap.icon}
+                  </span>
+                  <span className="flex-1 text-xs font-semibold uppercase tracking-wider truncate">
+                    {chap.label}
+                  </span>
+                  <span className="text-[10px] font-mono text-white/45 tabular-nums">
+                    {chap.tag}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        )}
+      </div>
+
+      {/* ===================== DESKTOP / TABLET: FULL PILL NAVBAR (sm+) ===================== */}
+      <header className="hidden sm:block fixed top-6 left-1/2 -translate-x-1/2 z-40 max-w-[calc(100vw-16px)] select-none pointer-events-auto">
+        <nav
+          aria-label="Chapter Navigation"
+          style={glassBackdropStyle}
+          className="relative flex flex-row items-center justify-center rounded-full px-[12px] py-[8px] gap-[12px] bg-white/[0.12] border border-white/30 shadow-[0_20px_44px_rgba(0,0,0,0.45),0_4px_14px_rgba(0,0,0,0.28),inset_0_1.5px_1.5px_rgba(255,255,255,0.65),inset_0_-2px_6px_rgba(0,0,0,0.22)]"
+        >
+          {/* Specular 3D Glass Curved Reflection Overlay */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(180deg,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0.06)_38%,rgba(255,255,255,0)_65%,rgba(255,255,255,0.10)_100%)]"
+          />
+
+          {CHAPTERS.map((chap, idx) => {
+            const isActive = activeChapter === idx;
+            const isFirst = idx === 0;
+            const isLast = idx === CHAPTERS.length - 1;
+
+            const tooltipHorizontalAlign = isFirst
+              ? 'left-0 sm:left-1/2 sm:-translate-x-1/2'
+              : isLast
+                ? 'right-0 sm:right-auto sm:left-1/2 sm:-translate-x-1/2'
+                : 'left-1/2 -translate-x-1/2';
+
+            return (
+              <button
+                key={chap.id}
+                type="button"
+                onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  onJumpToChapter(idx, {
+                    x: rect.left + rect.width * 0.5,
+                    y: rect.top + rect.height * 0.5,
+                  });
+                }}
+                aria-label={`${chap.tag} ${chap.label}`}
+                aria-current={isActive ? 'step' : undefined}
+                className={`group relative z-10 flex items-center justify-center shrink-0 w-[44px] h-[44px] rounded-full cursor-pointer transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 ${
+                  isActive
+                    ? 'text-white border border-white/65 bg-[radial-gradient(circle_at_35%_25%,rgba(255,255,255,0.52)_0%,rgba(255,255,255,0.20)_55%,rgba(255,255,255,0.12)_100%)] shadow-[inset_0_2px_2px_rgba(255,255,255,0.85),inset_0_-2px_5px_rgba(0,0,0,0.25),0_6px_18px_rgba(0,0,0,0.32),0_0_18px_rgba(255,255,255,0.26)] scale-[1.07]'
+                    : 'text-white/85 border border-white/25 bg-[radial-gradient(circle_at_35%_25%,rgba(255,255,255,0.30)_0%,rgba(255,255,255,0.08)_55%,rgba(255,255,255,0.03)_100%)] shadow-[inset_0_1.5px_1.5px_rgba(255,255,255,0.52),inset_0_-2px_4px_rgba(0,0,0,0.20),0_4px_10px_rgba(0,0,0,0.20)] hover:text-white hover:border-white/50 hover:bg-[radial-gradient(circle_at_35%_25%,rgba(255,255,255,0.44)_0%,rgba(255,255,255,0.15)_55%,rgba(255,255,255,0.08)_100%)] hover:shadow-[inset_0_2px_2px_rgba(255,255,255,0.72),inset_0_-2px_4px_rgba(0,0,0,0.22),0_6px_14px_rgba(0,0,0,0.28),0_0_14px_rgba(255,255,255,0.18)] hover:-translate-y-0.5 hover:scale-105'
+                }`}
+              >
+                {chap.icon}
+
+                {/* Floating 3D Glass Tooltip Below Icon */}
+                <span
+                  role="tooltip"
+                  style={tooltipGlassStyle}
+                  className={`absolute top-full mt-2.5 ${tooltipHorizontalAlign} px-2.5 py-1 rounded-full bg-white/[0.14] border border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.55),0_8px_20px_rgba(0,0,0,0.45)] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] text-[10px] font-medium tracking-wider uppercase whitespace-nowrap pointer-events-none opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 group-focus-visible:opacity-100 group-focus-visible:translate-y-0 transition-all duration-200`}
+                >
+                  {chap.label}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+      </header>
+    </>
   );
 }

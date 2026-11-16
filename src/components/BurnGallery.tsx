@@ -234,7 +234,7 @@ export default function BurnGallery({
 
   return (
     <div
-      className="absolute inset-0 z-30 pointer-events-auto w-full h-full flex flex-col justify-between p-4 sm:p-8 md:p-12 overflow-hidden select-none transition-opacity duration-300"
+      className="absolute inset-0 z-30 pointer-events-auto w-full h-full flex flex-col justify-center gap-5 pt-12 sm:gap-0 sm:justify-between p-4 sm:p-8 md:p-12 overflow-hidden select-none transition-opacity duration-300"
       style={{
         opacity: overallOpacity,
       }}
@@ -253,7 +253,7 @@ export default function BurnGallery({
 
       {/* ===================== TOP HEADER ===================== */}
       <div
-        className="relative z-20 w-full max-w-5xl mx-auto pt-16 sm:pt-24 md:pt-28 lg:pt-32 text-center flex flex-col items-center justify-center will-change-transform"
+        className="relative z-20 w-full max-w-5xl mx-auto pt-0 sm:pt-24 md:pt-28 lg:pt-32 text-center flex flex-col items-center justify-center will-change-transform"
         style={{
           opacity: titleOpacity,
           transform: `translateY(${titleTranslateY}px) scale(${titleScale})`,
@@ -263,7 +263,7 @@ export default function BurnGallery({
       >
         {/* Editorial Title - Same typography & heat-shimmer as FOREST AND LAND FIRES */}
         <CursorParallaxText shiftX={24} shiftY={15} tilt={6} disabled={activeChapter !== 2}>
-          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
+          <h2 className="text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
             BURNING THE FUTURE
           </h2>
         </CursorParallaxText>
@@ -271,14 +271,14 @@ export default function BurnGallery({
 
       {/* ===================== CENTER 3D COVERFLOW STAGE ===================== */}
       <div
-        className="relative z-10 w-full flex-1 flex items-center justify-center my-auto overflow-visible [perspective:1200px] will-change-transform"
+        className="relative z-10 w-full sm:flex-1 flex items-center justify-center sm:my-auto overflow-visible [perspective:1200px] will-change-transform"
         style={{
           transform: `translateX(${cardsTotalShiftVw}vw)`,
           opacity: cardsOpacity,
           transition: 'transform 0.1s ease-out, opacity 0.15s ease-out',
         }}
       >
-        <div className="relative w-full max-w-5xl h-[340px] sm:h-[420px] md:h-[480px] flex items-center justify-center pointer-events-none">
+        <div className="relative w-full max-w-5xl h-[250px] sm:h-[380px] md:h-[460px] flex items-center justify-center pointer-events-none">
           {items.map((item, index) => {
             // Distance from currently focused card using smooth momentum index
             const effectiveActive = smoothIndex + dragOffset / 320;
@@ -289,7 +289,10 @@ export default function BurnGallery({
             if (absOffset > 4.2) return null;
 
             // 3D Cover Flow layout calculations
-            const spacingX = typeof window !== 'undefined' && window.innerWidth < 640 ? 210 : 310;
+            const spacingX =
+              typeof window !== 'undefined' && window.innerWidth < 640
+                ? Math.round(window.innerWidth * 0.56)
+                : 310;
             const translateX = offset * spacingX;
             const rotateY = Math.max(-42, Math.min(42, -offset * 26));
             const translateZ = -absOffset * 95;
@@ -315,7 +318,7 @@ export default function BurnGallery({
                   opacity,
                   zIndex,
                 }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[380px] md:w-[460px] lg:w-[500px] aspect-[16/11] pointer-events-auto cursor-pointer group will-change-transform"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] max-w-[320px] sm:max-w-none sm:w-[380px] md:w-[460px] lg:w-[500px] aspect-[16/11] pointer-events-auto cursor-pointer group will-change-transform"
               >
                 <CursorTiltCard
                   maxTilt={14}
