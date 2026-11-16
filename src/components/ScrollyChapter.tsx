@@ -184,7 +184,7 @@ export default function ScrollyChapter({
                 activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}
             >
-              Before civilization, silence reigned.
+              The Message For Everyone.
             </p>
           </div>
         </div>
@@ -306,7 +306,11 @@ export default function ScrollyChapter({
       {/* ===================== SCENE 6: THE HUMAN TOLL ===================== */}
       <div
         className={`absolute inset-0 flex items-center justify-start px-8 sm:px-14 md:px-20 lg:px-24 transition-all duration-200 ${
-          activeChapter === 5 && s6Opacity > 0.1 ? 'pointer-events-auto z-30' : 'pointer-events-none z-0'
+          activeChapter === 5 && s6Opacity > 0.1
+            ? 'visible pointer-events-auto z-30'
+            : activeChapter === 5 && s6Opacity > 0.01
+              ? 'visible pointer-events-none z-0'
+              : 'invisible pointer-events-none z-0'
         }`}
         style={{
           opacity: s6Opacity,
@@ -327,7 +331,7 @@ export default function ScrollyChapter({
           </h1>
 
           {/* Subtitles: 3 at a time, scroll/group driven, with hover reveal for descriptions */}
-          <HealthImpacts s6Prog={s6Prog} />
+          <HealthImpacts s6Prog={s6Prog} isInteractive={activeChapter === 5 && s6Opacity > 0.1} />
         </div>
       </div>
 
@@ -371,7 +375,11 @@ export default function ScrollyChapter({
       {/* ===================== SCENE 8: THE CONTACT ===================== */}
       <div
         className={`absolute inset-0 flex flex-col items-center justify-center px-6 ${
-          activeChapter === 7 && s8Opacity > 0.2 ? 'pointer-events-auto' : 'pointer-events-none'
+          activeChapter === 7 && s8Opacity > 0.2
+            ? 'visible pointer-events-auto'
+            : activeChapter === 7 && s8Opacity > 0.01
+              ? 'visible pointer-events-none'
+              : 'invisible pointer-events-none'
         }`}
         style={{
           opacity: s8Opacity,

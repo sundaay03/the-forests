@@ -159,7 +159,7 @@ export default function IndonesiaGallery({
 
         {/* Narrative Paragraph */}
         <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-neutral-300/90 font-normal leading-relaxed max-w-md drop-shadow-[0_1px_4px_rgba(0,0,0,0.25)]">
-          Across 17,000 equatorial islands lies the world&apos;s most biodiverse tropical sanctuary — ancient rainforests harboring rare endemic wildlife, primordial rivers, and the living green lungs of Earth.
+          Indonesia&apos;s forest area covers 124,975,956 hectares, home to around 31,750 flora species and approximately 744,279 terrestrial and aquatic fauna species.
         </p>
       </div>
 
