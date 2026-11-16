@@ -8,6 +8,7 @@ import ScrollyVideoBackground from './ScrollyVideoBackground';
 import ScrollyChapter from './ScrollyChapter';
 import ScrollyHUD from './ScrollyHUD';
 import ScrollyBacksound from './ScrollyBacksound';
+import LoadingScreen from './LoadingScreen';
 import NavbarLiquidTransition, {
   type LiquidTransitionRequest,
 } from './NavbarLiquidTransition';
@@ -44,9 +45,104 @@ export default function ScrollyExperience() {
   const [liquidTransition, setLiquidTransition] =
     useState<LiquidTransitionRequest | null>(null);
 
+  // Initial Loading Screen states
+  const [loadProgress, setLoadProgress] = useState(12);
+  const [isLoaderExiting, setIsLoaderExiting] = useState(false);
+  const [isLoaderDone, setIsLoaderDone] = useState(false);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Coordinate real asset readiness (fonts + opening scene videos) before dismissing LoadingScreen
+  useEffect(() => {
+    if (!isMounted) return;
+
+    let cancelled = false;
+    let rafId = 0;
+    let exitTimer: number | null = null;
+    let doneTimer: number | null = null;
+
+    const mountStart = performance.now();
+    const MIN_DISPLAY_MS = 3200; // Minimum ~3.2s cinematic loading window
+    const MAX_WAIT_MS = 5000; // Hard cap at 5.0s total wait
+
+    let fontsDone = false;
+    let currentDisplayProg = 12;
+    let finished = false;
+
+    if (typeof document !== 'undefined' && document.fonts?.ready) {
+      document.fonts.ready
+        .then(() => {
+          fontsDone = true;
+        })
+        .catch(() => {
+          fontsDone = true;
+        });
+    } else {
+      fontsDone = true;
+    }
+
+    const triggerCompletion = () => {
+      if (cancelled || finished) return;
+      finished = true;
+      setLoadProgress(100);
+
+      exitTimer = window.setTimeout(() => {
+        if (cancelled) return;
+        setIsLoaderExiting(true);
+        doneTimer = window.setTimeout(() => {
+          if (cancelled) return;
+          setIsLoaderDone(true);
+        }, 700);
+      }, 220);
+    };
+
+    const tickProgress = (now: number) => {
+      if (cancelled || finished) return;
+
+      const elapsed = now - mountStart;
+      const videos = Array.from(document.querySelectorAll('video'));
+      const primaryVideo = videos[0];
+      const primaryReady = !primaryVideo || primaryVideo.readyState >= 2;
+
+      let readyCount = 0;
+      const checkCount = Math.min(4, videos.length);
+      for (let i = 0; i < checkCount; i++) {
+        if (videos[i].readyState >= (i === 0 ? 2 : 1)) {
+          readyCount += 1;
+        }
+      }
+
+      const videoRatio = checkCount > 0 ? readyCount / checkCount : 1;
+      const fontRatio = fontsDone ? 1 : 0;
+      const timeRatio = Math.min(1, elapsed / MIN_DISPLAY_MS);
+
+      const targetProg = Math.min(
+        98,
+        12 + timeRatio * 55 + fontRatio * 13 + videoRatio * 18
+      );
+      currentDisplayProg += (targetProg - currentDisplayProg) * 0.08;
+      setLoadProgress(currentDisplayProg);
+
+      const assetsReady = fontsDone && primaryReady && videoRatio >= 0.5;
+      if ((assetsReady && elapsed >= MIN_DISPLAY_MS) || elapsed >= MAX_WAIT_MS) {
+        triggerCompletion();
+        return;
+      }
+
+      rafId = requestAnimationFrame(tickProgress);
+    };
+
+    rafId = requestAnimationFrame(tickProgress);
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+      if (exitTimer !== null) window.clearTimeout(exitTimer);
+      if (doneTimer !== null) window.clearTimeout(doneTimer);
+    };
+  }, [isMounted]);
 
   useEffect(() => {
     if (!isMounted) return;
@@ -118,6 +214,22 @@ export default function ScrollyExperience() {
     };
   }, [isMounted]);
 
+  // Prevent scroll position drift until initial loading screen finishes
+  useEffect(() => {
+    if (!isMounted) return;
+    const lenis = lenisRef.current;
+    if (!isLoaderDone) {
+      lenis?.stop();
+      document.body.style.overflow = 'hidden';
+    } else {
+      lenis?.start();
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMounted, isLoaderDone]);
+
   // Executed behind 100% liquid coverage during Scene 3 of NavbarLiquidTransition
   const handleSwapChapter = useCallback((chapterIndex: number) => {
     if (!containerRef.current || !lenisRef.current) return;
@@ -167,7 +279,9 @@ export default function ScrollyExperience() {
   if (!isMounted) {
     return (
       <div className="relative w-full h-[2300vh] bg-black">
-        <div className="sticky top-0 left-0 w-full h-screen overflow-hidden bg-black" />
+        <div className="sticky top-0 left-0 w-full h-screen overflow-hidden bg-black">
+          <LoadingScreen progress={12} isExiting={false} />
+        </div>
       </div>
     );
   }
@@ -186,6 +300,7 @@ export default function ScrollyExperience() {
         <ScrollyChapter
           activeChapter={activeChapter}
           scrollProgress={scrollProgress}
+          isReady={isLoaderExiting || isLoaderDone}
         />
 
         {/* Liquid Morphing Transition Overlay (Navbar Navigation) */}
@@ -204,6 +319,11 @@ export default function ScrollyExperience() {
 
         {/* Top-Right Backsound Controller & Toggle */}
         <ScrollyBacksound activeChapter={activeChapter} />
+
+        {/* Initial Preloader Covering Component & Video Hydration */}
+        {!isLoaderDone && (
+          <LoadingScreen progress={loadProgress} isExiting={isLoaderExiting} />
+        )}
       </div>
     </div>
   );

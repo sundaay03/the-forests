@@ -11,11 +11,13 @@ import CursorParallaxText from './CursorParallaxText';
 interface ScrollyChapterProps {
   activeChapter: number;
   scrollProgress?: number;
+  isReady?: boolean;
 }
 
 export default function ScrollyChapter({
   activeChapter,
   scrollProgress = 0,
+  isReady = true,
 }: ScrollyChapterProps) {
   // Scene 1 Video Playback Time (mapped from scrollProgress 0.0 to 0.09 across 9.93s duration)
   const s1Time = Math.min(9.93, Math.max(0, (scrollProgress / 0.09) * 9.93));
@@ -168,7 +170,7 @@ export default function ScrollyChapter({
                       transitionDelay: `${120 + i * 45}ms`,
                     }}
                     className={`inline-block transform transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                      activeChapter === 0
+                      isReady && activeChapter === 0
                         ? 'translate-y-0 opacity-100'
                         : 'translate-y-full opacity-0'
                     }`}
@@ -183,12 +185,27 @@ export default function ScrollyChapter({
             <CursorParallaxText shiftX={16} shiftY={10} tilt={4} disabled={activeChapter !== 0}>
               <p
                 className={`relative mt-6 sm:mt-8 text-xs sm:text-sm md:text-base font-semibold text-white/95 tracking-[0.25em] uppercase max-w-xl transition-all duration-700 delay-500 subtitle-cinematic-shadow ${
-                  activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                  isReady && activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
               >
                 The Message For Everyone.
               </p>
             </CursorParallaxText>
+          </div>
+
+          {/* Bottom Scroll Indicator Icon (Scene 1 Opening) */}
+          <div
+            aria-hidden="true"
+            className={`absolute bottom-12 sm:bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 transition-all duration-700 delay-700 ${
+              isReady && activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+            }`}
+          >
+            <div className="w-[22px] h-[36px] sm:w-[24px] sm:h-[40px] rounded-full border border-white/55 bg-white/[0.06] backdrop-blur-sm shadow-[0_8px_24px_rgba(0,0,0,0.45)] flex justify-center pt-1.5 sm:pt-2">
+              <span className="w-1 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.85)] animate-scroll-wheel" />
+            </div>
+            <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.28em] text-white/70 subtitle-cinematic-shadow">
+              Scroll
+            </span>
           </div>
         </div>
 

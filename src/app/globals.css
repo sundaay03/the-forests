@@ -5,10 +5,29 @@
   --foreground: #ffffff;
 }
 
+html,
+body {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  overflow-x: clip;
+}
+
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+*::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 body {
   background: #000000;
   color: #ffffff;
-  overflow-x: hidden;
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -122,4 +141,26 @@ html.lenis, html.lenis body {
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
   transform-origin: center;
+}
+
+@keyframes scrollWheel {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  25% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.9;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.animate-scroll-wheel {
+  animation: scrollWheel 1.65s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
 }
