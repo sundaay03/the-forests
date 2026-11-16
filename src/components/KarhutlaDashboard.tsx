@@ -3,6 +3,7 @@
 import { useState, useEffect, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import CursorTiltCard from './CursorTiltCard';
+import CursorParallaxText from './CursorParallaxText';
 
 interface RegionalFireEntry {
   rank: number;
@@ -226,9 +227,16 @@ export default function KarhutlaDashboard({
             opacity: cardOpacity,
           }}
         >
-          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
-            STATISTICS
-          </h2>
+          <CursorParallaxText
+            shiftX={24}
+            shiftY={15}
+            tilt={6}
+            disabled={!isActive || Boolean(activeModal)}
+          >
+            <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
+              STATISTICS
+            </h2>
+          </CursorParallaxText>
         </div>
 
         {/* ===================== 3-CARD GRID (3D Liquid Glass) ===================== */}

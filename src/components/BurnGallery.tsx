@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import CursorTiltCard from './CursorTiltCard';
+import CursorParallaxText from './CursorParallaxText';
 
 export interface BurnGalleryItem {
   id: number;
@@ -261,9 +262,11 @@ export default function BurnGallery({
         }}
       >
         {/* Editorial Title - Same typography & heat-shimmer as FOREST AND LAND FIRES */}
-        <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
-          BURNING THE FUTURE
-        </h2>
+        <CursorParallaxText shiftX={24} shiftY={15} tilt={6} disabled={activeChapter !== 2}>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
+            BURNING THE FUTURE
+          </h2>
+        </CursorParallaxText>
       </div>
 
       {/* ===================== CENTER 3D COVERFLOW STAGE ===================== */}

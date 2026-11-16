@@ -6,6 +6,7 @@ import BurnGallery from './BurnGallery';
 import HealthImpacts from './HealthImpacts';
 import PortalTransition from './PortalTransition';
 import KarhutlaDashboard from './KarhutlaDashboard';
+import CursorParallaxText from './CursorParallaxText';
 
 interface ScrollyChapterProps {
   activeChapter: number;
@@ -160,32 +161,36 @@ export default function ScrollyChapter({
         >
           <div className="relative flex flex-col items-center justify-center">
             {/* Headline with Vertical Mask Slide-up & Letter Stagger */}
-            <h1 className="relative text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.88] text-white flex flex-wrap justify-center py-3 sm:py-5 text-cinematic-shadow">
-              {'THE FOREST'.split('').map((char, i) => (
-                <span
-                  key={i}
-                  style={{
-                    transitionDelay: `${120 + i * 45}ms`,
-                  }}
-                  className={`inline-block transform transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    activeChapter === 0
-                      ? 'translate-y-0 opacity-100'
-                      : 'translate-y-full opacity-0'
-                  }`}
-                >
-                  {char === ' ' ? '\u00A0' : char}
-                </span>
-              ))}
-            </h1>
+            <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 0}>
+              <h1 className="relative text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.88] text-white flex flex-wrap justify-center py-3 sm:py-5 text-cinematic-shadow">
+                {'THE FOREST'.split('').map((char, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      transitionDelay: `${120 + i * 45}ms`,
+                    }}
+                    className={`inline-block transform transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                      activeChapter === 0
+                        ? 'translate-y-0 opacity-100'
+                        : 'translate-y-full opacity-0'
+                    }`}
+                  >
+                    {char === ' ' ? '\u00A0' : char}
+                  </span>
+                ))}
+              </h1>
+            </CursorParallaxText>
 
             {/* Subtitle */}
-            <p
-              className={`relative mt-6 sm:mt-8 text-xs sm:text-sm md:text-base font-semibold text-white/95 tracking-[0.25em] uppercase max-w-xl transition-all duration-700 delay-500 subtitle-cinematic-shadow ${
-                activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-              }`}
-            >
-              The Message For Everyone.
-            </p>
+            <CursorParallaxText shiftX={16} shiftY={10} tilt={4} disabled={activeChapter !== 0}>
+              <p
+                className={`relative mt-6 sm:mt-8 text-xs sm:text-sm md:text-base font-semibold text-white/95 tracking-[0.25em] uppercase max-w-xl transition-all duration-700 delay-500 subtitle-cinematic-shadow ${
+                  activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                }`}
+              >
+                The Message For Everyone.
+              </p>
+            </CursorParallaxText>
           </div>
         </div>
 
@@ -200,14 +205,18 @@ export default function ScrollyChapter({
         >
           <div className="relative flex flex-col items-center justify-center w-full">
             {/* Headline */}
-            <h2 className="relative text-5xl sm:text-7xl md:text-8xl font-black uppercase tracking-tight text-white text-cinematic-shadow">
-              ABOUT
-            </h2>
+            <CursorParallaxText shiftX={26} shiftY={16} tilt={6} disabled={activeChapter !== 0}>
+              <h2 className="relative text-5xl sm:text-7xl md:text-8xl font-black uppercase tracking-tight text-white text-cinematic-shadow">
+                ABOUT
+              </h2>
+            </CursorParallaxText>
 
             {/* Narrative Overview */}
-            <p className="relative mt-5 sm:mt-6 text-sm sm:text-base md:text-lg font-normal text-white/95 tracking-wide max-w-2xl leading-relaxed subtitle-cinematic-shadow">
-              An interactive cinematic journey into ancient woodlands — witnessing their primordial majesty, the sudden terror of wildfire, and nature&apos;s quiet resilience toward rebirth.
-            </p>
+            <CursorParallaxText shiftX={14} shiftY={9} tilt={3.5} disabled={activeChapter !== 0}>
+              <p className="relative mt-5 sm:mt-6 text-sm sm:text-base md:text-lg font-normal text-white/95 tracking-wide max-w-2xl leading-relaxed subtitle-cinematic-shadow">
+                An interactive cinematic journey into ancient woodlands — witnessing their primordial majesty, the sudden terror of wildfire, and nature&apos;s quiet resilience toward rebirth.
+              </p>
+            </CursorParallaxText>
           </div>
         </div>
       </div>
@@ -232,9 +241,11 @@ export default function ScrollyChapter({
         }}
       >
         {/* Fast kinetic reveal with heat-shimmer & orange-amber text glow */}
-        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)]">
-          FOREST AND LAND FIRES
-        </h1>
+        <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 2}>
+          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)]">
+            FOREST AND LAND FIRES
+          </h1>
+        </CursorParallaxText>
       </div>
 
       {/* ===================== SCENE 3: BURN GALLERY (3D COVER FLOW PHOTO STREAM) ===================== */}
@@ -274,33 +285,37 @@ export default function ScrollyChapter({
         }}
       >
         {/* Letter-by-letter opacity fade mimicking settling ash */}
-        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-neutral-200 flex flex-wrap justify-center py-2">
-          {'WHAT REMAINS'.split('').map((char, i) => (
-            <span
-              key={i}
-              style={{
-                transitionDelay: `${100 + i * 40}ms`,
-              }}
-              className={`inline-block transform transition-all duration-700 ease-out ${
-                activeChapter === 4 && s5ExitProg < 0.1
-                  ? 'opacity-100 filter-none translate-y-0'
-                  : 'opacity-0 blur-sm -translate-y-2'
-              }`}
-            >
-              {char === ' ' ? '\u00A0' : char}
-            </span>
-          ))}
-        </h1>
+        <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 4}>
+          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-neutral-200 flex flex-wrap justify-center py-2">
+            {'WHAT REMAINS'.split('').map((char, i) => (
+              <span
+                key={i}
+                style={{
+                  transitionDelay: `${100 + i * 40}ms`,
+                }}
+                className={`inline-block transform transition-all duration-700 ease-out ${
+                  activeChapter === 4 && s5ExitProg < 0.1
+                    ? 'opacity-100 filter-none translate-y-0'
+                    : 'opacity-0 blur-sm -translate-y-2'
+                }`}
+              >
+                {char === ' ' ? '\u00A0' : char}
+              </span>
+            ))}
+          </h1>
+        </CursorParallaxText>
 
         {/* Subtitle */}
-        <p
-          className="mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-400 tracking-widest max-w-xl italic transition-all duration-300"
-          style={{
-            opacity: s5ExitProg > 0.05 ? 0 : 0.85,
-          }}
-        >
-          Where ancient canopies stood, silence and ash.
-        </p>
+        <CursorParallaxText shiftX={16} shiftY={10} tilt={4} disabled={activeChapter !== 4}>
+          <p
+            className="mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-400 tracking-widest max-w-xl italic transition-all duration-300"
+            style={{
+              opacity: s5ExitProg > 0.05 ? 0 : 0.85,
+            }}
+          >
+            Where ancient canopies stood, silence and ash.
+          </p>
+        </CursorParallaxText>
       </div>
 
       {/* ===================== SCENE 6: THE HUMAN TOLL ===================== */}
@@ -325,13 +340,27 @@ export default function ScrollyChapter({
           }`}
         >
           {/* Headline with cinematic tracking and smoke blur-to-sharp */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-[0.92] py-1 drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
-            <span className="block">HEALTH</span>
-            <span className="block">IMPACTS</span>
-          </h1>
+          <CursorParallaxText
+            shiftX={24}
+            shiftY={16}
+            tilt={6}
+            disabled={!(activeChapter === 5 && s6Opacity > 0.1)}
+          >
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-[0.92] py-1 drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+              <span className="block">HEALTH</span>
+              <span className="block">IMPACTS</span>
+            </h1>
+          </CursorParallaxText>
 
           {/* Subtitles: 3 at a time, scroll/group driven, with hover reveal for descriptions */}
-          <HealthImpacts s6Prog={s6Prog} isInteractive={activeChapter === 5 && s6Opacity > 0.1} />
+          <CursorParallaxText
+            shiftX={14}
+            shiftY={9}
+            tilt={3.5}
+            disabled={!(activeChapter === 5 && s6Opacity > 0.1)}
+          >
+            <HealthImpacts s6Prog={s6Prog} isInteractive={activeChapter === 5 && s6Opacity > 0.1} />
+          </CursorParallaxText>
         </div>
       </div>
 
@@ -349,24 +378,28 @@ export default function ScrollyChapter({
         }}
       >
         {/* Headline */}
-        <h1
-          className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[0.05em] text-white py-2 transition-all duration-1000 ease-out text-cinematic-shadow ${
-            activeChapter === 6
-              ? 'opacity-100 translate-y-0 scale-100'
-              : 'opacity-0 translate-y-6 scale-95'
-          }`}
-        >
-          REFOREST
-        </h1>
+        <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 6}>
+          <h1
+            className={`text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[0.05em] text-white py-2 transition-all duration-1000 ease-out text-cinematic-shadow ${
+              activeChapter === 6
+                ? 'opacity-100 translate-y-0 scale-100'
+                : 'opacity-0 translate-y-6 scale-95'
+            }`}
+          >
+            REFOREST
+          </h1>
+        </CursorParallaxText>
 
         {/* Subtitle */}
-        <p
-          className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-200 tracking-wide max-w-xl transition-all duration-1000 delay-300 subtitle-cinematic-shadow ${
-            activeChapter === 6 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}
-        >
-          From the ashes of yesterday, human hands plant the seeds of tomorrow.
-        </p>
+        <CursorParallaxText shiftX={16} shiftY={10} tilt={4} disabled={activeChapter !== 6}>
+          <p
+            className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-200 tracking-wide max-w-xl transition-all duration-1000 delay-300 subtitle-cinematic-shadow ${
+              activeChapter === 6 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}
+          >
+            From the ashes of yesterday, human hands plant the seeds of tomorrow.
+          </p>
+        </CursorParallaxText>
       </div>
 
       {/* ===================== TRANSISI TERSEDOT KE PORTAL (SCENE 7 -> SCENE 8) ===================== */}
@@ -394,14 +427,18 @@ export default function ScrollyChapter({
         <div className="relative flex flex-col items-center justify-center max-w-3xl mx-auto text-center">
 
           {/* Headline */}
-          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.9] text-white text-cinematic-shadow">
-            LET'S BUILD
-          </h1>
+          <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 7}>
+            <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.9] text-white text-cinematic-shadow">
+              LET&apos;S BUILD
+            </h1>
+          </CursorParallaxText>
 
           {/* Subtitle */}
-          <p className="mt-5 sm:mt-6 text-sm sm:text-base md:text-lg font-light text-white/90 tracking-wide max-w-xl leading-relaxed subtitle-cinematic-shadow">
-            Every voice, action, and collaboration helps protect Indonesia&apos;s ancient rainforests and restore what was lost.
-          </p>
+          <CursorParallaxText shiftX={16} shiftY={10} tilt={4} disabled={activeChapter !== 7}>
+            <p className="mt-5 sm:mt-6 text-sm sm:text-base md:text-lg font-light text-white/90 tracking-wide max-w-xl leading-relaxed subtitle-cinematic-shadow">
+              Every voice, action, and collaboration helps protect Indonesia&apos;s ancient rainforests and restore what was lost.
+            </p>
+          </CursorParallaxText>
 
           {/* Interactive Contact Links / Action Pills */}
           <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3.5 sm:gap-4">

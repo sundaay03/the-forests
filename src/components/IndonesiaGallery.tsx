@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import CursorTiltCard from './CursorTiltCard';
+import CursorParallaxText from './CursorParallaxText';
 
 interface GalleryItem {
   id: number;
@@ -122,45 +123,51 @@ export default function IndonesiaGallery({
         }}
       >
         {/* Main Headline */}
-        <h1
-          className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.95] text-white transition-colors duration-300"
-          style={{
-            textShadow:
-              burnProg > 0.05
-                ? `0 0 ${burnProg * 35}px rgba(255, 80, 0, ${burnProg * 0.95}), 0 0 ${
-                    burnProg * 65
-                  }px rgba(255, 30, 0, ${burnProg * 0.85})`
-                : '0 2px 10px rgba(0,0,0,0.25)',
-            color:
-              burnProg > 0.3
-                ? `rgb(255, ${Math.max(120, 255 - burnProg * 140)}, ${Math.max(
-                    40,
-                    255 - burnProg * 220
-                  )})`
-                : '#ffffff',
-          }}
-        >
-          <span className="block whitespace-nowrap">WONDERFUL OF</span>
-          <span className="block whitespace-nowrap">INDONESIA</span>
-        </h1>
+        <CursorParallaxText shiftX={24} shiftY={16} tilt={6} disabled={activeChapter !== 1}>
+          <h1
+            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.95] text-white transition-colors duration-300"
+            style={{
+              textShadow:
+                burnProg > 0.05
+                  ? `0 0 ${burnProg * 35}px rgba(255, 80, 0, ${burnProg * 0.95}), 0 0 ${
+                      burnProg * 65
+                    }px rgba(255, 30, 0, ${burnProg * 0.85})`
+                  : '0 2px 10px rgba(0,0,0,0.25)',
+              color:
+                burnProg > 0.3
+                  ? `rgb(255, ${Math.max(120, 255 - burnProg * 140)}, ${Math.max(
+                      40,
+                      255 - burnProg * 220
+                    )})`
+                  : '#ffffff',
+            }}
+          >
+            <span className="block whitespace-nowrap">WONDERFUL OF</span>
+            <span className="block whitespace-nowrap">INDONESIA</span>
+          </h1>
+        </CursorParallaxText>
 
         {/* Subtitle */}
-        <p
-          className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg font-light text-neutral-200 tracking-wider leading-relaxed max-w-md transition-colors duration-300"
-          style={{
-            textShadow:
-              burnProg > 0.05
-                ? `0 0 ${burnProg * 25}px rgba(255, 100, 0, ${burnProg * 0.8})`
-                : '0 1px 5px rgba(0,0,0,0.25)',
-          }}
-        >
-          Billions of respirations sustaining the biosphere.
-        </p>
+        <CursorParallaxText shiftX={16} shiftY={10} tilt={4} disabled={activeChapter !== 1}>
+          <p
+            className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg font-light text-neutral-200 tracking-wider leading-relaxed max-w-md transition-colors duration-300"
+            style={{
+              textShadow:
+                burnProg > 0.05
+                  ? `0 0 ${burnProg * 25}px rgba(255, 100, 0, ${burnProg * 0.8})`
+                  : '0 1px 5px rgba(0,0,0,0.25)',
+            }}
+          >
+            Billions of respirations sustaining the biosphere.
+          </p>
+        </CursorParallaxText>
 
         {/* Narrative Paragraph */}
-        <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-neutral-300/90 font-normal leading-relaxed max-w-md drop-shadow-[0_1px_4px_rgba(0,0,0,0.25)]">
-          Indonesia&apos;s forest area covers 124,975,956 hectares, home to around 31,750 flora species and approximately 744,279 terrestrial and aquatic fauna species.
-        </p>
+        <CursorParallaxText shiftX={11} shiftY={7} tilt={2.5} disabled={activeChapter !== 1}>
+          <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-neutral-300/90 font-normal leading-relaxed max-w-md drop-shadow-[0_1px_4px_rgba(0,0,0,0.25)]">
+            Indonesia&apos;s forest area covers 124,975,956 hectares, home to around 31,750 flora species and approximately 744,279 terrestrial and aquatic fauna species.
+          </p>
+        </CursorParallaxText>
       </div>
 
       {/* ===================== RIGHT SIDE: ONE-BY-ONE PHOTO STREAM ===================== */}
