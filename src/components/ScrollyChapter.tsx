@@ -114,31 +114,29 @@ export default function ScrollyChapter({
   }
 
   // Scene 7 (THE REBIRTH): local progress 0.857 to 1.000
-  // Stays upright (no rotation) and zooms cleanly inward toward the liquid portal core (0.945 -> 0.992)
-  const s7SuctionRaw =
+  // Smoothly fades to black at the end of Scene 7 (0.945 -> 0.967)
+  const s7FadeOutRaw =
     scrollProgress > 0.945
-      ? Math.max(0, Math.min(1, (scrollProgress - 0.945) / (0.992 - 0.945)))
+      ? Math.max(0, Math.min(1, (scrollProgress - 0.945) / (0.967 - 0.945)))
       : 0;
-  const s7SuctionEase = Math.pow(s7SuctionRaw, 1.85);
-  const s7Opacity = activeChapter === 6 ? Math.max(0, 1 - Math.pow(s7SuctionRaw, 2.0)) : 0;
-  const s7Scale = 1 + s7SuctionEase * 0.55;
+  const s7Opacity = activeChapter === 6 ? Math.max(0, 1 - s7FadeOutRaw) : 0;
+  const s7Scale = 1;
   const s7Rotate = 0;
-  const s7Blur = s7SuctionEase * 8;
+  const s7Blur = 0;
 
-  // Global Liquid Forest Portal Transition between Scene 7 (0.945) and Scene 8 (1.045), midpoint at 0.995
+  // Black Fade + 4 Sequential Dots transition between Scene 7 (0.945) and Scene 8 (1.045)
   let globalPortalProgress = 0;
   if (scrollProgress >= 0.945 && scrollProgress <= 1.045) {
     globalPortalProgress = (scrollProgress - 0.945) / (1.045 - 0.945);
   }
 
   // Scene 8 (THE CONTACT): local progress 1.000 to 1.143
-  // Emerges smoothly outward from the liquid forest portal core (1.008 -> 1.045)
-  const s8Prog = Math.max(0, Math.min(1, (scrollProgress - 1.0) / 0.143));
-  const s8EnterRaw = Math.max(0, Math.min(1, (s8Prog - 0.056) / 0.26));
-  const s8EnterEase = 1 - Math.pow(1 - s8EnterRaw, 2.4);
+  // Fades in cleanly right as the black transition overlay fades out (1.019 -> 1.045)
+  const s8EnterRaw = Math.max(0, Math.min(1, (scrollProgress - 1.019) / (1.045 - 1.019)));
+  const s8EnterEase = s8EnterRaw * s8EnterRaw * (3 - 2 * s8EnterRaw);
   const s8Opacity = activeChapter === 7 ? s8EnterEase : 0;
-  const s8Scale = 0.42 + s8EnterEase * 0.58;
-  const s8Blur = (1 - s8EnterEase) * 8;
+  const s8Scale = 1;
+  const s8Blur = 0;
 
   return (
     <div className="relative z-20 flex flex-col items-center justify-center min-h-screen px-6 text-center select-none pointer-events-none w-full">
@@ -402,7 +400,7 @@ export default function ScrollyChapter({
         </CursorParallaxText>
       </div>
 
-      {/* ===================== TRANSISI TERSEDOT KE PORTAL (SCENE 7 -> SCENE 8) ===================== */}
+      {/* ===================== TRANSISI HITAM + 4 TITIK BERURUTAN (SCENE 7 -> SCENE 8) ===================== */}
       <PortalTransition progress={globalPortalProgress} />
 
       {/* ===================== SCENE 8: THE CONTACT ===================== */}
