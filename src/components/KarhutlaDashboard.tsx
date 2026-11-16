@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
+import CursorTiltCard from './CursorTiltCard';
 
 interface RegionalFireEntry {
   rank: number;
@@ -139,7 +140,7 @@ const cardGlassStyle: CSSProperties = {
 };
 
 const cardGlassClassName =
-  'group relative overflow-hidden rounded-2xl bg-[linear-gradient(155deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.06)_42%,rgba(10,12,18,0.34)_100%)] hover:bg-[linear-gradient(155deg,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.09)_42%,rgba(10,12,18,0.28)_100%)] border border-white/30 hover:border-white/55 p-5 sm:p-6 flex flex-col h-full transition-[transform,border-color,box-shadow,background] duration-300 hover:-translate-y-2 shadow-[0_24px_50px_-12px_rgba(0,0,0,0.65),0_8px_20px_-6px_rgba(0,0,0,0.45),inset_0_1.5px_1.5px_rgba(255,255,255,0.65),inset_0_-2px_8px_rgba(0,0,0,0.35)] hover:shadow-[0_32px_65px_-12px_rgba(0,0,0,0.75),0_12px_28px_-6px_rgba(0,0,0,0.5),inset_0_2px_2px_rgba(255,255,255,0.85),inset_0_-2px_8px_rgba(0,0,0,0.30),0_0_28px_rgba(255,255,255,0.14)] cursor-pointer';
+  'group relative overflow-hidden rounded-2xl bg-[linear-gradient(155deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.06)_42%,rgba(10,12,18,0.34)_100%)] hover:bg-[linear-gradient(155deg,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.09)_42%,rgba(10,12,18,0.28)_100%)] border border-white/30 hover:border-white/55 p-5 sm:p-6 flex flex-col h-full transition-[border-color,box-shadow,background] duration-300 shadow-[0_24px_50px_-12px_rgba(0,0,0,0.65),0_8px_20px_-6px_rgba(0,0,0,0.45),inset_0_1.5px_1.5px_rgba(255,255,255,0.65),inset_0_-2px_8px_rgba(0,0,0,0.35)] hover:shadow-[0_32px_65px_-12px_rgba(0,0,0,0.75),0_12px_28px_-6px_rgba(0,0,0,0.5),inset_0_2px_2px_rgba(255,255,255,0.85),inset_0_-2px_8px_rgba(0,0,0,0.30),0_0_28px_rgba(255,255,255,0.14)] cursor-pointer';
 
 function CardGlassSpecularOverlay() {
   return (
@@ -234,10 +235,14 @@ export default function KarhutlaDashboard({
         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6 items-stretch">
           {/* ---------------- CARD 1: BURNED LAND AREA ---------------- */}
           <div style={slotTransformStyle} className="h-full">
-            <div
+            <CursorTiltCard
               onClick={() => setActiveModal('burned')}
               style={cardStyle}
               className={cardGlassClassName}
+              maxTilt={8}
+              maxShift={6}
+              hoverScale={1.025}
+              disabled={!isActive || Boolean(activeModal)}
             >
               <CardGlassSpecularOverlay />
               <div style={contentBlurStyle} className="relative z-10 flex flex-col flex-grow">
@@ -265,15 +270,19 @@ export default function KarhutlaDashboard({
                   </p>
                 </div>
               </div>
-            </div>
+            </CursorTiltCard>
           </div>
 
           {/* ---------------- CARD 2: DIRECT CASUALTIES ---------------- */}
           <div style={slotTransformStyle} className="h-full">
-            <div
+            <CursorTiltCard
               onClick={() => setActiveModal('casualties')}
               style={cardStyle}
               className={cardGlassClassName}
+              maxTilt={8}
+              maxShift={6}
+              hoverScale={1.025}
+              disabled={!isActive || Boolean(activeModal)}
             >
               <CardGlassSpecularOverlay />
               <div style={contentBlurStyle} className="relative z-10 flex flex-col flex-grow">
@@ -300,15 +309,19 @@ export default function KarhutlaDashboard({
                   </p>
                 </div>
               </div>
-            </div>
+            </CursorTiltCard>
           </div>
 
           {/* ---------------- CARD 3: HEALTH IMPACTS FROM HAZE ---------------- */}
           <div style={slotTransformStyle} className="h-full">
-            <div
+            <CursorTiltCard
               onClick={() => setActiveModal('health')}
               style={cardStyle}
               className={cardGlassClassName}
+              maxTilt={8}
+              maxShift={6}
+              hoverScale={1.025}
+              disabled={!isActive || Boolean(activeModal)}
             >
               <CardGlassSpecularOverlay />
               <div style={contentBlurStyle} className="relative z-10 flex flex-col flex-grow">
@@ -333,7 +346,7 @@ export default function KarhutlaDashboard({
                   </p>
                 </div>
               </div>
-            </div>
+            </CursorTiltCard>
           </div>
         </div>
       </div>

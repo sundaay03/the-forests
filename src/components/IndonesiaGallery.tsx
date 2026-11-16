@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import CursorTiltCard from './CursorTiltCard';
 
 interface GalleryItem {
   id: number;
@@ -167,7 +168,7 @@ export default function IndonesiaGallery({
         All 10 photos complete their full cycle between s2Prog = 0.04 and 0.68.
         Zero lingering photos remain when the fire transition begins at s2Prog = 0.72.
       */}
-      <div className="absolute right-6 sm:right-12 md:right-16 lg:right-24 top-1/2 -translate-y-1/2 w-[300px] sm:w-[400px] md:w-[480px] lg:w-[540px] h-[360px] sm:h-[420px] md:h-[480px] pointer-events-none">
+      <div className="absolute right-6 sm:right-12 md:right-16 lg:right-24 top-1/2 -translate-y-1/2 z-30 w-[300px] sm:w-[400px] md:w-[480px] lg:w-[540px] h-[360px] sm:h-[420px] md:h-[480px] pointer-events-none">
         {items.map((item, index) => {
           // Center scroll progress for this photo (spaced compactly from 0.08 to 0.58)
           const centerProg = 0.08 + (index / Math.max(1, totalPhotos - 1)) * 0.50;
@@ -198,7 +199,7 @@ export default function IndonesiaGallery({
 
           // Highest z-index for the photo currently centered and largest
           const zIndex = Math.round((1 - Math.abs(clampedP - 0.5) * 2) * 30);
-          const isInteractive = clampedP >= 0.2 && clampedP <= 0.8;
+          const isInteractive = clampedP >= 0.05 && clampedP <= 0.95;
 
           return (
             <div
@@ -212,8 +213,16 @@ export default function IndonesiaGallery({
               }}
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full aspect-[4/3] group will-change-transform"
             >
-              {/* Inner Card Frame with smooth hover float movement and clean neutral shadow */}
-              <div className="w-full h-full rounded-3xl p-2.5 sm:p-3 bg-black/40 backdrop-blur-md border border-white/20 hover:border-white/40 shadow-[0_20px_50px_rgba(0,0,0,0.55)] hover:shadow-[0_28px_65px_rgba(0,0,0,0.75)] cursor-pointer transition-all duration-500 ease-out transform group-hover:-translate-y-2 group-hover:scale-[1.03] group-hover:-rotate-1">
+              {/* Inner Card Frame with smooth cursor-following 3D tilt and glass spotlight */}
+              <CursorTiltCard
+                maxTilt={14}
+                maxShift={12}
+                hoverScale={1.045}
+                perspective={900}
+                disabled={!isInteractive}
+                spotlightColor="rgba(255, 255, 255, 0.24)"
+                className="relative w-full h-full rounded-3xl p-2.5 sm:p-3 bg-black/40 backdrop-blur-md border border-white/20 hover:border-white/50 shadow-[0_20px_50px_rgba(0,0,0,0.55)] hover:shadow-[0_28px_65px_rgba(0,0,0,0.75)] cursor-pointer transition-[border-color,box-shadow] duration-300"
+              >
                 <div className="relative w-full h-full overflow-hidden rounded-2xl bg-neutral-950">
                   <img
                     src={`/gallery/${item.file}`}
@@ -228,7 +237,7 @@ export default function IndonesiaGallery({
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   />
                 </div>
-              </div>
+              </CursorTiltCard>
             </div>
           );
         })}
@@ -240,7 +249,11 @@ export default function IndonesiaGallery({
           className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 md:p-12 bg-black/50 backdrop-blur-md pointer-events-auto transition-opacity duration-300 cursor-pointer animate-fadeIn"
           onClick={() => setSelectedItem(null)}
         >
-          <div
+          <CursorTiltCard
+            maxTilt={6}
+            maxShift={6}
+            hoverScale={1.015}
+            spotlightColor="rgba(255, 255, 255, 0.16)"
             className="relative w-full max-w-2xl sm:max-w-3xl md:max-w-4xl h-[56vh] sm:h-[64vh] overflow-hidden rounded-3xl bg-black/50 backdrop-blur-md border border-white/20 shadow-[0_25px_80px_rgba(0,0,0,0.6)] flex items-center justify-center p-2.5 sm:p-3"
             onClick={() => setSelectedItem(null)}
           >
@@ -255,7 +268,7 @@ export default function IndonesiaGallery({
               }}
               className="w-full h-full object-contain rounded-2xl"
             />
-          </div>
+          </CursorTiltCard>
         </div>
       )}
     </div>

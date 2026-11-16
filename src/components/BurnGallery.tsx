@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import CursorTiltCard from './CursorTiltCard';
 
 export interface BurnGalleryItem {
   id: number;
@@ -311,27 +312,37 @@ export default function BurnGallery({
                   opacity,
                   zIndex,
                 }}
-                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[380px] md:w-[460px] lg:w-[500px] aspect-[16/11] rounded-3xl p-2 sm:p-2.5 bg-neutral-950/80 backdrop-blur-xl border transition-[border-color,box-shadow] duration-300 pointer-events-auto cursor-pointer group will-change-transform ${
-                  isCenter
-                    ? 'border-orange-500/60 shadow-[0_20px_60px_rgba(255,87,34,0.35)] ring-1 ring-orange-400/30'
-                    : 'border-white/15 hover:border-white/35 shadow-[0_15px_40px_rgba(0,0,0,0.6)]'
-                }`}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[380px] md:w-[460px] lg:w-[500px] aspect-[16/11] pointer-events-auto cursor-pointer group will-change-transform"
               >
-                {/* Image Container with Rounded Corners - Pure Clean Photos */}
-                <div className="relative w-full h-full overflow-hidden rounded-2xl bg-neutral-900">
-                  <img
-                    src={`/burn/${item.file}`}
-                    alt={item.title}
-                    loading={absOffset <= 2 ? 'eager' : 'lazy'}
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      if (!target.src.includes('/api/burn/')) {
-                        target.src = `/api/burn/${item.file}`;
-                      }
-                    }}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  />
-                </div>
+                <CursorTiltCard
+                  maxTilt={14}
+                  maxShift={10}
+                  hoverScale={1.04}
+                  perspective={900}
+                  disabled={absOffset > 3.5}
+                  spotlightColor="rgba(255, 165, 115, 0.26)"
+                  className={`relative w-full h-full rounded-3xl p-2 sm:p-2.5 bg-neutral-950/80 backdrop-blur-xl border transition-[border-color,box-shadow] duration-300 ${
+                    isCenter
+                      ? 'border-orange-500/60 shadow-[0_20px_60px_rgba(255,87,34,0.35)] ring-1 ring-orange-400/30'
+                      : 'border-white/15 hover:border-white/35 shadow-[0_15px_40px_rgba(0,0,0,0.6)]'
+                  }`}
+                >
+                  {/* Image Container with Rounded Corners - Pure Clean Photos */}
+                  <div className="relative w-full h-full overflow-hidden rounded-2xl bg-neutral-900">
+                    <img
+                      src={`/burn/${item.file}`}
+                      alt={item.title}
+                      loading={absOffset <= 2 ? 'eager' : 'lazy'}
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        if (!target.src.includes('/api/burn/')) {
+                          target.src = `/api/burn/${item.file}`;
+                        }
+                      }}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                    />
+                  </div>
+                </CursorTiltCard>
               </div>
             );
           })}
@@ -344,7 +355,11 @@ export default function BurnGallery({
           className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 md:p-12 bg-black/50 backdrop-blur-md pointer-events-auto transition-opacity duration-300 cursor-pointer animate-fadeIn"
           onClick={() => setSelectedItem(null)}
         >
-          <div
+          <CursorTiltCard
+            maxTilt={6}
+            maxShift={6}
+            hoverScale={1.015}
+            spotlightColor="rgba(255, 165, 115, 0.16)"
             className="relative w-full max-w-2xl sm:max-w-3xl md:max-w-4xl h-[56vh] sm:h-[64vh] overflow-hidden rounded-3xl bg-black/50 backdrop-blur-md border border-white/20 shadow-[0_25px_80px_rgba(0,0,0,0.6)] flex items-center justify-center p-2.5 sm:p-3"
             onClick={() => setSelectedItem(null)}
           >
@@ -359,7 +374,7 @@ export default function BurnGallery({
               }}
               className="w-full h-full object-contain rounded-2xl"
             />
-          </div>
+          </CursorTiltCard>
         </div>
       )}
     </div>
