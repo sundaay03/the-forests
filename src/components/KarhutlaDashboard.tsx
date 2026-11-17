@@ -41,7 +41,7 @@ function MonochromeBarChart({
   const isSingleBar = data.length === 1;
 
   return (
-    <div className="relative z-10 w-full h-36 sm:h-44 lg:h-52 rounded-xl overflow-hidden mb-3.5 sm:mb-4 lg:mb-5 border border-white/20 group-hover:border-white/40 bg-black/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.28),inset_0_-3px_10px_rgba(0,0,0,0.55),0_8px_20px_-6px_rgba(0,0,0,0.55)] p-2.5 sm:p-3 lg:p-3.5 flex flex-col transition-all duration-300 select-none">
+    <div className="relative z-10 w-full h-[clamp(108px,19dvh,208px)] rounded-xl overflow-hidden mb-[clamp(0.6rem,1.6dvh,1.25rem)] border border-white/20 group-hover:border-white/40 bg-black/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.28),inset_0_-3px_10px_rgba(0,0,0,0.55),0_8px_20px_-6px_rgba(0,0,0,0.55)] p-2.5 sm:p-3 lg:p-3.5 flex flex-col transition-all duration-300 select-none">
       {/* Top-left Y-Axis Unit Label */}
       <div className="text-[9.5px] sm:text-[10.5px] font-bold text-white tracking-tight text-left leading-none mb-2">
         {unitLabel}
@@ -196,7 +196,7 @@ const cardGlassStyle: CSSProperties = {
 };
 
 const cardGlassClassName =
-  'group relative overflow-hidden rounded-2xl bg-[linear-gradient(155deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.06)_42%,rgba(10,12,18,0.34)_100%)] hover:bg-[linear-gradient(155deg,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.09)_42%,rgba(10,12,18,0.28)_100%)] border border-white/30 hover:border-white/55 p-4 sm:p-5 lg:p-6 flex flex-col h-full transition-[border-color,box-shadow,background] duration-300 shadow-[0_24px_50px_-12px_rgba(0,0,0,0.65),0_8px_20px_-6px_rgba(0,0,0,0.45),inset_0_1.5px_1.5px_rgba(255,255,255,0.65),inset_0_-2px_8px_rgba(0,0,0,0.35)] hover:shadow-[0_32px_65px_-12px_rgba(0,0,0,0.75),0_12px_28px_-6px_rgba(0,0,0,0.5),inset_0_2px_2px_rgba(255,255,255,0.85),inset_0_-2px_8px_rgba(0,0,0,0.30),0_0_28px_rgba(255,255,255,0.14)] cursor-pointer';
+  'group relative overflow-hidden rounded-2xl bg-[linear-gradient(155deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.06)_42%,rgba(10,12,18,0.34)_100%)] hover:bg-[linear-gradient(155deg,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.09)_42%,rgba(10,12,18,0.28)_100%)] border border-white/30 hover:border-white/55 p-4 sm:p-[clamp(0.9rem,2dvh,1.5rem)] flex flex-col h-full transition-[border-color,box-shadow,background] duration-300 shadow-[0_24px_50px_-12px_rgba(0,0,0,0.65),0_8px_20px_-6px_rgba(0,0,0,0.45),inset_0_1.5px_1.5px_rgba(255,255,255,0.65),inset_0_-2px_8px_rgba(0,0,0,0.35)] hover:shadow-[0_32px_65px_-12px_rgba(0,0,0,0.75),0_12px_28px_-6px_rgba(0,0,0,0.5),inset_0_2px_2px_rgba(255,255,255,0.85),inset_0_-2px_8px_rgba(0,0,0,0.30),0_0_28px_rgba(255,255,255,0.14)] cursor-pointer';
 
 function CardGlassSpecularOverlay() {
   return (
@@ -207,19 +207,59 @@ function CardGlassSpecularOverlay() {
   );
 }
 
+function computeWindowMotion(
+  prog: number,
+  enterStart: number,
+  enterEnd: number,
+  exitStart: number,
+  exitEnd: number
+) {
+  const enterRaw = Math.max(0, Math.min(1, (prog - enterStart) / (enterEnd - enterStart)));
+  const enterEase = 1 - Math.pow(1 - enterRaw, 2.4);
+  const exitRaw =
+    prog > exitStart
+      ? Math.max(0, Math.min(1, (prog - exitStart) / (exitEnd - exitStart)))
+      : 0;
+  const exitEase = exitRaw * exitRaw;
+
+  return {
+    opacity: enterEase * (1 - exitEase),
+    translateY: (1 - enterEase) * 34 - exitEase * 30,
+    blur: exitEase * 7,
+  };
+}
+
+const DESKTOP_CARD_WINDOWS: readonly {
+  enterStart: number;
+  enterEnd: number;
+  exitStart: number;
+  exitEnd: number;
+}[] = [
+  { enterStart: 0.04, enterEnd: 0.16, exitStart: 0.66, exitEnd: 0.77 },
+  { enterStart: 0.16, enterEnd: 0.28, exitStart: 0.76, exitEnd: 0.87 },
+  { enterStart: 0.28, enterEnd: 0.40, exitStart: 0.86, exitEnd: 0.97 },
+];
+
 export default function KarhutlaDashboard({
   isActive,
   cardsProgress = 1,
   exitProgress = 0,
-  localProgress = 0.25,
+  localProgress = 0.43,
 }: KarhutlaDashboardProps) {
   const [activeModal, setActiveModal] = useState<'burned' | 'casualties' | 'health' | null>(null);
   const [mounted, setMounted] = useState(false);
   const [manualMobileIndex, setManualMobileIndex] = useState<number | null>(null);
+  const [isDesktop, setIsDesktop] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.innerWidth >= 1024 : true
+  );
   const lastLocalProgRef = useRef(localProgress);
 
   useEffect(() => {
     setMounted(true);
+    const updateViewport = () => setIsDesktop(window.innerWidth >= 1024);
+    updateViewport();
+    window.addEventListener('resize', updateViewport, { passive: true });
+    return () => window.removeEventListener('resize', updateViewport);
   }, []);
 
   // Return to scroll-driven alternating cards whenever user scrolls
@@ -230,7 +270,7 @@ export default function KarhutlaDashboard({
     }
   }, [localProgress]);
 
-  const scrollMobileIndex = localProgress < 0.42 ? 0 : localProgress < 0.64 ? 1 : 2;
+  const scrollMobileIndex = localProgress < 0.52 ? 0 : localProgress < 0.69 ? 1 : 2;
   const activeMobileIndex = manualMobileIndex !== null ? manualMobileIndex : scrollMobileIndex;
 
   useEffect(() => {
@@ -266,6 +306,23 @@ export default function KarhutlaDashboard({
   const cardOpacity = activeModal ? opacity * 0.65 : opacity;
   const contentBlur = activeModal ? Math.max(exitBlur, 5) : exitBlur;
 
+  // Desktop staggered header motion (enters early 0.00 -> 0.14, exits last 0.86 -> 0.99)
+  const desktopHeader = isActive
+    ? computeWindowMotion(localProgress, 0.0, 0.14, 0.86, 0.99)
+    : { opacity: 0, translateY: 34, blur: 0 };
+
+  const headerOpacity = isDesktop
+    ? activeModal
+      ? desktopHeader.opacity * 0.65
+      : desktopHeader.opacity
+    : cardOpacity;
+  const headerTranslateY = isDesktop ? desktopHeader.translateY : translateY;
+  const headerBlur = isDesktop
+    ? activeModal
+      ? Math.max(desktopHeader.blur, 5)
+      : desktopHeader.blur
+    : contentBlur;
+
   const slotTransformStyle: CSSProperties = {
     transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)${activeModal ? ' scale(0.99)' : ''}`,
   };
@@ -279,21 +336,21 @@ export default function KarhutlaDashboard({
 
   return (
     <div
-      className="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-12 sm:pt-14 lg:pt-0 flex flex-col items-center justify-center"
+      className="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-14 sm:pt-12 lg:pt-6 pb-6 lg:pb-12 flex flex-col items-center justify-center"
       style={{
-        visibility: opacity > 0.01 ? 'visible' : 'hidden',
+        visibility: isActive && (opacity > 0.01 || desktopHeader.opacity > 0.01) ? 'visible' : 'hidden',
         pointerEvents: isActive && opacity > 0.05 && !activeModal ? 'auto' : 'none',
       }}
     >
       {/* ===================== DASHBOARD CONTENT (NO ANCESTOR OPACITY/FILTER SO BACKDROP-FILTER STAYS ACTIVE) ===================== */}
       <div className="w-full flex flex-col items-center justify-center">
-        {/* ===================== SECTION HEADER (Matches Scene 3 BURNING THE FUTURE typography) ===================== */}
+        {/* ===================== SECTION HEADER (Positioned higher toward marked zone) ===================== */}
         <div
-          className="text-center mb-4 sm:mb-6 lg:mb-10 max-w-4xl sm:max-w-5xl mx-auto flex flex-col items-center justify-center"
+          className="text-center mb-6 sm:mb-8 lg:mb-[clamp(1.75rem,5.5dvh,3.75rem)] max-w-4xl sm:max-w-5xl mx-auto flex flex-col items-center justify-center"
           style={{
-            ...slotTransformStyle,
-            ...contentBlurStyle,
-            opacity: cardOpacity,
+            transform: `translate3d(0, ${headerTranslateY.toFixed(1)}px, 0)${activeModal ? ' scale(0.99)' : ''}`,
+            filter: headerBlur > 0.05 ? `blur(${headerBlur.toFixed(1)}px)` : 'none',
+            opacity: headerOpacity,
           }}
         >
           <CursorParallaxText
@@ -302,15 +359,51 @@ export default function KarhutlaDashboard({
             tilt={6}
             disabled={!isActive || Boolean(activeModal)}
           >
-            <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
+            <h2 className="text-[clamp(1.45rem,min(4.6vw,5.8dvh),3.75rem)] font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
               STATISTICS
             </h2>
           </CursorParallaxText>
         </div>
 
-        {/* ===================== 3-CARD GRID (Scroll-alternating stack on mobile/tablet, 3-column grid on lg+) ===================== */}
+        {/* ===================== 3-CARD GRID (Staggered in-place on desktop lg+, alternating stack on mobile) ===================== */}
         <div className="w-full max-w-[350px] sm:max-w-[390px] lg:max-w-none mx-auto grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6 items-stretch">
           {STATISTIC_CARDS.map((card, idx) => {
+            const win = DESKTOP_CARD_WINDOWS[idx];
+            const desktopMotion = isActive
+              ? computeWindowMotion(
+                  localProgress,
+                  win.enterStart,
+                  win.enterEnd,
+                  win.exitStart,
+                  win.exitEnd
+                )
+              : { opacity: 0, translateY: 34, blur: 0 };
+
+            const perCardOpacity = isDesktop
+              ? activeModal
+                ? desktopMotion.opacity * 0.65
+                : desktopMotion.opacity
+              : cardOpacity;
+            const perCardTransform: CSSProperties = isDesktop
+              ? {
+                  transform: `translate3d(0, ${desktopMotion.translateY.toFixed(1)}px, 0)${
+                    activeModal ? ' scale(0.99)' : ''
+                  }`,
+                }
+              : slotTransformStyle;
+            const perCardBlurVal = isDesktop
+              ? activeModal
+                ? Math.max(desktopMotion.blur, 5)
+                : desktopMotion.blur
+              : contentBlur;
+            const perCardBlurStyle: CSSProperties = {
+              filter: perCardBlurVal > 0.05 ? `blur(${perCardBlurVal.toFixed(1)}px)` : 'none',
+            };
+            const perCardStyle: CSSProperties = {
+              ...cardGlassStyle,
+              opacity: perCardOpacity,
+            };
+
             const isMobileCurrent = idx === activeMobileIndex;
             const mobilePositionClass = isMobileCurrent
               ? 'opacity-100 translate-y-0 scale-100 z-20 pointer-events-auto'
@@ -318,23 +411,32 @@ export default function KarhutlaDashboard({
                 ? 'opacity-0 -translate-y-5 scale-95 z-10 pointer-events-none'
                 : 'opacity-0 translate-y-5 scale-95 z-10 pointer-events-none';
 
+            const desktopPointerClass =
+              isDesktop && desktopMotion.opacity > 0.15 && !activeModal
+                ? 'lg:pointer-events-auto'
+                : 'lg:pointer-events-none';
+
             return (
               <div
                 key={card.id}
-                style={slotTransformStyle}
-                className={`col-start-1 row-start-1 lg:col-auto lg:row-auto h-full transition-all duration-500 ease-out lg:opacity-100 lg:translate-y-0 lg:scale-100 lg:pointer-events-auto lg:z-auto lg:transition-none ${mobilePositionClass}`}
+                style={perCardTransform}
+                className={`col-start-1 row-start-1 lg:col-auto lg:row-auto h-full transition-all duration-500 ease-out lg:opacity-100 lg:translate-y-0 lg:scale-100 lg:z-auto lg:transition-none ${mobilePositionClass} ${desktopPointerClass}`}
               >
                 <CursorTiltCard
                   onClick={() => setActiveModal(card.id)}
-                  style={cardStyle}
+                  style={perCardStyle}
                   className={cardGlassClassName}
                   maxTilt={8}
                   maxShift={6}
                   hoverScale={1.025}
-                  disabled={!isActive || Boolean(activeModal)}
+                  disabled={
+                    !isActive ||
+                    Boolean(activeModal) ||
+                    (isDesktop ? desktopMotion.opacity < 0.2 : !isMobileCurrent)
+                  }
                 >
                   <CardGlassSpecularOverlay />
-                  <div style={contentBlurStyle} className="relative z-10 flex flex-col flex-grow">
+                  <div style={perCardBlurStyle} className="relative z-10 flex flex-col flex-grow">
                     {/* Top Visual Box (Monochrome Bar Chart) */}
                     <MonochromeBarChart
                       unitLabel={card.unitLabel}
@@ -345,11 +447,11 @@ export default function KarhutlaDashboard({
 
                     {/* Card Meta Content */}
                     <div className="flex flex-col flex-grow">
-                      <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] group-hover:text-white transition-colors duration-200">
+                      <h3 className="text-[clamp(0.95rem,min(1.4vw,2.3dvh),1.25rem)] font-bold text-white tracking-tight leading-snug mb-1.5 sm:mb-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] group-hover:text-white transition-colors duration-200">
                         {card.title}
                       </h3>
 
-                      <p className="text-xs sm:text-sm text-white/80 group-hover:text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] transition-colors duration-200 font-normal leading-relaxed">
+                      <p className="text-[clamp(0.72rem,min(1.05vw,1.7dvh),0.875rem)] text-white/80 group-hover:text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] transition-colors duration-200 font-normal leading-relaxed">
                         {card.description}
                       </p>
                     </div>

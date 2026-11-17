@@ -95,7 +95,7 @@ export default function HealthImpacts({
               }`}
             >
               {/* Pure White Enlarged Title with Bullet Point */}
-              <h3 className="flex items-start sm:items-center gap-2.5 sm:gap-4 text-base sm:text-xl md:text-2xl lg:text-3xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:text-white group-hover:translate-x-1.5">
+              <h3 className="flex items-start sm:items-center gap-2.5 sm:gap-4 text-[clamp(0.95rem,min(2.1vw,2.9dvh),1.875rem)] font-extrabold tracking-tight text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:text-white group-hover:translate-x-1.5">
                 <span className={`mt-2 sm:mt-0 w-1.5 sm:w-2.5 h-1.5 sm:h-2.5 rounded-full bg-white flex-shrink-0 shadow-[0_0_8px_rgba(255,255,255,0.9)] transition-all duration-300 ${
                   isOpen ? 'scale-125' : 'group-hover:scale-125'
                 }`} />
@@ -110,7 +110,7 @@ export default function HealthImpacts({
                     : 'max-h-0 opacity-0 mt-0 pointer-events-none'
                 }`}
               >
-                <p className="text-xs sm:text-base md:text-lg font-light text-white/95 leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-lg">
+                <p className="text-[clamp(0.75rem,min(1.4vw,2.1dvh),1.125rem)] font-light text-white/95 leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-lg">
                   {item.desc}
                 </p>
               </div>

@@ -162,7 +162,7 @@ export default function ScrollyChapter({
           <div className="relative flex flex-col items-center justify-center">
             {/* Headline with Vertical Mask Slide-up & Letter Stagger */}
             <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 0}>
-              <h1 className="relative text-[2.5rem] min-[390px]:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.88] text-white flex flex-wrap justify-center py-3 sm:py-5 text-cinematic-shadow">
+              <h1 className="relative text-[clamp(2.35rem,min(9.5vw,13.5dvh),8rem)] font-black uppercase tracking-tight leading-[0.88] text-white flex flex-wrap justify-center py-3 sm:py-5 text-cinematic-shadow">
                 {'THE FOREST'.split('').map((char, i) => (
                   <span
                     key={i}
@@ -184,7 +184,7 @@ export default function ScrollyChapter({
             {/* Subtitle */}
             <CursorParallaxText shiftX={16} shiftY={10} tilt={4} disabled={activeChapter !== 0}>
               <p
-                className={`relative mt-6 sm:mt-8 text-xs sm:text-sm md:text-base font-semibold text-white/95 tracking-[0.25em] uppercase max-w-xl transition-all duration-700 delay-500 subtitle-cinematic-shadow ${
+                className={`relative mt-4 sm:mt-7 text-[clamp(0.7rem,min(1.4vw,2.2dvh),1rem)] font-semibold text-white/95 tracking-[0.25em] uppercase max-w-xl transition-all duration-700 delay-500 subtitle-cinematic-shadow ${
                   isReady && activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
               >
@@ -196,7 +196,7 @@ export default function ScrollyChapter({
           {/* Bottom Scroll Indicator Icon (Scene 1 Opening) */}
           <div
             aria-hidden="true"
-            className={`absolute bottom-12 sm:bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 transition-all duration-700 delay-700 ${
+            className={`absolute bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5 sm:gap-2 transition-all duration-700 delay-700 ${
               isReady && activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
             }`}
           >
@@ -218,17 +218,17 @@ export default function ScrollyChapter({
             filter: `blur(${s1AboutBlur}px)`,
           }}
         >
-          <div className="relative flex flex-col items-center justify-center w-full">
+          <div className="relative flex flex-col items-center justify-center w-full pt-12">
             {/* Headline */}
             <CursorParallaxText shiftX={26} shiftY={16} tilt={6} disabled={activeChapter !== 0}>
-              <h2 className="relative text-5xl sm:text-7xl md:text-8xl font-black uppercase tracking-tight text-white text-cinematic-shadow">
+              <h2 className="relative text-[clamp(2.25rem,min(7.5vw,11dvh),6rem)] font-black uppercase tracking-tight text-white text-cinematic-shadow">
                 ABOUT
               </h2>
             </CursorParallaxText>
 
             {/* Narrative Overview */}
             <CursorParallaxText shiftX={14} shiftY={9} tilt={3.5} disabled={activeChapter !== 0}>
-              <p className="relative mt-5 sm:mt-6 text-sm sm:text-base md:text-lg font-normal text-white/95 tracking-wide max-w-2xl leading-relaxed subtitle-cinematic-shadow">
+              <p className="relative mt-4 sm:mt-6 text-[clamp(0.85rem,min(1.6vw,2.4dvh),1.125rem)] font-normal text-white/95 tracking-wide max-w-2xl leading-relaxed subtitle-cinematic-shadow">
                 An interactive cinematic journey into ancient woodlands — witnessing their primordial majesty, the sudden terror of wildfire, and nature&apos;s quiet resilience toward rebirth.
               </p>
             </CursorParallaxText>
@@ -257,7 +257,7 @@ export default function ScrollyChapter({
       >
         {/* Fast kinetic reveal with heat-shimmer & orange-amber text glow */}
         <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 2}>
-          <h1 className="text-4xl min-[400px]:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)]">
+          <h1 className="text-[clamp(2rem,min(7.2vw,11dvh),7.5rem)] font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)]">
             FOREST AND LAND FIRES
           </h1>
         </CursorParallaxText>
@@ -302,7 +302,7 @@ export default function ScrollyChapter({
       >
         {/* Letter-by-letter opacity fade mimicking settling ash */}
         <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 4}>
-          <h1 className="text-[2.25rem] min-[390px]:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight text-neutral-200 flex flex-wrap justify-center py-2">
+          <h1 className="text-[clamp(2.1rem,min(7.8vw,11.5dvh),7.5rem)] font-black uppercase tracking-tight text-neutral-200 flex flex-wrap justify-center py-2">
             {'WHAT REMAINS'.split('').map((char, i) => (
               <span
                 key={i}
@@ -324,7 +324,7 @@ export default function ScrollyChapter({
         {/* Subtitle */}
         <CursorParallaxText shiftX={16} shiftY={10} tilt={4} disabled={activeChapter !== 4}>
           <p
-            className="mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-400 tracking-widest max-w-xl italic transition-all duration-300"
+            className="mt-4 sm:mt-7 text-[clamp(0.85rem,min(1.8vw,2.5dvh),1.25rem)] font-light text-neutral-400 tracking-widest max-w-xl italic transition-all duration-300"
             style={{
               opacity: s5ExitProg > 0.05 ? 0 : 0.85,
             }}
@@ -336,7 +336,7 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 6: THE HUMAN TOLL ===================== */}
       <div
-        className={`absolute inset-0 flex items-center justify-start px-5 sm:px-14 md:px-20 lg:px-24 pt-16 sm:pt-0 transition-all duration-200 ${
+        className={`absolute inset-0 flex items-center justify-start px-5 sm:px-14 md:px-20 lg:px-24 pt-20 pb-6 transition-all duration-200 ${
           activeChapter === 5 && s6Opacity > 0.1
             ? 'visible pointer-events-auto z-30'
             : activeChapter === 5 && s6Opacity > 0.01
@@ -351,7 +351,7 @@ export default function ScrollyChapter({
         }}
       >
         <div
-          className={`text-left max-w-xl md:max-w-2xl flex flex-col gap-3 sm:gap-4 ${
+          className={`text-left max-w-xl md:max-w-2xl flex flex-col gap-2.5 sm:gap-4 ${
             activeChapter === 5 && s6Opacity > 0.1 ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
         >
@@ -362,7 +362,7 @@ export default function ScrollyChapter({
             tilt={6}
             disabled={!(activeChapter === 5 && s6Opacity > 0.1)}
           >
-            <h1 className="text-[2.25rem] min-[390px]:text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-[0.92] py-1 drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+            <h1 className="text-[clamp(2rem,min(6vw,9.5dvh),6rem)] font-black uppercase tracking-tight text-white leading-[0.92] py-1 drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
               <span className="block">HEALTH</span>
               <span className="block">IMPACTS</span>
             </h1>
@@ -396,7 +396,7 @@ export default function ScrollyChapter({
         {/* Headline */}
         <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 6}>
           <h1
-            className={`text-[2.35rem] min-[400px]:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[0.05em] text-white py-2 transition-all duration-1000 ease-out text-cinematic-shadow ${
+            className={`text-[clamp(2.2rem,min(8vw,11.5dvh),7.5rem)] font-black uppercase tracking-[0.05em] text-white py-2 transition-all duration-1000 ease-out text-cinematic-shadow ${
               activeChapter === 6
                 ? 'opacity-100 translate-y-0 scale-100'
                 : 'opacity-0 translate-y-6 scale-95'
@@ -409,7 +409,7 @@ export default function ScrollyChapter({
         {/* Subtitle */}
         <CursorParallaxText shiftX={16} shiftY={10} tilt={4} disabled={activeChapter !== 6}>
           <p
-            className={`mt-6 sm:mt-8 text-sm sm:text-lg md:text-xl font-light text-neutral-200 tracking-wide max-w-xl transition-all duration-1000 delay-300 subtitle-cinematic-shadow ${
+            className={`mt-4 sm:mt-7 text-[clamp(0.85rem,min(1.7vw,2.4dvh),1.25rem)] font-light text-neutral-200 tracking-wide max-w-xl transition-all duration-1000 delay-300 subtitle-cinematic-shadow ${
               activeChapter === 6 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
           >
@@ -440,18 +440,18 @@ export default function ScrollyChapter({
               : 'opacity 0.2s ease-out, transform 0.2s ease-out, filter 0.2s ease-out',
         }}
       >
-        <div className="relative flex flex-col items-center justify-center max-w-3xl mx-auto text-center">
+        <div className="relative flex flex-col items-center justify-center max-w-3xl mx-auto text-center pt-12">
 
           {/* Headline */}
           <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 7}>
-            <h1 className="text-[2.5rem] min-[390px]:text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-tight leading-[0.9] text-white text-cinematic-shadow">
+            <h1 className="text-[clamp(2.35rem,min(8.5vw,11.5dvh),7.5rem)] font-black uppercase tracking-tight leading-[0.9] text-white text-cinematic-shadow">
               LET&apos;S BUILD
             </h1>
           </CursorParallaxText>
 
           {/* Subtitle */}
           <CursorParallaxText shiftX={16} shiftY={10} tilt={4} disabled={activeChapter !== 7}>
-            <p className="mt-5 sm:mt-6 text-sm sm:text-base md:text-lg font-light text-white/90 tracking-wide max-w-xl leading-relaxed subtitle-cinematic-shadow">
+            <p className="mt-4 sm:mt-6 text-[clamp(0.85rem,min(1.6vw,2.3dvh),1.125rem)] font-light text-white/90 tracking-wide max-w-xl leading-relaxed subtitle-cinematic-shadow">
               Every voice, action, and collaboration helps protect Indonesia&apos;s ancient rainforests and restore what was lost.
             </p>
           </CursorParallaxText>

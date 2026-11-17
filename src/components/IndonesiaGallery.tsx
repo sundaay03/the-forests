@@ -35,6 +35,16 @@ export default function IndonesiaGallery({
 }: IndonesiaGalleryProps) {
   const [items, setItems] = useState<GalleryItem[]>(DEFAULT_GALLERY_ITEMS);
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
+  const [viewportWidth, setViewportWidth] = useState<number>(() =>
+    typeof window !== 'undefined' ? window.innerWidth : 1280
+  );
+
+  useEffect(() => {
+    const onResize = () => setViewportWidth(window.innerWidth);
+    onResize();
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   // Dynamically query R2 images on mount
   useEffect(() => {
@@ -100,19 +110,19 @@ export default function IndonesiaGallery({
   const totalPhotos = items.length;
   // Compact photo window so all 10 photos finish completely before s2Prog = 0.68
   const photoWindow = 0.16;
-  const isCompactViewport = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isCompactViewport = viewportWidth < 768;
 
   return (
     <div
-      className="absolute inset-0 pointer-events-none w-full h-full overflow-hidden select-none z-20"
+      className="absolute inset-0 pointer-events-none w-full h-full overflow-hidden select-none z-20 flex flex-col md:flex-row items-center justify-center md:justify-between gap-4 sm:gap-6 md:gap-[2.6vw] px-5 sm:px-10 md:px-[5.2vw] pt-20 pb-6 sm:pt-24 sm:pb-8 md:pt-[10dvh] md:pb-[4dvh]"
       style={{
         opacity: s2OverallOpacity,
         transition: 'opacity 0.15s ease-out',
       }}
     >
-      {/* ===================== LEFT / TOP CONTENT (Stacks above photo stream on mobile) ===================== */}
+      {/* ===================== LEFT / TOP CONTENT (Flex-isolated & zoom-invariant proportion) ===================== */}
       <div
-        className="absolute left-5 right-5 top-[78px] sm:top-[92px] md:right-auto md:left-16 lg:left-24 md:top-[52%] md:-translate-y-1/2 z-20 pointer-events-auto max-w-xl md:max-w-md lg:max-w-xl text-center md:text-left mx-auto md:mx-0 will-change-transform"
+        className="relative z-20 pointer-events-auto w-full md:w-[46%] lg:w-[45%] min-w-0 max-w-xl md:max-w-[45vw] text-center md:text-left will-change-transform"
         style={{
           opacity: textOpacity,
           filter: textBlur > 0 ? `blur(${textBlur}px)` : 'none',
@@ -122,7 +132,7 @@ export default function IndonesiaGallery({
         {/* Main Headline */}
         <CursorParallaxText shiftX={24} shiftY={16} tilt={6} disabled={activeChapter !== 1}>
           <h1
-            className="text-[1.75rem] min-[390px]:text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-[0.95] text-white transition-colors duration-300"
+            className="text-[clamp(1.65rem,6.5vw,2.75rem)] md:text-[min(4vw,8dvh)] font-black uppercase tracking-tight leading-[0.95] text-white transition-colors duration-300"
             style={{
               textShadow:
                 burnProg > 0.05
@@ -147,7 +157,7 @@ export default function IndonesiaGallery({
         {/* Subtitle */}
         <CursorParallaxText shiftX={16} shiftY={10} tilt={4} disabled={activeChapter !== 1}>
           <p
-            className="mt-2.5 sm:mt-4 md:mt-5 text-xs sm:text-sm md:text-lg font-light text-neutral-200 tracking-wider leading-relaxed max-w-md mx-auto md:mx-0 transition-colors duration-300"
+            className="mt-2.5 sm:mt-4 md:mt-[1.8dvh] text-[clamp(0.8rem,3.4vw,1.05rem)] md:text-[min(1.22vw,2.4dvh)] font-light text-neutral-200 tracking-wider leading-relaxed max-w-md md:max-w-[30vw] mx-auto md:mx-0 transition-colors duration-300"
             style={{
               textShadow:
                 burnProg > 0.05
@@ -161,14 +171,14 @@ export default function IndonesiaGallery({
 
         {/* Narrative Paragraph */}
         <CursorParallaxText shiftX={11} shiftY={7} tilt={2.5} disabled={activeChapter !== 1}>
-          <p className="mt-2 sm:mt-3 md:mt-4 text-[11px] sm:text-xs md:text-sm text-neutral-300/90 font-normal leading-relaxed max-w-md mx-auto md:mx-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.25)]">
+          <p className="mt-2 sm:mt-3 md:mt-[1.5dvh] text-[clamp(0.72rem,2.8vw,0.9rem)] md:text-[min(0.95vw,1.9dvh)] text-neutral-300/90 font-normal leading-relaxed max-w-md md:max-w-[29vw] mx-auto md:mx-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.25)]">
             Indonesia&apos;s forest area covers 124,975,956 hectares, home to around 31,750 flora species and approximately 744,279 terrestrial and aquatic fauna species.
           </p>
         </CursorParallaxText>
       </div>
 
-      {/* ===================== RIGHT / CENTER-BOTTOM PHOTO STREAM ===================== */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-[59%] -translate-y-1/2 sm:top-[58%] md:left-auto md:translate-x-0 md:right-12 lg:right-24 md:top-1/2 md:-translate-y-1/2 z-30 w-[min(86vw,340px)] sm:w-[400px] md:w-[440px] lg:w-[540px] h-[255px] sm:h-[300px] md:h-[440px] lg:h-[480px] pointer-events-none">
+      {/* ===================== RIGHT / BOTTOM PHOTO STREAM (Dedicated flex slot & zoom-invariant size) ===================== */}
+      <div className="relative z-30 w-[min(86vw,44dvh,340px)] h-[min(34dvh,255px)] md:w-[min(34vw,68.5dvh)] md:h-[min(25.5vw,51.4dvh)] shrink-0 pointer-events-none">
         {items.map((item, index) => {
           // Center scroll progress for this photo (spaced compactly from 0.08 to 0.58)
           const centerProg = 0.08 + (index / Math.max(1, totalPhotos - 1)) * 0.50;
@@ -180,9 +190,9 @@ export default function IndonesiaGallery({
 
           const clampedP = Math.max(0, Math.min(1, p));
 
-          // Keep mobile cards horizontally centered & gently animated vertically
-          const translateY = (0.5 - clampedP) * (isCompactViewport ? 20 : 72); // in vh
-          const translateX = isCompactViewport ? 0 : Math.pow(clampedP - 0.5, 2) * 4 * 12; // in vw
+          // Keep motion proportionally bounded within the dedicated right/bottom container
+          const translateY = (0.5 - clampedP) * (isCompactViewport ? 18 : 42); // in vh
+          const translateX = isCompactViewport ? 0 : Math.pow(clampedP - 0.5, 2) * 4 * 5; // in vw
 
           // Scale: small at start (0.35) -> large in center (1.05) -> small at end (0.35)
           const scale = 0.35 + 4 * clampedP * (1 - clampedP) * 0.70;

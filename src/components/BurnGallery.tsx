@@ -41,6 +41,16 @@ export default function BurnGallery({
 }: BurnGalleryProps) {
   const [items, setItems] = useState<BurnGalleryItem[]>(DEFAULT_BURN_ITEMS);
   const [selectedItem, setSelectedItem] = useState<BurnGalleryItem | null>(null);
+  const [viewportWidth, setViewportWidth] = useState<number>(() =>
+    typeof window !== 'undefined' ? window.innerWidth : 1280
+  );
+
+  useEffect(() => {
+    const onResize = () => setViewportWidth(window.innerWidth);
+    onResize();
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   // Manual override index (when user clicks arrows or drags)
   const [manualOffset, setManualOffset] = useState<number | null>(null);
@@ -234,7 +244,7 @@ export default function BurnGallery({
 
   return (
     <div
-      className="absolute inset-0 z-30 pointer-events-auto w-full h-full flex flex-col justify-center gap-5 pt-12 sm:gap-0 sm:justify-between p-4 sm:p-8 md:p-12 overflow-hidden select-none transition-opacity duration-300"
+      className="absolute inset-0 z-30 pointer-events-auto w-full h-full flex flex-col justify-center gap-4 sm:gap-6 pt-16 sm:pt-20 pb-4 sm:pb-8 px-4 sm:px-8 md:px-12 overflow-hidden select-none transition-opacity duration-300"
       style={{
         opacity: overallOpacity,
       }}
@@ -253,7 +263,7 @@ export default function BurnGallery({
 
       {/* ===================== TOP HEADER ===================== */}
       <div
-        className="relative z-20 w-full max-w-5xl mx-auto pt-0 sm:pt-24 md:pt-28 lg:pt-32 text-center flex flex-col items-center justify-center will-change-transform"
+        className="relative z-20 w-full max-w-5xl mx-auto text-center flex flex-col items-center justify-center will-change-transform"
         style={{
           opacity: titleOpacity,
           transform: `translateY(${titleTranslateY}px) scale(${titleScale})`,
@@ -263,7 +273,7 @@ export default function BurnGallery({
       >
         {/* Editorial Title - Same typography & heat-shimmer as FOREST AND LAND FIRES */}
         <CursorParallaxText shiftX={24} shiftY={15} tilt={6} disabled={activeChapter !== 2}>
-          <h2 className="text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
+          <h2 className="text-[clamp(1.45rem,min(4.8vw,6dvh),3.75rem)] font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
             BURNING THE FUTURE
           </h2>
         </CursorParallaxText>
@@ -271,14 +281,14 @@ export default function BurnGallery({
 
       {/* ===================== CENTER 3D COVERFLOW STAGE ===================== */}
       <div
-        className="relative z-10 w-full sm:flex-1 flex items-center justify-center sm:my-auto overflow-visible [perspective:1200px] will-change-transform"
+        className="relative z-10 w-full flex items-center justify-center overflow-visible [perspective:1200px] will-change-transform"
         style={{
           transform: `translateX(${cardsTotalShiftVw}vw)`,
           opacity: cardsOpacity,
           transition: 'transform 0.1s ease-out, opacity 0.15s ease-out',
         }}
       >
-        <div className="relative w-full max-w-5xl h-[250px] sm:h-[380px] md:h-[460px] flex items-center justify-center pointer-events-none">
+        <div className="relative w-full max-w-5xl h-[min(42dvh,380px)] sm:h-[min(48dvh,460px)] flex items-center justify-center pointer-events-none">
           {items.map((item, index) => {
             // Distance from currently focused card using smooth momentum index
             const effectiveActive = smoothIndex + dragOffset / 320;
@@ -288,11 +298,11 @@ export default function BurnGallery({
             // Hide cards that are far outside the viewport to maximize performance
             if (absOffset > 4.2) return null;
 
-            // 3D Cover Flow layout calculations
+            // 3D Cover Flow layout calculations scaled smoothly to current viewport width
             const spacingX =
-              typeof window !== 'undefined' && window.innerWidth < 640
-                ? Math.round(window.innerWidth * 0.56)
-                : 310;
+              viewportWidth < 640
+                ? Math.round(viewportWidth * 0.56)
+                : Math.min(310, Math.round(viewportWidth * 0.27));
             const translateX = offset * spacingX;
             const rotateY = Math.max(-42, Math.min(42, -offset * 26));
             const translateZ = -absOffset * 95;
@@ -318,7 +328,7 @@ export default function BurnGallery({
                   opacity,
                   zIndex,
                 }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] max-w-[320px] sm:max-w-none sm:w-[380px] md:w-[460px] lg:w-[500px] aspect-[16/11] pointer-events-auto cursor-pointer group will-change-transform"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(80vw,54dvh,490px)] aspect-[16/11] pointer-events-auto cursor-pointer group will-change-transform"
               >
                 <CursorTiltCard
                   maxTilt={14}

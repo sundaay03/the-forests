@@ -23,7 +23,7 @@ const CHAPTER_TARGET_RATIOS = [
   0.000, // 01 THE GATEWAY    -> "THE FOREST" headline + 1.webm
   0.138, // 02 THE CANOPY     -> "WONDERFUL OF INDONESIA" + 1st gallery photo + 2.webm
   0.270, // 03 THE INFERNO    -> "FOREST AND LAND FIRES" (burn overlay cleared) + 3.webm
-  0.412, // 04 STATISTIC      -> Karhutla 3-card dashboard fully entered + 4.webm
+  0.429, // 04 STATISTIC      -> Karhutla 3-card dashboard all entered + 4.webm
   0.525, // 05 THE ASHES      -> "WHAT REMAINS" + subtitle + 5.webm
   0.648, // 06 THE HUMAN TOLL -> "HEALTH IMPACTS" + items 1-3 + 6.webm
   0.788, // 07 THE REBIRTH    -> "REFOREST" + subtitle + 7.webm
@@ -229,6 +229,51 @@ export default function ScrollyExperience() {
       document.body.style.overflow = '';
     };
   }, [isMounted, isLoaderDone]);
+
+  // Prevent browser pinch-zoom, Ctrl+Scroll zoom, and Ctrl +/-/0 keyboard zoom
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const handleWheelZoom = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+      }
+    };
+
+    const handleKeyZoom = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      if (
+        e.key === '+' ||
+        e.key === '=' ||
+        e.key === '-' ||
+        e.key === '_' ||
+        e.key === '0' ||
+        e.code === 'NumpadAdd' ||
+        e.code === 'NumpadSubtract' ||
+        e.code === 'Numpad0'
+      ) {
+        e.preventDefault();
+      }
+    };
+
+    const handleGesture = (e: Event) => {
+      e.preventDefault();
+    };
+
+    window.addEventListener('wheel', handleWheelZoom, { passive: false });
+    window.addEventListener('keydown', handleKeyZoom);
+    window.addEventListener('gesturestart', handleGesture);
+    window.addEventListener('gesturechange', handleGesture);
+    window.addEventListener('gestureend', handleGesture);
+
+    return () => {
+      window.removeEventListener('wheel', handleWheelZoom);
+      window.removeEventListener('keydown', handleKeyZoom);
+      window.removeEventListener('gesturestart', handleGesture);
+      window.removeEventListener('gesturechange', handleGesture);
+      window.removeEventListener('gestureend', handleGesture);
+    };
+  }, [isMounted]);
 
   // Executed behind 100% liquid coverage during Scene 3 of NavbarLiquidTransition
   const handleSwapChapter = useCallback((chapterIndex: number) => {
