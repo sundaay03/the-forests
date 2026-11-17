@@ -53,13 +53,13 @@ Website ini juga dilengkapi dengan loading screen awal, navigasi **Liquid Morphi
    Akses [http://localhost:3000](http://localhost:3000).
 
 ### Menjalankan Melalui Link Deployment
-   [text](https://the-forest-sigma.vercel.app/)
+   [https://the-forest-sigma.vercel.app/](https://the-forest-sigma.vercel.app/)
 
 
 ## Nama Tim dan Anggota
 
-- **Nama Tim:** `[Isi Nama Tim Anda]`
+- **Nama Tim:** `Zayyan Cihuy 😂`
 - **Anggota:**
-  1. `[Isi Nama Anggota 1]` — `[Peran, mis. UI/UX & Frontend Developer]`
-  2. `[Isi Nama Anggota 2]` — `[Peran]`
-  3. `[Isi Nama Anggota 3]` — `[Peran]`
+  1. `Sandi Riandi - 3337250154`
+  2. `Raditya Ahmad Pratama - 3337250052`
+  3. `Zayyan Fadhlur Rahman - 3337250010`
