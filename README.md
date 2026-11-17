@@ -29,42 +29,32 @@ Website ini juga dilengkapi dengan loading screen awal, navigasi **Liquid Morphi
 
 ### Langkah Instalasi & Menjalankan (Development)
 
-1. **Masuk ke direktori project** (atau clone repository jika mengunduh dari Git):
+1. **Buka Code Editor** (kemudian clone repository):
    ```bash
-   cd the-forest
+   git clone https://github.com/sundaay03/webdesign_Zayyan-Cihuy_technoversary_vol.II
    ```
 
-2. **Instal seluruh dependensi**:
+2. **Masuk ke direktori project**:
+   ```bash
+   cd webdesign_Zayyan-Cihuy_technoversary_vol.II
+   ```
+
+3. **Instal seluruh dependensi**:
    ```bash
    npm install
    ```
 
-3. **Jalankan server development**:
+4. **Jalankan server development**:
    ```bash
    npm run dev
    ```
 
-4. **Buka di browser**:
+5. **Buka di browser**:
    Akses [http://localhost:3000](http://localhost:3000).
 
-### Menjalankan Versi Produksi
+### Menjalankan Melalui Link Deployment
+   [text](https://the-forest-sigma.vercel.app/)
 
-1. **Build project**:
-   ```bash
-   npm run build
-   ```
-
-2. **Jalankan server produksi**:
-   ```bash
-   npm run start
-   ```
-
-3. *(Opsional)* **Pemeriksaan linter**:
-   ```bash
-   npm run lint
-   ```
-
----
 
 ## Nama Tim dan Anggota
 
