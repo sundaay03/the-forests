@@ -58,6 +58,8 @@ Website ini juga dilengkapi dengan loading screen awal, navigasi **Liquid Morphi
 
 ## Nama Tim dan Anggota
 
+**Universitas Sultan Ageng Tirtayasa**
+
 - **Nama Tim:** **Zayyan Cihuy 😂**
 - **Anggota:**
   - **Sandi Riandi - 3337250154**
