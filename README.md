@@ -1,4 +1,4 @@
-# THE FOREST
+![THE FOREST](./public/the-forest-title.png)
 
 Website scrollytelling sinematik interaktif tentang kelestarian hutan tropis Indonesia — mengajak pengunjung menyusuri keindahan hutan nusantara, krisis kebakaran hutan dan lahan (karhutla), dampak kesehatan bagi masyarakat, hingga pesan pemulihan dan reboisasi.
 
