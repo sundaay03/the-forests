@@ -60,6 +60,6 @@ Website ini juga dilengkapi dengan loading screen awal, navigasi **Liquid Morphi
 
 - **Nama Tim:** `Zayyan Cihuy 😂`
 - **Anggota:**
-  `Sandi Riandi - 3337250154`
-  `Raditya Ahmad Pratama - 3337250052`
-  `Zayyan Fadhlur Rahman - 3337250010`
+  - `Sandi Riandi - 3337250154`
+  - `Raditya Ahmad Pratama - 3337250052`
+  - `Zayyan Fadhlur Rahman - 3337250010`
