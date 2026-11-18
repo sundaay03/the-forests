@@ -53,7 +53,7 @@ Website ini juga dilengkapi dengan loading screen awal, navigasi **Liquid Morphi
    Akses [http://localhost:3000](http://localhost:3000).
 
 ### Menjalankan Melalui Link Deployment
-   [https://the-forest-sigma.vercel.app/](https://the-forest-sigma.vercel.app/)
+   [https://theforestofficial.vercel.app/](https://theforestofficial.vercel.app/)
 
 
 ## Nama Tim dan Anggota
