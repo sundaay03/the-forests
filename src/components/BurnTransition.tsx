@@ -49,11 +49,13 @@ export default function BurnTransition({ progress }: BurnTransitionProps) {
 
     let width = (canvas.width = window.innerWidth);
     let height = (canvas.height = window.innerHeight);
+    let isMobile = width < 768 || window.matchMedia('(pointer: coarse)').matches;
 
     const handleResize = () => {
       if (!canvas) return;
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
+      isMobile = width < 768 || window.matchMedia('(pointer: coarse)').matches;
     };
     window.addEventListener('resize', handleResize);
 
@@ -70,10 +72,11 @@ export default function BurnTransition({ progress }: BurnTransitionProps) {
       // At progress = 1: fire is at -100
       const fireFrontY = height * (1.1 - progress * 1.3);
 
-      // 1. SPAWN FLAME PARTICLES along the fire front
-      const spawnCount = Math.floor(10 + progress * 25);
+      // 1. SPAWN FLAME PARTICLES along the fire front (capped lighter on mobile)
+      const maxFlames = isMobile ? 55 : 180;
+      const spawnCount = isMobile ? Math.floor(4 + progress * 10) : Math.floor(10 + progress * 25);
       for (let i = 0; i < spawnCount; i++) {
-        if (flamesRef.current.length < 180) {
+        if (flamesRef.current.length < maxFlames) {
           const x = Math.random() * width;
           const y = fireFrontY + Math.random() * (height - fireFrontY + 80);
           flamesRef.current.push({
@@ -90,9 +93,10 @@ export default function BurnTransition({ progress }: BurnTransitionProps) {
       }
 
       // 2. SPAWN RISING SPARKS / EMBERS
-      const sparkCount = Math.floor(4 + progress * 10);
+      const maxSparks = isMobile ? 25 : 80;
+      const sparkCount = isMobile ? Math.floor(2 + progress * 4) : Math.floor(4 + progress * 10);
       for (let i = 0; i < sparkCount; i++) {
-        if (sparksRef.current.length < 80) {
+        if (sparksRef.current.length < maxSparks) {
           sparksRef.current.push({
             x: Math.random() * width,
             y: fireFrontY + Math.random() * 200,

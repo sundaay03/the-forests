@@ -125,24 +125,58 @@ export default function BurnGallery({
   // Combine scroll-driven index with manual arrow/drag navigation
   const targetIndex = manualOffset !== null ? manualOffset : scrollIndex;
 
-  // Deeply cushioned smooth momentum lerp for ultra-calm card transitions
+  // Deeply cushioned smooth momentum lerp (only runs while Scene 3 is visible and index is still converging)
   const [smoothIndex, setSmoothIndex] = useState(0);
   const targetIndexRef = useRef(targetIndex);
   targetIndexRef.current = targetIndex;
+  const smoothIndexRef = useRef(0);
+  const kickLerpRef = useRef<() => void>(() => {});
+  const isGalleryActive = activeChapter === 2 || (scrollProgress >= 0.25 && scrollProgress <= 0.45);
+  const isGalleryActiveRef = useRef(isGalleryActive);
+  isGalleryActiveRef.current = isGalleryActive;
 
   useEffect(() => {
-    let animId: number;
+    let animId: number | null = null;
     const lerpLoop = () => {
-      setSmoothIndex((prev) => {
-        const diff = targetIndexRef.current - prev;
-        if (Math.abs(diff) < 0.0005) return targetIndexRef.current;
-        return prev + diff * 0.05; // calm, silky, responsive momentum
-      });
+      animId = null;
+      if (!isGalleryActiveRef.current) return;
+
+      const cur = smoothIndexRef.current;
+      const tgt = targetIndexRef.current;
+      const diff = tgt - cur;
+      if (Math.abs(diff) < 0.0005) {
+        if (cur !== tgt) {
+          smoothIndexRef.current = tgt;
+          setSmoothIndex(tgt);
+        }
+        return;
+      }
+
+      const next = cur + diff * 0.05;
+      smoothIndexRef.current = next;
+      setSmoothIndex(next);
       animId = requestAnimationFrame(lerpLoop);
     };
-    animId = requestAnimationFrame(lerpLoop);
-    return () => cancelAnimationFrame(animId);
+
+    const kickLerp = () => {
+      if (animId === null && isGalleryActiveRef.current) {
+        animId = requestAnimationFrame(lerpLoop);
+      }
+    };
+    kickLerpRef.current = kickLerp;
+    kickLerp();
+
+    return () => {
+      kickLerpRef.current = () => {};
+      if (animId !== null) cancelAnimationFrame(animId);
+    };
   }, []);
+
+  useEffect(() => {
+    if (isGalleryActive) {
+      kickLerpRef.current();
+    }
+  }, [isGalleryActive, targetIndex]);
 
   // Title entrance animation (drops down, scales up, deblurs)
   const titleEnterEase = 1 - Math.pow(1 - enterProg, 2.5);
@@ -295,8 +329,9 @@ export default function BurnGallery({
             const offset = index - effectiveActive;
             const absOffset = Math.abs(offset);
 
-            // Hide cards that are far outside the viewport to maximize performance
-            if (absOffset > 4.2) return null;
+            // Hide cards that are far outside the viewport to maximize performance (tighter cull on mobile)
+            const cullLimit = viewportWidth < 768 ? 2.1 : 4.2;
+            if (absOffset > cullLimit) return null;
 
             // 3D Cover Flow layout calculations scaled smoothly to current viewport width
             const spacingX =
@@ -335,9 +370,9 @@ export default function BurnGallery({
                   maxShift={10}
                   hoverScale={1.04}
                   perspective={900}
-                  disabled={absOffset > 3.5}
+                  disabled={viewportWidth < 768 || absOffset > 3.5}
                   spotlightColor="rgba(255, 165, 115, 0.26)"
-                  className={`relative w-full h-full rounded-3xl p-2 sm:p-2.5 bg-neutral-950/80 backdrop-blur-xl border transition-[border-color,box-shadow] duration-300 ${
+                  className={`relative w-full h-full rounded-3xl p-2 sm:p-2.5 bg-neutral-950/92 md:bg-neutral-950/80 md:backdrop-blur-xl border transition-[border-color,box-shadow] duration-300 ${
                     isCenter
                       ? 'border-orange-500/60 shadow-[0_20px_60px_rgba(255,87,34,0.35)] ring-1 ring-orange-400/30'
                       : 'border-white/15 hover:border-white/35 shadow-[0_15px_40px_rgba(0,0,0,0.6)]'

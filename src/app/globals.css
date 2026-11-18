@@ -171,3 +171,11 @@ html.lenis, html.lenis body {
 .animate-scroll-wheel {
   animation: scrollWheel 1.65s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
 }
+
+/* Mobile / Touch Performance Guard: avoid continuous GPU filter repaints */
+@media (max-width: 767px), (pointer: coarse) {
+  .animate-heat-shimmer {
+    animation: none !important;
+    text-shadow: 0 0 22px rgba(255, 87, 34, 0.72);
+  }
+}

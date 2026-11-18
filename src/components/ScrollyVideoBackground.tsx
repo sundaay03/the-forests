@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ScrollyVideoBackgroundProps {
   activeChapter: number;
@@ -35,9 +35,32 @@ export default function ScrollyVideoBackground({
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const scrollProgRef = useRef(scrollProgress);
   scrollProgRef.current = scrollProgress;
+  const activeChapterRef = useRef(activeChapter);
+  activeChapterRef.current = activeChapter;
   const lerpTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
   const desiredTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
   const seekStartTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
+  const lastCommitTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
+  const kickScrubRef = useRef<() => void>(() => {});
+
+  const [isMobileMode, setIsMobileMode] = useState<boolean>(() =>
+    typeof window !== 'undefined'
+      ? window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches
+      : false
+  );
+  const isMobileRef = useRef(isMobileMode);
+  isMobileRef.current = isMobileMode;
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile =
+        window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches;
+      setIsMobileMode(mobile);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile, { passive: true });
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // 1. Dedicated Realtime Playback Controller for Scene 3 (THE INFERNO) & Scene 8 (THE CONTACT)
   // Ensures Video 3 and Video 8 play continuously at normal speed, looping forever, even when user is stationary
@@ -87,16 +110,23 @@ export default function ScrollyVideoBackground({
     const commitSeek = (index: number) => {
       const video = videoRefs.current[index];
       if (!video || SCENE_DATA[index].isRealtime) return;
-      if (video.readyState < 1) return;
+      if (video.readyState < 1 || !video.getAttribute('src')) return;
 
       const now = performance.now();
-      // Never allow video.seeking to permanently deadlock scrubbing if a range seek stalls (> 160ms)
-      if (video.seeking && now - seekStartTimesRef.current[index] < 160) return;
+      const mobile = isMobileRef.current;
+      // Throttle mobile seeks (~65ms) so hardware/software decoders never choke on rapid touch flicks
+      if (mobile && now - lastCommitTimesRef.current[index] < 65) return;
+
+      // Never allow video.seeking to permanently deadlock scrubbing if a range seek stalls
+      const stallTimeout = mobile ? 220 : 160;
+      if (video.seeking && now - seekStartTimesRef.current[index] < stallTimeout) return;
 
       const target = desiredTimesRef.current[index] ?? 0;
-      if (Math.abs(video.currentTime - target) > 0.008) {
+      const minDelta = mobile ? 0.025 : 0.008;
+      if (Math.abs(video.currentTime - target) > minDelta) {
         try {
           seekStartTimesRef.current[index] = now;
+          lastCommitTimesRef.current[index] = now;
           video.currentTime = target;
         } catch {
           // Ignore if seeking fails before metadata is ready
@@ -120,7 +150,9 @@ export default function ScrollyVideoBackground({
           }
         };
         video.addEventListener('canplay', playRealtime, { once: true });
-        video.load();
+        if (video.getAttribute('src')) {
+          video.load();
+        }
         cleanupListeners.push(() => video.removeEventListener('canplay', playRealtime));
         return;
       }
@@ -151,7 +183,7 @@ export default function ScrollyVideoBackground({
 
       if (video.readyState >= 2) {
         wakeUp();
-      } else {
+      } else if (video.getAttribute('src')) {
         video.addEventListener('canplay', wakeUp, { once: true });
         cleanupListeners.push(() => video.removeEventListener('canplay', wakeUp));
         video.load();
@@ -163,7 +195,7 @@ export default function ScrollyVideoBackground({
       SCENE_DATA.forEach((s, idx) => {
         if (!s.isRealtime) return;
         const v = videoRefs.current[idx];
-        if (v) {
+        if (v && v.getAttribute('src')) {
           v.muted = true;
           v.defaultMuted = true;
           const curProg = scrollProgRef.current;
@@ -178,19 +210,22 @@ export default function ScrollyVideoBackground({
       cleanupListeners.push(() => window.removeEventListener(evt, handleUserInteraction));
     });
 
-    // 3. Continuous 120fps Lerp Scrubbing Loop for Scenes 1, 2, 4, 5, 6, 7 & Realtime Keeper for Scene 3
-    let animId: number;
+    // 3. On-Demand Smooth Lerp Scrubbing Loop (sleeps at 0% CPU when scroll settles)
+    let animId: number | null = null;
 
     const scrub = () => {
-      animId = requestAnimationFrame(scrub);
+      animId = null;
       const prog = scrollProgRef.current;
+      const mobile = isMobileRef.current;
+      const curChap = activeChapterRef.current;
+      let needsAnotherFrame = false;
 
       SCENE_DATA.forEach((scene, index) => {
         // Realtime looping mode for Scene 3 & Scene 8
         if (scene.isRealtime) {
           const isNearRealtime = prog >= scene.startProg - 0.06 && prog <= scene.endProg + 0.05;
           const v = videoRefs.current[index];
-          if (v) {
+          if (v && v.getAttribute('src')) {
             if (isNearRealtime) {
               if (v.paused) {
                 v.muted = true;
@@ -209,15 +244,18 @@ export default function ScrollyVideoBackground({
           return;
         }
 
+        // On mobile, skip non-loaded distant videos completely
+        if (mobile && Math.abs(index - curChap) > 1) return;
+
         // Only seek videos that are currently visible or approaching
         const isNearActive =
           prog >= scene.startProg - 0.08 && prog <= scene.endProg + 0.08;
         if (!isNearActive) return;
 
         const video = videoRefs.current[index];
-        if (!video) return;
+        if (!video || !video.getAttribute('src')) return;
 
-        // Recover if Chrome's initial concurrent connection pool stalled this video's load
+        // Recover if initial concurrent connection pool stalled this video's load
         if (video.readyState === 0 && video.networkState !== 2) {
           video.load();
         }
@@ -246,11 +284,16 @@ export default function ScrollyVideoBackground({
         // Snap directly after large jumps (e.g. navbar transition), lerp smoothly during continuous scroll
         const currentLerp = lerpTimesRef.current[index] ?? 0;
         const diff = targetTime - currentLerp;
+        const converged = Math.abs(diff) < 0.002;
         const nextLerp =
-          Math.abs(diff) < 0.002 || Math.abs(diff) > 0.6
+          converged || Math.abs(diff) > 0.6
             ? targetTime
-            : currentLerp + diff * 0.28;
+            : currentLerp + diff * (mobile ? 0.36 : 0.28);
         lerpTimesRef.current[index] = nextLerp;
+
+        if (!converged) {
+          needsAnotherFrame = true;
+        }
 
         const safeTime = Math.max(0, Math.min(nextLerp, duration - 0.01));
         desiredTimesRef.current[index] = safeTime;
@@ -258,15 +301,31 @@ export default function ScrollyVideoBackground({
         // Non-blocking frame seek with deadlock protection
         commitSeek(index);
       });
+
+      if (needsAnotherFrame) {
+        animId = requestAnimationFrame(scrub);
+      }
     };
 
-    animId = requestAnimationFrame(scrub);
+    const kickScrub = () => {
+      if (animId === null) {
+        animId = requestAnimationFrame(scrub);
+      }
+    };
+    kickScrubRef.current = kickScrub;
+    kickScrub();
 
     return () => {
-      cancelAnimationFrame(animId);
+      kickScrubRef.current = () => {};
+      if (animId !== null) cancelAnimationFrame(animId);
       cleanupListeners.forEach((fn) => fn());
     };
   }, []);
+
+  // Wake scrubbing loop cleanly whenever scrollProgress or activeChapter changes
+  useEffect(() => {
+    kickScrubRef.current();
+  }, [scrollProgress, activeChapter, isMobileMode]);
 
   const isBlackTransitionWindow = scrollProgress >= 0.942 && scrollProgress <= 1.05;
 
@@ -330,8 +389,9 @@ export default function ScrollyVideoBackground({
         const clampedOpacity = Math.max(0, Math.min(1, opacity));
 
         const videoTransform = 'translateZ(0) scale(1.01)';
-        const videoFilter =
-          index === 2
+        const videoFilter = isMobileMode
+          ? 'none'
+          : index === 2
             ? 'contrast(1.15) saturate(1.2)'
             : index === 3
             ? 'contrast(1.25) brightness(0.95)'
@@ -344,6 +404,7 @@ export default function ScrollyVideoBackground({
             : 'contrast(1.05) saturate(1.05)';
 
         const disableOpacityLag = (index === 6 || index === 7) && isBlackTransitionWindow;
+        const shouldLoadVideo = !isMobileMode || Math.abs(index - activeChapter) <= 1;
 
         return (
           <div
@@ -352,9 +413,10 @@ export default function ScrollyVideoBackground({
             className="absolute inset-0 w-full h-full"
             style={{
               opacity: clampedOpacity,
+              visibility: clampedOpacity <= 0.001 ? 'hidden' : 'visible',
               zIndex: clampedOpacity > 0.01 ? 2 : 1,
               transition: disableOpacityLag ? 'none' : 'opacity 0.18s ease-out',
-              willChange: 'opacity',
+              willChange: isMobileMode ? undefined : 'opacity',
             }}
           >
             <video
@@ -370,12 +432,12 @@ export default function ScrollyVideoBackground({
                 }
               }}
               suppressHydrationWarning
-              src={scene.src}
+              src={shouldLoadVideo ? scene.src : undefined}
               playsInline
               muted
               autoPlay={scene.isRealtime || false}
               loop={scene.isRealtime || false}
-              preload="auto"
+              preload={isMobileMode ? (index === activeChapter ? 'auto' : 'metadata') : 'auto'}
               onLoadedMetadata={(e) => {
                 if (scene.isRealtime) {
                   e.currentTarget.muted = true;
@@ -396,7 +458,7 @@ export default function ScrollyVideoBackground({
                 height: '100%',
                 objectFit: 'cover',
                 transform: videoTransform,
-                willChange: 'transform, filter',
+                willChange: isMobileMode ? undefined : 'transform, filter',
                 filter: videoFilter,
               }}
             />

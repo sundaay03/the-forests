@@ -102,7 +102,9 @@ export default function ScrollyExperience() {
       if (cancelled || finished) return;
 
       const elapsed = now - mountStart;
-      const videos = Array.from(document.querySelectorAll('video'));
+      const allVideos = Array.from(document.querySelectorAll('video'));
+      const activeVideos = allVideos.filter((v) => Boolean(v.getAttribute('src')));
+      const videos = activeVideos.length > 0 ? activeVideos : allVideos;
       const primaryVideo = videos[0];
       const primaryReady = !primaryVideo || primaryVideo.readyState >= 2;
 
@@ -160,10 +162,14 @@ export default function ScrollyExperience() {
     lenisRef.current = lenis;
 
     let lastProg = -1;
+    const minProgDelta =
+      window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches
+        ? 0.00025
+        : 0.00005;
     const updateScrollMetrics = (prog: number) => {
       if (typeof prog !== 'number' || isNaN(prog)) return;
       const clampedProg = Math.max(0, Math.min(1, prog));
-      if (Math.abs(clampedProg - lastProg) < 0.00005) return;
+      if (Math.abs(clampedProg - lastProg) < minProgDelta) return;
       lastProg = clampedProg;
 
       // Scale progress by (8 / 7) so Scenes 1–7 preserve their exact 0.0 -> 1.0 checkpoints
