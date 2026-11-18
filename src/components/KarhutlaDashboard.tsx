@@ -1,10 +1,18 @@
 'use client';
 
-import { useState, useEffect, useRef, type CSSProperties } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+  type CSSProperties,
+} from 'react';
 import { createPortal } from 'react-dom';
 import CursorTiltCard from './CursorTiltCard';
 import CursorParallaxText from './CursorParallaxText';
 import type { Language } from '@/lib/i18n';
+
+const emptySubscribe = () => () => {};
 
 interface RegionalFireEntry {
   rank: number;
@@ -313,7 +321,11 @@ export default function KarhutlaDashboard({
   const regionalFires = REGIONAL_FIRES_BY_LANG[lang];
   const sourceLabel = lang === 'id' ? 'Sumber' : 'Source';
   const [activeModal, setActiveModal] = useState<'burned' | 'casualties' | 'health' | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   const [manualMobileIndex, setManualMobileIndex] = useState<number | null>(null);
   const [isDesktop, setIsDesktop] = useState<boolean>(() =>
     typeof window !== 'undefined' ? window.innerWidth >= 1024 : true
@@ -321,9 +333,7 @@ export default function KarhutlaDashboard({
   const lastLocalProgRef = useRef(localProgress);
 
   useEffect(() => {
-    setMounted(true);
     const updateViewport = () => setIsDesktop(window.innerWidth >= 1024);
-    updateViewport();
     window.addEventListener('resize', updateViewport, { passive: true });
     return () => window.removeEventListener('resize', updateViewport);
   }, []);
@@ -331,29 +341,32 @@ export default function KarhutlaDashboard({
   // Return to scroll-driven alternating cards whenever user scrolls
   useEffect(() => {
     if (Math.abs(localProgress - lastLocalProgRef.current) > 0.04) {
-      setManualMobileIndex(null);
       lastLocalProgRef.current = localProgress;
+      const raf = requestAnimationFrame(() => setManualMobileIndex(null));
+      return () => cancelAnimationFrame(raf);
     }
   }, [localProgress]);
 
   const scrollMobileIndex = localProgress < 0.52 ? 0 : localProgress < 0.69 ? 1 : 2;
   const activeMobileIndex = manualMobileIndex !== null ? manualMobileIndex : scrollMobileIndex;
 
+  const canKeepModal = isActive && exitProgress < 0.75;
+  const visibleModal = canKeepModal ? activeModal : null;
+
   useEffect(() => {
-    if (!activeModal) return;
+    if (!visibleModal) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setActiveModal(null);
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeModal]);
+  }, [visibleModal]);
 
-  const canKeepModal = isActive && exitProgress < 0.75;
-
-  // Automatically dismiss modal if user scrolls out of Scene 4
+  // Clear stored modal state cleanly after user scrolls out of Scene 4
   useEffect(() => {
     if (!canKeepModal && activeModal) {
-      setActiveModal(null);
+      const raf = requestAnimationFrame(() => setActiveModal(null));
+      return () => cancelAnimationFrame(raf);
     }
   }, [canKeepModal, activeModal]);
 
@@ -369,8 +382,8 @@ export default function KarhutlaDashboard({
 
   const opacity = isActive ? enterOpacity * exitOpacity : 0;
   const translateY = enterTranslateY + exitTranslateY;
-  const cardOpacity = activeModal ? opacity * 0.65 : opacity;
-  const contentBlur = activeModal ? Math.max(exitBlur, 5) : exitBlur;
+  const cardOpacity = visibleModal ? opacity * 0.65 : opacity;
+  const contentBlur = visibleModal ? Math.max(exitBlur, 5) : exitBlur;
 
   // Desktop staggered header motion (enters early 0.00 -> 0.14, exits last 0.86 -> 0.99)
   const desktopHeader = isActive
@@ -378,26 +391,19 @@ export default function KarhutlaDashboard({
     : { opacity: 0, translateY: 34, blur: 0 };
 
   const headerOpacity = isDesktop
-    ? activeModal
+    ? visibleModal
       ? desktopHeader.opacity * 0.65
       : desktopHeader.opacity
     : cardOpacity;
   const headerTranslateY = isDesktop ? desktopHeader.translateY : translateY;
   const headerBlur = isDesktop
-    ? activeModal
+    ? visibleModal
       ? Math.max(desktopHeader.blur, 5)
       : desktopHeader.blur
     : contentBlur;
 
   const slotTransformStyle: CSSProperties = {
-    transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)${activeModal ? ' scale(0.99)' : ''}`,
-  };
-  const cardStyle: CSSProperties = {
-    ...cardGlassStyle,
-    opacity: cardOpacity,
-  };
-  const contentBlurStyle: CSSProperties = {
-    filter: contentBlur > 0.05 ? `blur(${contentBlur.toFixed(1)}px)` : 'none',
+    transform: `translate3d(0, ${translateY.toFixed(1)}px, 0)${visibleModal ? ' scale(0.99)' : ''}`,
   };
 
   return (
@@ -405,7 +411,7 @@ export default function KarhutlaDashboard({
       className="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-14 sm:pt-12 lg:pt-6 pb-6 lg:pb-12 flex flex-col items-center justify-center"
       style={{
         visibility: isActive && (opacity > 0.01 || desktopHeader.opacity > 0.01) ? 'visible' : 'hidden',
-        pointerEvents: isActive && opacity > 0.05 && !activeModal ? 'auto' : 'none',
+        pointerEvents: isActive && opacity > 0.05 && !visibleModal ? 'auto' : 'none',
       }}
     >
       {/* ===================== DASHBOARD CONTENT (NO ANCESTOR OPACITY/FILTER SO BACKDROP-FILTER STAYS ACTIVE) ===================== */}
@@ -414,7 +420,7 @@ export default function KarhutlaDashboard({
         <div
           className="text-center mb-6 sm:mb-8 lg:mb-[clamp(1.75rem,5.5dvh,3.75rem)] max-w-4xl sm:max-w-5xl mx-auto flex flex-col items-center justify-center"
           style={{
-            transform: `translate3d(0, ${headerTranslateY.toFixed(1)}px, 0)${activeModal ? ' scale(0.99)' : ''}`,
+            transform: `translate3d(0, ${headerTranslateY.toFixed(1)}px, 0)${visibleModal ? ' scale(0.99)' : ''}`,
             filter: headerBlur > 0.05 ? `blur(${headerBlur.toFixed(1)}px)` : 'none',
             opacity: headerOpacity,
           }}
@@ -423,7 +429,7 @@ export default function KarhutlaDashboard({
             shiftX={24}
             shiftY={15}
             tilt={6}
-            disabled={!isActive || Boolean(activeModal)}
+            disabled={!isActive || Boolean(visibleModal)}
           >
             <h2 className="text-[clamp(1.45rem,min(4.6vw,5.8dvh),3.75rem)] font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
               {lang === 'id' ? 'STATISTIK' : 'STATISTICS'}
@@ -446,19 +452,19 @@ export default function KarhutlaDashboard({
               : { opacity: 0, translateY: 34, blur: 0 };
 
             const perCardOpacity = isDesktop
-              ? activeModal
+              ? visibleModal
                 ? desktopMotion.opacity * 0.65
                 : desktopMotion.opacity
               : cardOpacity;
             const perCardTransform: CSSProperties = isDesktop
               ? {
                   transform: `translate3d(0, ${desktopMotion.translateY.toFixed(1)}px, 0)${
-                    activeModal ? ' scale(0.99)' : ''
+                    visibleModal ? ' scale(0.99)' : ''
                   }`,
                 }
               : slotTransformStyle;
             const perCardBlurVal = isDesktop
-              ? activeModal
+              ? visibleModal
                 ? Math.max(desktopMotion.blur, 5)
                 : desktopMotion.blur
               : contentBlur;
@@ -478,7 +484,7 @@ export default function KarhutlaDashboard({
                 : 'opacity-0 translate-y-5 scale-95 z-10 pointer-events-none';
 
             const desktopPointerClass =
-              isDesktop && desktopMotion.opacity > 0.15 && !activeModal
+              isDesktop && desktopMotion.opacity > 0.15 && !visibleModal
                 ? 'lg:pointer-events-auto'
                 : 'lg:pointer-events-none';
 
@@ -497,7 +503,7 @@ export default function KarhutlaDashboard({
                   hoverScale={1.025}
                   disabled={
                     !isActive ||
-                    Boolean(activeModal) ||
+                    Boolean(visibleModal) ||
                     (isDesktop ? desktopMotion.opacity < 0.2 : !isMobileCurrent)
                   }
                 >
@@ -557,7 +563,7 @@ export default function KarhutlaDashboard({
       </div>
 
       {/* ===================== INTERACTIVE DETAIL MODAL (PORTALED TO BODY FOR FULL-VIEWPORT DEFOCUS) ===================== */}
-      {mounted && activeModal && createPortal(
+      {mounted && visibleModal && createPortal(
         <div
           role="dialog"
           aria-modal="true"
@@ -578,7 +584,7 @@ export default function KarhutlaDashboard({
             </button>
 
             {/* TAB 1: BURNED LAND AREA */}
-            {activeModal === 'burned' && (
+            {visibleModal === 'burned' && (
               <div>
                 <h3 className="text-2xl font-black text-white mb-1">
                   {lang === 'id' ? '1.103.132 ha Lahan Terbakar' : '1,103,132 ha Scorched'}
@@ -619,7 +625,7 @@ export default function KarhutlaDashboard({
             )}
 
             {/* TAB 2: CASUALTIES */}
-            {activeModal === 'casualties' && (
+            {visibleModal === 'casualties' && (
               <div>
                 <h3 className="text-2xl font-black text-white mb-1">
                   {lang === 'id' ? '351 Korban di Garis Depan' : '351 Frontline Casualties'}
@@ -661,7 +667,7 @@ export default function KarhutlaDashboard({
             )}
 
             {/* TAB 3: HEALTH CRISIS */}
-            {activeModal === 'health' && (
+            {visibleModal === 'health' && (
               <div>
                 <h3 className="text-2xl font-black text-white mb-1">
                   {lang === 'id' ? '333.470 Kasus ISPA' : '333,470 ARI Cases'}

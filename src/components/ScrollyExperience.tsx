@@ -1,9 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import Lenis from 'lenis';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ScrollyVideoBackground from './ScrollyVideoBackground';
 import ScrollyChapter from './ScrollyChapter';
 import ScrollyHUD from './ScrollyHUD';
@@ -14,8 +18,25 @@ import NavbarLiquidTransition, {
 } from './NavbarLiquidTransition';
 import type { Language } from '@/lib/i18n';
 
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
+const emptySubscribe = () => () => {};
+const LANG_STORAGE_KEY = 'the-forest-lang';
+const LANG_EVENT = 'the-forest-lang-change';
+
+function subscribeLanguage(callback: () => void) {
+  window.addEventListener('storage', callback);
+  window.addEventListener(LANG_EVENT, callback);
+  return () => {
+    window.removeEventListener('storage', callback);
+    window.removeEventListener(LANG_EVENT, callback);
+  };
+}
+
+function getLanguageSnapshot(): Language {
+  try {
+    return window.localStorage.getItem(LANG_STORAGE_KEY) === 'id' ? 'id' : 'en';
+  } catch {
+    return 'en';
+  }
 }
 
 // Exact scroll ratio (0.0 -> 1.0) landing squarely on each chapter's main showcase
@@ -32,7 +53,16 @@ const CHAPTER_TARGET_RATIOS = [
 ] as const;
 
 export default function ScrollyExperience() {
-  const [isMounted, setIsMounted] = useState(false);
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+  const lang = useSyncExternalStore<Language>(
+    subscribeLanguage,
+    getLanguageSnapshot,
+    () => 'en'
+  );
   const containerRef = useRef<HTMLDivElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
   const transitionLockRef = useRef(false);
@@ -41,7 +71,6 @@ export default function ScrollyExperience() {
 
   const [activeChapter, setActiveChapter] = useState(0);
   const activeChapterRef = useRef(0);
-  activeChapterRef.current = activeChapter;
   const [scrollProgress, setScrollProgress] = useState(0);
   const [liquidTransition, setLiquidTransition] =
     useState<LiquidTransitionRequest | null>(null);
@@ -50,30 +79,19 @@ export default function ScrollyExperience() {
   const [loadProgress, setLoadProgress] = useState(12);
   const [isLoaderExiting, setIsLoaderExiting] = useState(false);
   const [isLoaderDone, setIsLoaderDone] = useState(false);
-  const [lang, setLang] = useState<Language>('en');
 
   useEffect(() => {
-    setIsMounted(true);
+    activeChapterRef.current = activeChapter;
+  }, [activeChapter]);
+
+  const handleToggleLanguage = useCallback(() => {
+    const next: Language = getLanguageSnapshot() === 'en' ? 'id' : 'en';
     try {
-      const saved = window.localStorage.getItem('the-forest-lang');
-      if (saved === 'id' || saved === 'en') {
-        setLang(saved);
-      }
+      window.localStorage.setItem(LANG_STORAGE_KEY, next);
+      window.dispatchEvent(new Event(LANG_EVENT));
     } catch {
       // Ignore storage access errors
     }
-  }, []);
-
-  const handleToggleLanguage = useCallback(() => {
-    setLang((prev) => {
-      const next: Language = prev === 'en' ? 'id' : 'en';
-      try {
-        window.localStorage.setItem('the-forest-lang', next);
-      } catch {
-        // Ignore storage access errors
-      }
-      return next;
-    });
   }, []);
 
   // Coordinate real asset readiness (fonts + opening scene videos) before dismissing LoadingScreen
@@ -217,7 +235,6 @@ export default function ScrollyExperience() {
         p = maxScroll > 0 ? (window.scrollY || window.pageYOffset || 0) / maxScroll : 0;
       }
       updateScrollMetrics(p);
-      ScrollTrigger.update();
     });
 
     // 3. Native scroll listener fallback to guarantee updates from pixel 0
@@ -236,7 +253,6 @@ export default function ScrollyExperience() {
     // 4. Teardown on unmount
     return () => {
       window.removeEventListener('scroll', handleNativeScroll);
-      ScrollTrigger.getAll().forEach((t) => t.kill());
       lenis.destroy();
       lenisRef.current = null;
     };
@@ -320,7 +336,6 @@ export default function ScrollyExperience() {
       behavior: 'instant' as ScrollBehavior,
     });
     updateMetricsRef.current(targetRatio);
-    ScrollTrigger.update();
   }, []);
 
   const handleTransitionComplete = useCallback(() => {

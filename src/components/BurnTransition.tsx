@@ -35,9 +35,15 @@ export default function BurnTransition({ progress }: BurnTransitionProps) {
   const animFrameRef = useRef<number | null>(null);
   const flamesRef = useRef<FlameParticle[]>([]);
   const sparksRef = useRef<Spark[]>([]);
+  const progressRef = useRef(progress);
+  const isActive = progress > 0.01;
 
   useEffect(() => {
-    if (progress <= 0.01) {
+    progressRef.current = progress;
+  }, [progress]);
+
+  useEffect(() => {
+    if (!isActive) {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       return;
     }
@@ -63,6 +69,7 @@ export default function BurnTransition({ progress }: BurnTransitionProps) {
 
     let time = 0;
     const render = () => {
+      const curProg = progressRef.current;
       time += 0.05;
       ctx.clearRect(0, 0, width, height);
 
@@ -70,11 +77,11 @@ export default function BurnTransition({ progress }: BurnTransitionProps) {
       // At progress = 0: fire is at height + 50
       // At progress = 0.5: fire is at height * 0.4
       // At progress = 1: fire is at -100
-      const fireFrontY = height * (1.1 - progress * 1.3);
+      const fireFrontY = height * (1.1 - curProg * 1.3);
 
       // 1. SPAWN FLAME PARTICLES along the fire front (capped lighter on mobile)
       const maxFlames = isMobile ? 55 : 180;
-      const spawnCount = isMobile ? Math.floor(4 + progress * 10) : Math.floor(10 + progress * 25);
+      const spawnCount = isMobile ? Math.floor(4 + curProg * 10) : Math.floor(10 + curProg * 25);
       for (let i = 0; i < spawnCount; i++) {
         if (flamesRef.current.length < maxFlames) {
           const x = Math.random() * width;
@@ -94,7 +101,7 @@ export default function BurnTransition({ progress }: BurnTransitionProps) {
 
       // 2. SPAWN RISING SPARKS / EMBERS
       const maxSparks = isMobile ? 25 : 80;
-      const sparkCount = isMobile ? Math.floor(2 + progress * 4) : Math.floor(4 + progress * 10);
+      const sparkCount = isMobile ? Math.floor(2 + curProg * 4) : Math.floor(4 + curProg * 10);
       for (let i = 0; i < sparkCount; i++) {
         if (sparksRef.current.length < maxSparks) {
           sparksRef.current.push({
@@ -163,7 +170,7 @@ export default function BurnTransition({ progress }: BurnTransitionProps) {
           continue;
         }
 
-        ctx.globalAlpha = Math.max(0, s.opacity) * Math.min(1, progress * 1.5);
+        ctx.globalAlpha = Math.max(0, s.opacity) * Math.min(1, curProg * 1.5);
         ctx.fillStyle = s.color;
         ctx.shadowColor = '#ff6600';
         ctx.shadowBlur = s.size * 5;
@@ -183,7 +190,7 @@ export default function BurnTransition({ progress }: BurnTransitionProps) {
       window.removeEventListener('resize', handleResize);
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [progress > 0.01]);
+  }, [isActive]);
 
   if (progress <= 0.005) return null;
 

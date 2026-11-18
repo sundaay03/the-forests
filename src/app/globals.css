@@ -83,21 +83,6 @@ html.lenis, html.lenis body {
   animation: heatShimmer 1.8s ease-in-out infinite;
 }
 
-@keyframes emergencyPulse {
-  0%, 100% {
-    border-color: rgba(239, 68, 68, 0.8);
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
-  }
-  50% {
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
-  }
-}
-
-.animate-emergency-beacon {
-  animation: emergencyPulse 1.2s ease-in-out infinite;
-}
-
 /* Cinematic High-Contrast Text Shadows without Background Boxes */
 .text-cinematic-shadow {
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);

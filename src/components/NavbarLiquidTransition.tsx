@@ -313,8 +313,11 @@ export default function NavbarLiquidTransition({
 
   const onSwapRef = useRef(onSwapPage);
   const onCompleteRef = useRef(onComplete);
-  onSwapRef.current = onSwapPage;
-  onCompleteRef.current = onComplete;
+
+  useEffect(() => {
+    onSwapRef.current = onSwapPage;
+    onCompleteRef.current = onComplete;
+  }, [onSwapPage, onComplete]);
 
   useEffect(() => {
     if (!request) return;

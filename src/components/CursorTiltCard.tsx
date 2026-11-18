@@ -72,7 +72,11 @@ export default function CursorTiltCard({
   const rafRef = useRef<number | null>(null);
   const isHoveredRef = useRef(false);
   const configRef = useRef({ perspective, spotlightColor });
-  configRef.current = { perspective, spotlightColor };
+  const applyFrameRef = useRef<() => void>(() => {});
+
+  useEffect(() => {
+    configRef.current = { perspective, spotlightColor };
+  }, [perspective, spotlightColor]);
 
   const applyFrame = useCallback(() => {
     const cur = currentRef.current;
@@ -131,14 +135,18 @@ export default function CursorTiltCard({
       return;
     }
 
-    rafRef.current = requestAnimationFrame(applyFrame);
+    rafRef.current = requestAnimationFrame(() => applyFrameRef.current());
   }, []);
+
+  useEffect(() => {
+    applyFrameRef.current = applyFrame;
+  }, [applyFrame]);
 
   const ensureLoop = useCallback(() => {
     if (rafRef.current === null) {
-      rafRef.current = requestAnimationFrame(applyFrame);
+      rafRef.current = requestAnimationFrame(() => applyFrameRef.current());
     }
-  }, [applyFrame]);
+  }, []);
 
   useEffect(() => {
     if (!disabled) return;

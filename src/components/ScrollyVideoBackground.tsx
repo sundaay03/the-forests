@@ -34,9 +34,7 @@ export default function ScrollyVideoBackground({
 }: ScrollyVideoBackgroundProps) {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const scrollProgRef = useRef(scrollProgress);
-  scrollProgRef.current = scrollProgress;
   const activeChapterRef = useRef(activeChapter);
-  activeChapterRef.current = activeChapter;
   const lerpTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
   const desiredTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
   const seekStartTimesRef = useRef<number[]>([0, 0, 0, 0, 0, 0, 0, 0]);
@@ -49,7 +47,6 @@ export default function ScrollyVideoBackground({
       : false
   );
   const isMobileRef = useRef(isMobileMode);
-  isMobileRef.current = isMobileMode;
 
   useEffect(() => {
     const checkMobile = () => {
@@ -57,7 +54,6 @@ export default function ScrollyVideoBackground({
         window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches;
       setIsMobileMode(mobile);
     };
-    checkMobile();
     window.addEventListener('resize', checkMobile, { passive: true });
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
@@ -322,8 +318,11 @@ export default function ScrollyVideoBackground({
     };
   }, []);
 
-  // Wake scrubbing loop cleanly whenever scrollProgress or activeChapter changes
+  // Sync refs and wake scrubbing loop cleanly whenever scrollProgress or activeChapter changes
   useEffect(() => {
+    scrollProgRef.current = scrollProgress;
+    activeChapterRef.current = activeChapter;
+    isMobileRef.current = isMobileMode;
     kickScrubRef.current();
   }, [scrollProgress, activeChapter, isMobileMode]);
 

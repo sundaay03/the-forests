@@ -131,12 +131,15 @@ export default function BurnGallery({
   // Deeply cushioned smooth momentum lerp (only runs while Scene 3 is visible and index is still converging)
   const [smoothIndex, setSmoothIndex] = useState(0);
   const targetIndexRef = useRef(targetIndex);
-  targetIndexRef.current = targetIndex;
   const smoothIndexRef = useRef(0);
   const kickLerpRef = useRef<() => void>(() => {});
   const isGalleryActive = activeChapter === 2 || (scrollProgress >= 0.25 && scrollProgress <= 0.45);
   const isGalleryActiveRef = useRef(isGalleryActive);
-  isGalleryActiveRef.current = isGalleryActive;
+
+  useEffect(() => {
+    targetIndexRef.current = targetIndex;
+    isGalleryActiveRef.current = isGalleryActive;
+  }, [targetIndex, isGalleryActive]);
 
   useEffect(() => {
     let animId: number | null = null;

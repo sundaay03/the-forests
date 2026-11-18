@@ -105,15 +105,13 @@ export default function HealthImpacts({
 
   // Trigger upward fade-in entrance whenever Scene 6 becomes active
   useEffect(() => {
-    if (!isActive) {
-      setHasEntered(false);
-      return;
-    }
     const raf = requestAnimationFrame(() => {
-      setHasEntered(true);
+      setHasEntered(isActive);
     });
     return () => cancelAnimationFrame(raf);
   }, [isActive]);
+
+  const showEntered = isActive && hasEntered;
 
   // Map active viewing range (0.00 to 0.70) sequentially across all 6 cards one by one
   const scrollRatio = Math.max(0, Math.min(0.9999, s6Prog / 0.70));
@@ -131,8 +129,8 @@ export default function HealthImpacts({
       {/* Centered Single-Slot Card Stage (3D glass cards rising & fading in from below) */}
       <div className="relative w-full grid grid-cols-1 items-center">
         {items.map((item, idx) => {
-          const isCurrent = hasEntered && idx === activeIndex;
-          const isPast = hasEntered && idx < activeIndex;
+          const isCurrent = showEntered && idx === activeIndex;
+          const isPast = showEntered && idx < activeIndex;
 
           const slotClass = isCurrent
             ? 'translate-y-0 scale-100 z-20 pointer-events-auto duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]'
@@ -205,7 +203,7 @@ export default function HealthImpacts({
       {/* Data Source Attribution */}
       <p
         className={`relative z-30 mt-3 sm:mt-3.5 text-[clamp(0.66rem,min(0.95vw,1.5dvh),0.8rem)] font-mono tracking-wide text-white/60 text-center drop-shadow-[0_1px_4px_rgba(0,0,0,0.75)] pointer-events-none select-none transition-opacity duration-500 ${
-          hasEntered ? 'opacity-100' : 'opacity-0'
+          showEntered ? 'opacity-100' : 'opacity-0'
         }`}
       >
         {lang === 'id' ? 'Sumber: Ucare Indonesia' : 'Source: Ucare Indonesia'}

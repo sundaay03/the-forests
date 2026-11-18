@@ -44,6 +44,7 @@ export default function ScrollyBacksound({
   void isReady;
   const [isEnabled, setIsEnabled] = useState(true);
   const [isActuallyPlaying, setIsActuallyPlaying] = useState(false);
+  const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
 
   const audio1Ref = useRef<HTMLAudioElement | null>(null);
   const audio2Ref = useRef<HTMLAudioElement | null>(null);
@@ -56,12 +57,13 @@ export default function ScrollyBacksound({
   const fadeDurationRef = useRef(CROSSFADE_MS);
 
   const isEnabledRef = useRef(isEnabled);
-  isEnabledRef.current = isEnabled;
-
   const activeChapterRef = useRef(activeChapter);
-  activeChapterRef.current = activeChapter;
-
   const audioUnlockedRef = useRef(false);
+
+  useEffect(() => {
+    isEnabledRef.current = isEnabled;
+    activeChapterRef.current = activeChapter;
+  }, [isEnabled, activeChapter]);
 
   const startFadeLoop = (durationMs = CROSSFADE_MS) => {
     fadeDurationRef.current = durationMs;
@@ -144,16 +146,19 @@ export default function ScrollyBacksound({
       if (p !== undefined) {
         p.then(() => {
           audioUnlockedRef.current = true;
+          setIsAudioUnlocked(true);
           setIsActuallyPlaying(true);
         }).catch(() => {
           // Waiting for user gesture unlock
         });
       } else {
         audioUnlockedRef.current = true;
+        setIsAudioUnlocked(true);
         setIsActuallyPlaying(true);
       }
     } else {
       audioUnlockedRef.current = true;
+      setIsAudioUnlocked(true);
       setIsActuallyPlaying(true);
     }
 
@@ -230,7 +235,7 @@ export default function ScrollyBacksound({
     syncTracks(activeChapter, nextEnabled, TOGGLE_FADE_MS);
   };
 
-  const showActiveUi = isEnabled && (isActuallyPlaying || !audioUnlockedRef.current);
+  const showActiveUi = isEnabled && (isActuallyPlaying || !isAudioUnlocked);
 
   return (
     <div className="fixed top-4 right-4 sm:top-6 sm:right-5 lg:right-6 z-40 select-none pointer-events-auto">

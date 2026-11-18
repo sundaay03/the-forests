@@ -125,9 +125,6 @@ export default function ScrollyChapter({
       ? Math.max(0, Math.min(1, (scrollProgress - 0.945) / (0.967 - 0.945)))
       : 0;
   const s7Opacity = activeChapter === 6 ? Math.max(0, 1 - s7FadeOutRaw) : 0;
-  const s7Scale = 1;
-  const s7Rotate = 0;
-  const s7Blur = 0;
 
   // Black Fade + 4 Sequential Dots transition between Scene 7 (0.945) and Scene 8 (1.045)
   let globalPortalProgress = 0;
@@ -140,8 +137,6 @@ export default function ScrollyChapter({
   const s8EnterRaw = Math.max(0, Math.min(1, (scrollProgress - 1.019) / (1.045 - 1.019)));
   const s8EnterEase = s8EnterRaw * s8EnterRaw * (3 - 2 * s8EnterRaw);
   const s8Opacity = activeChapter === 7 ? s8EnterEase : 0;
-  const s8Scale = 1;
-  const s8Blur = 0;
 
   return (
     <div className="relative z-20 flex flex-col items-center justify-center min-h-screen px-6 text-center select-none pointer-events-none w-full">
@@ -394,12 +389,10 @@ export default function ScrollyChapter({
         className="absolute inset-0 flex flex-col items-center justify-center px-4 pointer-events-none"
         style={{
           opacity: s7Opacity,
-          transform: `scale(${s7Scale}) rotate(${s7Rotate}deg)`,
-          filter: s7Blur > 0.1 ? `blur(${s7Blur}px)` : 'none',
           transition:
             scrollProgress >= 0.945
               ? 'none'
-              : 'opacity 0.15s ease-out, transform 0.15s ease-out, filter 0.15s ease-out',
+              : 'opacity 0.15s ease-out',
         }}
       >
         {/* Headline */}
@@ -443,12 +436,10 @@ export default function ScrollyChapter({
         }`}
         style={{
           opacity: s8Opacity,
-          transform: `scale(${s8Scale})`,
-          filter: s8Blur > 0.1 ? `blur(${s8Blur}px)` : 'none',
           transition:
             scrollProgress <= 1.046
               ? 'none'
-              : 'opacity 0.2s ease-out, transform 0.2s ease-out, filter 0.2s ease-out',
+              : 'opacity 0.2s ease-out',
         }}
       >
         <div className="relative flex flex-col items-center justify-center max-w-3xl mx-auto text-center pt-12">
