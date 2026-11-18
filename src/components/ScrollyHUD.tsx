@@ -206,6 +206,7 @@ const CHAPTERS: ChapterItem[] = [
 
 export default function ScrollyHUD({
   activeChapter,
+  scrollProgress = 0,
   onJumpToChapter,
 }: ScrollyHUDProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -218,6 +219,11 @@ export default function ScrollyHUD({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isMobileMenuOpen]);
+
+  // Convert scaled scrollProgress (0..1.143 across 8 scenes) back to normalized scroll ratio (0..1)
+  const rawScrollRatio = Math.max(0, Math.min(1, scrollProgress * (7 / 8)));
+  const thumbHeightPct = 14;
+  const thumbTopPct = rawScrollRatio * (100 - thumbHeightPct);
 
   const currentChap = CHAPTERS[activeChapter] ?? CHAPTERS[0];
 
@@ -373,6 +379,29 @@ export default function ScrollyHUD({
           })}
         </nav>
       </header>
+
+      {/* ===================== BOTTOM-LEFT COPYRIGHT NOTICE ===================== */}
+      <footer className="fixed bottom-3.5 left-4 sm:bottom-5 sm:left-6 z-40 pointer-events-none select-none">
+        <p className="text-[9px] sm:text-[10.5px] font-mono uppercase tracking-[0.14em] text-white/55 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+          &copy; 2026 THE FOREST. All rights reserved.
+        </p>
+      </footer>
+
+      {/* ===================== RIGHT-EDGE THIN WHITE SCROLLBAR (NON-INTERACTIVE) ===================== */}
+      <div
+        aria-hidden="true"
+        className="fixed top-3 bottom-3 right-1 sm:right-1.5 z-40 w-[3px] pointer-events-none select-none"
+      >
+        <div className="relative h-full w-full rounded-full bg-white/15 overflow-hidden">
+          <div
+            style={{
+              height: `${thumbHeightPct}%`,
+              top: `${thumbTopPct.toFixed(2)}%`,
+            }}
+            className="absolute left-0 right-0 rounded-full bg-white/85 shadow-[0_0_8px_rgba(255,255,255,0.6)]"
+          />
+        </div>
+      </div>
     </>
   );
 }
