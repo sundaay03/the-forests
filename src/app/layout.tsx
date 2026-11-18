@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "The Forest | The Message For Everyone",
-  description: "An immersive 3D forest exploration powered by Next.js and Three.js.",
+  description: "An immersive forest exploration powered by Next.js and Three.js.",
 };
 
 export const viewport: Viewport = {
