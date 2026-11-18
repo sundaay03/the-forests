@@ -336,7 +336,7 @@ export default function ScrollyChapter({
 
       {/* ===================== SCENE 6: THE HUMAN TOLL ===================== */}
       <div
-        className={`absolute inset-0 flex items-center justify-start px-5 sm:px-14 md:px-20 lg:px-24 pt-20 pb-6 transition-all duration-200 ${
+        className={`absolute inset-0 flex items-center justify-center px-5 sm:px-8 pt-20 pb-6 transition-all duration-200 ${
           activeChapter === 5 && s6Opacity > 0.1
             ? 'visible pointer-events-auto z-30'
             : activeChapter === 5 && s6Opacity > 0.01
@@ -351,32 +351,30 @@ export default function ScrollyChapter({
         }}
       >
         <div
-          className={`text-left max-w-xl md:max-w-2xl flex flex-col gap-2.5 sm:gap-4 ${
+          className={`text-center w-full max-w-2xl mx-auto flex flex-col items-center justify-center gap-4 sm:gap-6 ${
             activeChapter === 5 && s6Opacity > 0.1 ? 'pointer-events-auto' : 'pointer-events-none'
           }`}
         >
           {/* Headline with cinematic tracking and smoke blur-to-sharp */}
           <CursorParallaxText
-            shiftX={24}
-            shiftY={16}
-            tilt={6}
+            shiftX={22}
+            shiftY={14}
+            tilt={5}
             disabled={!(activeChapter === 5 && s6Opacity > 0.1)}
           >
-            <h1 className="text-[clamp(2rem,min(6vw,9.5dvh),6rem)] font-black uppercase tracking-tight text-white leading-[0.92] py-1 drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
-              <span className="block">HEALTH</span>
-              <span className="block">IMPACTS</span>
+            <h1 className="text-[clamp(2.1rem,min(6vw,9dvh),5.5rem)] font-black uppercase tracking-tight text-white leading-[0.95] py-1 text-center drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
+              HEALTH IMPACTS
             </h1>
           </CursorParallaxText>
 
-          {/* Subtitles: 3 at a time, scroll/group driven, with hover reveal for descriptions */}
-          <CursorParallaxText
-            shiftX={14}
-            shiftY={9}
-            tilt={3.5}
-            disabled={!(activeChapter === 5 && s6Opacity > 0.1)}
-          >
-            <HealthImpacts s6Prog={s6Prog} isInteractive={activeChapter === 5 && s6Opacity > 0.1} />
-          </CursorParallaxText>
+          {/* Sequential centered 3D glass impact cards (1 card at a time, always visible description) */}
+          <div className="w-full flex justify-center">
+            <HealthImpacts
+              s6Prog={s6Prog}
+              isInteractive={activeChapter === 5 && s6Opacity > 0.1}
+              isActive={activeChapter === 5 && s6Opacity > 0.05}
+            />
+          </div>
         </div>
       </div>
 

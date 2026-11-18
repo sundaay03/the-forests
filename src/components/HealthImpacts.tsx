@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
+import CursorTiltCard from './CursorTiltCard';
 
 export interface HealthImpactItem {
   id: number;
@@ -41,83 +42,134 @@ export const HEALTH_IMPACTS_DATA: HealthImpactItem[] = [
   },
 ];
 
+const cardGlassStyle: CSSProperties = {
+  backdropFilter: 'blur(22px) saturate(185%) brightness(1.04)',
+  WebkitBackdropFilter: 'blur(22px) saturate(185%) brightness(1.04)',
+};
+
+const cardGlassClassName =
+  'group relative overflow-hidden w-full rounded-3xl px-6 py-6 sm:px-8 sm:py-7 bg-[linear-gradient(155deg,rgba(255,255,255,0.16)_0%,rgba(255,255,255,0.06)_42%,rgba(10,12,18,0.44)_100%)] hover:bg-[linear-gradient(155deg,rgba(255,255,255,0.22)_0%,rgba(255,255,255,0.09)_42%,rgba(10,12,18,0.36)_100%)] border border-white/30 hover:border-white/55 flex flex-col items-center text-center shadow-[0_24px_50px_-12px_rgba(0,0,0,0.65),0_8px_20px_-6px_rgba(0,0,0,0.45),inset_0_1.5px_1.5px_rgba(255,255,255,0.65),inset_0_-2px_8px_rgba(0,0,0,0.35)] hover:shadow-[0_32px_65px_-12px_rgba(0,0,0,0.75),0_12px_28px_-6px_rgba(0,0,0,0.5),inset_0_2px_2px_rgba(255,255,255,0.85),inset_0_-2px_8px_rgba(0,0,0,0.30),0_0_28px_rgba(255,255,255,0.14)]';
+
 interface HealthImpactsProps {
   s6Prog: number; // 0.0 to 1.0 (local progress within Scene 6)
   isInteractive?: boolean;
+  isActive?: boolean;
 }
 
 export default function HealthImpacts({
   s6Prog,
   isInteractive = true,
+  isActive = true,
 }: HealthImpactsProps) {
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [hasEntered, setHasEntered] = useState(false);
 
-  // Divide the active viewing range (0.00 to 0.70) into 2 groups of 3 items:
-  // Group 0: Items 1, 2, 3 (0.00 - 0.35)
-  // Group 1: Items 4, 5, 6 (0.35 - 0.70)
-  const scrollGroup = s6Prog >= 0.35 ? 1 : 0;
+  // Trigger upward fade-in entrance whenever Scene 6 becomes active
+  useEffect(() => {
+    if (!isActive) {
+      setHasEntered(false);
+      return;
+    }
+    const raf = requestAnimationFrame(() => {
+      setHasEntered(true);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [isActive]);
 
-  const currentGroupItems = HEALTH_IMPACTS_DATA.slice(
-    scrollGroup * 3,
-    scrollGroup * 3 + 3
+  // Map active viewing range (0.00 to 0.70) sequentially across all 6 cards one by one
+  const scrollRatio = Math.max(0, Math.min(0.9999, s6Prog / 0.70));
+  const activeIndex = Math.min(
+    HEALTH_IMPACTS_DATA.length - 1,
+    Math.floor(scrollRatio * HEALTH_IMPACTS_DATA.length)
   );
-
-  const toggleItem = (id: number) => {
-    if (!isInteractive) return;
-    setSelectedId((prev) => (prev === id ? null : id));
-  };
 
   return (
     <div
-      className={`w-full max-w-[calc(100vw-2.5rem)] sm:max-w-[460px] md:max-w-[560px] lg:max-w-[620px] flex flex-col mt-1.5 sm:mt-3 ${
+      className={`w-full max-w-xl mx-auto flex flex-col items-center justify-center ${
         isInteractive ? 'pointer-events-auto' : 'pointer-events-none'
       }`}
     >
-      {/* 3 Pure White Text Subtitles per group (no black boxes, no badges, no icons) */}
-      <div
-        key={scrollGroup}
-        className="flex flex-col gap-3 sm:gap-5 transition-all duration-500 animate-fadeIn"
-      >
-        {currentGroupItems.map((item) => {
-          const isOpen = isInteractive && (hoveredId === item.id || selectedId === item.id);
+      {/* Centered Single-Slot Card Stage (3D glass cards rising & fading in from below) */}
+      <div className="relative w-full grid grid-cols-1 items-center">
+        {HEALTH_IMPACTS_DATA.map((item, idx) => {
+          const isCurrent = hasEntered && idx === activeIndex;
+          const isPast = hasEntered && idx < activeIndex;
+
+          const slotClass = isCurrent
+            ? 'translate-y-0 scale-100 z-20 pointer-events-auto duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]'
+            : isPast
+              ? 'translate-y-6 scale-[0.94] z-10 pointer-events-none duration-500 ease-out'
+              : 'translate-y-28 scale-[0.97] z-20 pointer-events-none duration-500 ease-out';
 
           return (
             <div
               key={item.id}
-              onMouseEnter={() => {
-                if (isInteractive) setHoveredId(item.id);
-              }}
-              onMouseLeave={() => setHoveredId(null)}
-              onClick={() => toggleItem(item.id)}
-              className={`group flex flex-col select-none text-left transition-all duration-300 ${
-                isInteractive ? 'cursor-pointer' : 'cursor-default pointer-events-none'
-              }`}
+              aria-hidden={!isCurrent}
+              className={`col-start-1 row-start-1 w-full transition-transform will-change-transform ${slotClass}`}
             >
-              {/* Pure White Enlarged Title with Bullet Point */}
-              <h3 className="flex items-start sm:items-center gap-2.5 sm:gap-4 text-[clamp(0.95rem,min(2.1vw,2.9dvh),1.875rem)] font-extrabold tracking-tight text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:text-white group-hover:translate-x-1.5">
-                <span className={`mt-2 sm:mt-0 w-1.5 sm:w-2.5 h-1.5 sm:h-2.5 rounded-full bg-white flex-shrink-0 shadow-[0_0_8px_rgba(255,255,255,0.9)] transition-all duration-300 ${
-                  isOpen ? 'scale-125' : 'group-hover:scale-125'
-                }`} />
-                <span>{item.title}</span>
-              </h3>
-
-              {/* Description (reveals smoothly on hover or click in enlarged pure white text) */}
-              <div
-                className={`overflow-hidden transition-all duration-300 ease-out pl-4 sm:pl-6.5 ${
-                  isOpen
-                    ? `max-h-48 opacity-100 mt-1.5 sm:mt-2 ${isInteractive ? 'pointer-events-auto' : 'pointer-events-none'}`
-                    : 'max-h-0 opacity-0 mt-0 pointer-events-none'
-                }`}
+              <CursorTiltCard
+                maxTilt={10}
+                maxShift={8}
+                hoverScale={1.03}
+                perspective={1000}
+                spotlightColor="rgba(255, 255, 255, 0.2)"
+                disabled={!isInteractive || !isCurrent}
+                style={{
+                  ...cardGlassStyle,
+                  opacity: isCurrent ? 1 : 0,
+                  transition:
+                    'opacity 550ms ease-out, border-color 300ms ease, box-shadow 300ms ease, background 300ms ease',
+                }}
+                className={cardGlassClassName}
               >
-                <p className="text-[clamp(0.75rem,min(1.4vw,2.1dvh),1.125rem)] font-light text-white/95 leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)] max-w-lg">
-                  {item.desc}
-                </p>
-              </div>
+                {/* Specular 3D Glass Top-Edge Curved Highlight */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 rounded-3xl bg-[linear-gradient(180deg,rgba(255,255,255,0.24)_0%,rgba(255,255,255,0.06)_26%,rgba(255,255,255,0)_56%,rgba(255,255,255,0.08)_100%)]"
+                />
+
+                <div className="relative z-10 flex flex-col items-center text-center">
+                  {/* Title */}
+                  <h3 className="text-[clamp(1.05rem,min(2.1vw,2.9dvh),1.6rem)] font-extrabold tracking-tight text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] leading-snug">
+                    {item.title}
+                  </h3>
+
+                  {/* Always-Visible Description */}
+                  <p className="mt-2 sm:mt-2.5 text-[clamp(0.8rem,min(1.25vw,2dvh),1.02rem)] font-normal text-white/85 group-hover:text-white/95 leading-relaxed max-w-md drop-shadow-[0_1px_6px_rgba(0,0,0,0.75)] transition-colors duration-200">
+                    {item.desc}
+                  </p>
+                </div>
+              </CursorTiltCard>
             </div>
           );
         })}
       </div>
+
+      {/* Centered 6-Step Non-Interactive Progress Indicator */}
+      <div
+        aria-hidden="true"
+        className="relative z-30 mt-7 sm:mt-8 flex items-center justify-center gap-2 pointer-events-none select-none"
+      >
+        {HEALTH_IMPACTS_DATA.map((item, idx) => {
+          const isCurrent = idx === activeIndex;
+          return (
+            <span
+              key={item.id}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                isCurrent ? 'w-7 bg-white shadow-[0_0_10px_rgba(255,255,255,0.65)]' : 'w-1.5 bg-white/35'
+              }`}
+            />
+          );
+        })}
+      </div>
+
+      {/* Data Source Attribution */}
+      <p
+        className={`relative z-30 mt-3 sm:mt-3.5 text-[clamp(0.66rem,min(0.95vw,1.5dvh),0.8rem)] font-mono tracking-wide text-white/60 text-center drop-shadow-[0_1px_4px_rgba(0,0,0,0.75)] pointer-events-none select-none transition-opacity duration-500 ${
+          hasEntered ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        Source: Ucare Indonesia
+      </p>
     </div>
   );
 }

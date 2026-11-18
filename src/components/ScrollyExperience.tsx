@@ -25,7 +25,7 @@ const CHAPTER_TARGET_RATIOS = [
   0.270, // 03 THE INFERNO    -> "FOREST AND LAND FIRES" (burn overlay cleared) + 3.webm
   0.429, // 04 STATISTIC      -> Karhutla 3-card dashboard all entered + 4.webm
   0.525, // 05 THE ASHES      -> "WHAT REMAINS" + subtitle + 5.webm
-  0.648, // 06 THE HUMAN TOLL -> "HEALTH IMPACTS" + items 1-3 + 6.webm
+  0.630, // 06 THE HUMAN TOLL -> "HEALTH IMPACTS" + card 01 + 6.webm
   0.788, // 07 THE REBIRTH    -> "REFOREST" + subtitle + 7.webm
   0.935, // 08 THE CONTACT    -> "LET'S BUILD" (portal cleared) + 8new.webm
 ] as const;
