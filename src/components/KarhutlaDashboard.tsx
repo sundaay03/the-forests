@@ -144,6 +144,7 @@ interface StatisticCardConfig {
   data: BarDatum[];
   title: string;
   description: string;
+  source: string;
 }
 
 const STATISTIC_CARDS: StatisticCardConfig[] = [
@@ -161,6 +162,7 @@ const STATISTIC_CARDS: StatisticCardConfig[] = [
     title: '1,103,132 ha scorched across Indonesia',
     description:
       'Papua, Bali-Nusa Tenggara, Kalimantan, and Sumatra recorded massive scorched acreage, ravaging pristine carbon-sink peatland.',
+    source: 'MapBiomas Fire Indonesia',
   },
   {
     id: 'casualties',
@@ -175,6 +177,7 @@ const STATISTIC_CARDS: StatisticCardConfig[] = [
     title: '351 direct casualties on the fire front',
     description:
       '4 fatalities and 347 injuries recorded among courageous ground firefighters, volunteer rangers, and local villagers holding perimeters.',
+    source: 'Databoks and CNBC Indonesia',
   },
   {
     id: 'health',
@@ -187,6 +190,7 @@ const STATISTIC_CARDS: StatisticCardConfig[] = [
     title: '333,470 acute respiratory infection cases',
     description:
       'Dangerous PM2.5 concentrations enveloped entire cities, triggering widespread respiratory distress among infants, children, and elderly citizens.',
+    source: 'BNPB and Kemenkes',
   },
 ];
 
@@ -454,6 +458,10 @@ export default function KarhutlaDashboard({
                       <p className="text-[clamp(0.72rem,min(1.05vw,1.7dvh),0.875rem)] text-white/80 group-hover:text-white/95 drop-shadow-[0_1px_2px_rgba(0,0,0,0.65)] transition-colors duration-200 font-normal leading-relaxed">
                         {card.description}
                       </p>
+
+                      <p className="mt-auto pt-2.5 sm:pt-3 border-t border-white/10 text-[clamp(0.62rem,min(0.88vw,1.35dvh),0.75rem)] font-mono tracking-wide text-white/55 group-hover:text-white/75 transition-colors duration-200">
+                        Source: {card.source}
+                      </p>
                     </div>
                   </div>
                 </CursorTiltCard>
@@ -536,6 +544,9 @@ export default function KarhutlaDashboard({
                   <span className="text-neutral-400 uppercase tracking-widest text-xs">National Total</span>
                   <span className="text-xl font-black text-white tabular-nums">1,103,132 ha</span>
                 </div>
+                <p className="mt-4 pt-3 border-t border-white/10 text-[11px] font-mono text-neutral-400">
+                  Source: {STATISTIC_CARDS[0].source}
+                </p>
               </div>
             )}
 
@@ -561,6 +572,9 @@ export default function KarhutlaDashboard({
                     <p className="text-[11px] text-neutral-400 mt-2">Severe burns, smoke inhalation, heat exhaustion, and blunt trauma.</p>
                   </div>
                 </div>
+                <p className="mt-5 pt-3 border-t border-white/10 text-[11px] font-mono text-neutral-400">
+                  Source: {STATISTIC_CARDS[1].source}
+                </p>
               </div>
             )}
 
@@ -589,6 +603,9 @@ export default function KarhutlaDashboard({
                     </ul>
                   </div>
                 </div>
+                <p className="mt-5 pt-3 border-t border-white/10 text-[11px] font-mono text-neutral-400">
+                  Source: {STATISTIC_CARDS[2].source}
+                </p>
               </div>
             )}
           </div>
