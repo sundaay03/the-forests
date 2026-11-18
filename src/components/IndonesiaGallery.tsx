@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import CursorTiltCard from './CursorTiltCard';
 import CursorParallaxText from './CursorParallaxText';
+import type { Language } from '@/lib/i18n';
 
 interface GalleryItem {
   id: number;
@@ -27,11 +28,13 @@ const DEFAULT_GALLERY_ITEMS: GalleryItem[] = [
 interface IndonesiaGalleryProps {
   activeChapter: number;
   scrollProgress: number;
+  lang?: Language;
 }
 
 export default function IndonesiaGallery({
   activeChapter,
   scrollProgress,
+  lang = 'en',
 }: IndonesiaGalleryProps) {
   const [items, setItems] = useState<GalleryItem[]>(DEFAULT_GALLERY_ITEMS);
   const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
@@ -149,7 +152,9 @@ export default function IndonesiaGallery({
                   : '#ffffff',
             }}
           >
-            <span className="block sm:whitespace-nowrap">WONDERFUL OF</span>
+            <span className="block sm:whitespace-nowrap">
+              {lang === 'id' ? 'PESONA' : 'WONDERFUL OF'}
+            </span>
             <span className="block sm:whitespace-nowrap">INDONESIA</span>
           </h1>
         </CursorParallaxText>
@@ -165,17 +170,23 @@ export default function IndonesiaGallery({
                   : '0 1px 5px rgba(0,0,0,0.25)',
             }}
           >
-            Billions of respirations sustaining the biosphere.
+            {lang === 'id'
+              ? 'Miliaran napas kehidupan yang menopang biosfer.'
+              : 'Billions of respirations sustaining the biosphere.'}
           </p>
         </CursorParallaxText>
 
         {/* Narrative Paragraph + Data Source */}
         <CursorParallaxText shiftX={11} shiftY={7} tilt={2.5} disabled={activeChapter !== 1}>
           <p className="mt-2 sm:mt-3 md:mt-[1.5dvh] text-[clamp(0.72rem,2.8vw,0.9rem)] md:text-[min(0.95vw,1.9dvh)] text-neutral-300/90 font-normal leading-relaxed max-w-md md:max-w-[29vw] mx-auto md:mx-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.25)]">
-            Indonesia&apos;s forest area covers 124,975,956 hectares, home to around 31,750 flora species and approximately 744,279 terrestrial and aquatic fauna species.
+            {lang === 'id'
+              ? 'Luas kawasan hutan Indonesia mencapai 124.975.956 hektare, menjadi rumah bagi sekitar 31.750 spesies flora serta kurang lebih 744.279 spesies fauna darat dan perairan.'
+              : "Indonesia's forest area covers 124,975,956 hectares, home to around 31,750 flora species and approximately 744,279 terrestrial and aquatic fauna species."}
           </p>
           <p className="mt-2 sm:mt-2.5 md:mt-[1.2dvh] text-[clamp(0.62rem,2.3vw,0.78rem)] md:text-[min(0.8vw,1.55dvh)] font-mono tracking-wide text-white/55 max-w-md md:max-w-[29vw] mx-auto md:mx-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
-            Source: Kementerian Kehutanan and Kementerian Lingkungan
+            {lang === 'id'
+              ? 'Sumber: Kementerian Kehutanan dan Kementerian Lingkungan'
+              : 'Source: Kementerian Kehutanan and Kementerian Lingkungan'}
           </p>
         </CursorParallaxText>
       </div>

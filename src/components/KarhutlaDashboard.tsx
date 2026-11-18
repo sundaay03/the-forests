@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import CursorTiltCard from './CursorTiltCard';
 import CursorParallaxText from './CursorParallaxText';
+import type { Language } from '@/lib/i18n';
 
 interface RegionalFireEntry {
   rank: number;
@@ -12,12 +13,20 @@ interface RegionalFireEntry {
   percent: string;
 }
 
-const REGIONAL_FIRES: RegionalFireEntry[] = [
-  { rank: 1, region: 'Papua', area: '313,777 ha', percent: '28.4%' },
-  { rank: 2, region: 'Bali, Nusa Tenggara, and Maluku', area: '297,732 ha', percent: '27.0%' },
-  { rank: 3, region: 'Kalimantan', area: '258,149 ha', percent: '23.4%' },
-  { rank: 4, region: 'Sumatra, Java, and Sulawesi', area: '233,474 ha', percent: '21.2%' },
-];
+const REGIONAL_FIRES_BY_LANG: Record<Language, RegionalFireEntry[]> = {
+  en: [
+    { rank: 1, region: 'Papua', area: '313,777 ha', percent: '28.4%' },
+    { rank: 2, region: 'Bali, Nusa Tenggara, and Maluku', area: '297,732 ha', percent: '27.0%' },
+    { rank: 3, region: 'Kalimantan', area: '258,149 ha', percent: '23.4%' },
+    { rank: 4, region: 'Sumatra, Java, and Sulawesi', area: '233,474 ha', percent: '21.2%' },
+  ],
+  id: [
+    { rank: 1, region: 'Papua', area: '313.777 ha', percent: '28,4%' },
+    { rank: 2, region: 'Bali, Nusa Tenggara, dan Maluku', area: '297.732 ha', percent: '27,0%' },
+    { rank: 3, region: 'Kalimantan', area: '258.149 ha', percent: '23,4%' },
+    { rank: 4, region: 'Sumatra, Jawa, dan Sulawesi', area: '233.474 ha', percent: '21,2%' },
+  ],
+};
 
 interface BarDatum {
   label: string;
@@ -134,6 +143,7 @@ interface KarhutlaDashboardProps {
   cardsProgress?: number; // 0.0 to 1.0
   exitProgress?: number; // 0.0 to 1.0
   localProgress?: number; // 0.0 to 1.0 across Scene 4
+  lang?: Language;
 }
 
 interface StatisticCardConfig {
@@ -147,52 +157,100 @@ interface StatisticCardConfig {
   source: string;
 }
 
-const STATISTIC_CARDS: StatisticCardConfig[] = [
-  {
-    id: 'burned',
-    unitLabel: 'Area (ha)',
-    yMax: 400000,
-    yTicks: ['400.000', '300.000', '200.000', '100.000', '0'],
-    data: [
-      { label: 'Papua', value: 313777, displayValue: '313.777' },
-      { label: 'Bali, Nusa Tenggara, and Maluku', value: 297732, displayValue: '297.732' },
-      { label: 'Kalimantan', value: 258149, displayValue: '258.149' },
-      { label: 'Sumatra, Java, and Sulawesi', value: 233474, displayValue: '233.474' },
-    ],
-    title: '1,103,132 ha scorched across Indonesia',
-    description:
-      'Papua, Bali-Nusa Tenggara, Kalimantan, and Sumatra recorded massive scorched acreage, ravaging pristine carbon-sink peatland.',
-    source: 'MapBiomas Fire Indonesia',
-  },
-  {
-    id: 'casualties',
-    unitLabel: 'People',
-    yMax: 400,
-    yTicks: ['400', '300', '200', '100', '0'],
-    data: [
-      { label: 'Total Casualties', value: 351, displayValue: '351' },
-      { label: 'Injuries', value: 347, displayValue: '347' },
-      { label: 'Fatalities', value: 4, displayValue: '4' },
-    ],
-    title: '351 direct casualties on the fire front',
-    description:
-      '4 fatalities and 347 injuries recorded among courageous ground firefighters, volunteer rangers, and local villagers holding perimeters.',
-    source: 'Databoks and CNBC Indonesia',
-  },
-  {
-    id: 'health',
-    unitLabel: 'Cases',
-    yMax: 400000,
-    yTicks: ['400.000', '300.000', '200.000', '100.000', '0'],
-    data: [
-      { label: 'Acute Respiratory Infections (ISPA)', value: 333470, displayValue: '333.470' },
-    ],
-    title: '333,470 acute respiratory infection cases',
-    description:
-      'Dangerous PM2.5 concentrations enveloped entire cities, triggering widespread respiratory distress among infants, children, and elderly citizens.',
-    source: 'BNPB and Kemenkes',
-  },
-];
+const STATISTIC_CARDS_BY_LANG: Record<Language, StatisticCardConfig[]> = {
+  en: [
+    {
+      id: 'burned',
+      unitLabel: 'Area (ha)',
+      yMax: 400000,
+      yTicks: ['400.000', '300.000', '200.000', '100.000', '0'],
+      data: [
+        { label: 'Papua', value: 313777, displayValue: '313.777' },
+        { label: 'Bali, Nusa Tenggara, and Maluku', value: 297732, displayValue: '297.732' },
+        { label: 'Kalimantan', value: 258149, displayValue: '258.149' },
+        { label: 'Sumatra, Java, and Sulawesi', value: 233474, displayValue: '233.474' },
+      ],
+      title: '1,103,132 ha scorched across Indonesia',
+      description:
+        'Papua, Bali-Nusa Tenggara, Kalimantan, and Sumatra recorded massive scorched acreage, ravaging pristine carbon-sink peatland.',
+      source: 'MapBiomas Fire Indonesia',
+    },
+    {
+      id: 'casualties',
+      unitLabel: 'People',
+      yMax: 400,
+      yTicks: ['400', '300', '200', '100', '0'],
+      data: [
+        { label: 'Total Casualties', value: 351, displayValue: '351' },
+        { label: 'Injuries', value: 347, displayValue: '347' },
+        { label: 'Fatalities', value: 4, displayValue: '4' },
+      ],
+      title: '351 direct casualties on the fire front',
+      description:
+        '4 fatalities and 347 injuries recorded among courageous ground firefighters, volunteer rangers, and local villagers holding perimeters.',
+      source: 'Databoks and CNBC Indonesia',
+    },
+    {
+      id: 'health',
+      unitLabel: 'Cases',
+      yMax: 400000,
+      yTicks: ['400.000', '300.000', '200.000', '100.000', '0'],
+      data: [
+        { label: 'Acute Respiratory Infections (ISPA)', value: 333470, displayValue: '333.470' },
+      ],
+      title: '333,470 acute respiratory infection cases',
+      description:
+        'Dangerous PM2.5 concentrations enveloped entire cities, triggering widespread respiratory distress among infants, children, and elderly citizens.',
+      source: 'BNPB and Kemenkes',
+    },
+  ],
+  id: [
+    {
+      id: 'burned',
+      unitLabel: 'Luas (ha)',
+      yMax: 400000,
+      yTicks: ['400.000', '300.000', '200.000', '100.000', '0'],
+      data: [
+        { label: 'Papua', value: 313777, displayValue: '313.777' },
+        { label: 'Bali, Nusa Tenggara, dan Maluku', value: 297732, displayValue: '297.732' },
+        { label: 'Kalimantan', value: 258149, displayValue: '258.149' },
+        { label: 'Sumatra, Jawa, dan Sulawesi', value: 233474, displayValue: '233.474' },
+      ],
+      title: '1.103.132 ha lahan terbakar di Indonesia',
+      description:
+        'Papua, Bali-Nusa Tenggara, Kalimantan, dan Sumatra mencatat kebakaran lahan masif yang merusak lahan gambut penyerap karbon.',
+      source: 'MapBiomas Fire Indonesia',
+    },
+    {
+      id: 'casualties',
+      unitLabel: 'Jiwa',
+      yMax: 400,
+      yTicks: ['400', '300', '200', '100', '0'],
+      data: [
+        { label: 'Total Korban', value: 351, displayValue: '351' },
+        { label: 'Luka-luka', value: 347, displayValue: '347' },
+        { label: 'Meninggal', value: 4, displayValue: '4' },
+      ],
+      title: '351 korban langsung di garis api',
+      description:
+        'Tercatat 4 korban jiwa dan 347 luka-luka di antara petugas pemadam, relawan penjaga hutan, dan warga sekitar.',
+      source: 'Databoks dan CNBC Indonesia',
+    },
+    {
+      id: 'health',
+      unitLabel: 'Kasus',
+      yMax: 400000,
+      yTicks: ['400.000', '300.000', '200.000', '100.000', '0'],
+      data: [
+        { label: 'Infeksi Saluran Pernapasan Akut (ISPA)', value: 333470, displayValue: '333.470' },
+      ],
+      title: '333.470 kasus infeksi pernapasan akut',
+      description:
+        'Konsentrasi PM2.5 berbahaya menyelimuti berbagai kota, memicu gangguan pernapasan luas pada bayi, anak-anak, hingga lansia.',
+      source: 'BNPB dan Kemenkes',
+    },
+  ],
+};
 
 const cardGlassStyle: CSSProperties = {
   backdropFilter: 'blur(22px) saturate(185%) brightness(1.04)',
@@ -249,7 +307,11 @@ export default function KarhutlaDashboard({
   cardsProgress = 1,
   exitProgress = 0,
   localProgress = 0.43,
+  lang = 'en',
 }: KarhutlaDashboardProps) {
+  const statisticCards = STATISTIC_CARDS_BY_LANG[lang];
+  const regionalFires = REGIONAL_FIRES_BY_LANG[lang];
+  const sourceLabel = lang === 'id' ? 'Sumber' : 'Source';
   const [activeModal, setActiveModal] = useState<'burned' | 'casualties' | 'health' | null>(null);
   const [mounted, setMounted] = useState(false);
   const [manualMobileIndex, setManualMobileIndex] = useState<number | null>(null);
@@ -364,14 +426,14 @@ export default function KarhutlaDashboard({
             disabled={!isActive || Boolean(activeModal)}
           >
             <h2 className="text-[clamp(1.45rem,min(4.6vw,5.8dvh),3.75rem)] font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
-              STATISTICS
+              {lang === 'id' ? 'STATISTIK' : 'STATISTICS'}
             </h2>
           </CursorParallaxText>
         </div>
 
         {/* ===================== 3-CARD GRID (Staggered in-place on desktop lg+, alternating stack on mobile) ===================== */}
         <div className="w-full max-w-[350px] sm:max-w-[390px] lg:max-w-none mx-auto grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6 items-stretch">
-          {STATISTIC_CARDS.map((card, idx) => {
+          {statisticCards.map((card, idx) => {
             const win = DESKTOP_CARD_WINDOWS[idx];
             const desktopMotion = isActive
               ? computeWindowMotion(
@@ -460,7 +522,7 @@ export default function KarhutlaDashboard({
                       </p>
 
                       <p className="mt-auto pt-2.5 sm:pt-3 border-t border-white/10 text-[clamp(0.62rem,min(0.88vw,1.35dvh),0.75rem)] font-mono tracking-wide text-white/55 group-hover:text-white/75 transition-colors duration-200">
-                        Source: {card.source}
+                        {sourceLabel}: {card.source}
                       </p>
                     </div>
                   </div>
@@ -476,7 +538,7 @@ export default function KarhutlaDashboard({
           style={{ opacity: cardOpacity }}
         >
           <div className="flex items-center gap-2">
-            {STATISTIC_CARDS.map((card, idx) => {
+            {statisticCards.map((card, idx) => {
               const isCurrent = idx === activeMobileIndex;
               return (
                 <button
@@ -510,7 +572,7 @@ export default function KarhutlaDashboard({
             <button
               onClick={() => setActiveModal(null)}
               className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-neutral-300 hover:text-white flex items-center justify-center transition-colors text-sm font-bold"
-              aria-label="Close modal"
+              aria-label={lang === 'id' ? 'Tutup modal' : 'Close modal'}
             >
               ✕
             </button>
@@ -519,14 +581,16 @@ export default function KarhutlaDashboard({
             {activeModal === 'burned' && (
               <div>
                 <h3 className="text-2xl font-black text-white mb-1">
-                  1,103,132 ha Scorched
+                  {lang === 'id' ? '1.103.132 ha Lahan Terbakar' : '1,103,132 ha Scorched'}
                 </h3>
                 <p className="text-xs text-neutral-400 mb-5">
-                  Detailed distribution of burned forest and land area across Indonesian regions.
+                  {lang === 'id'
+                    ? 'Rincian sebaran luas hutan dan lahan terbakar di berbagai wilayah Indonesia.'
+                    : 'Detailed distribution of burned forest and land area across Indonesian regions.'}
                 </p>
 
                 <div className="divide-y divide-white/10 border-y border-white/10 mb-5">
-                  {REGIONAL_FIRES.map((entry) => (
+                  {regionalFires.map((entry) => (
                     <div
                       key={entry.rank}
                       className="py-2.5 px-3 rounded-xl flex items-center justify-between transition-colors duration-200 hover:bg-black/50"
@@ -541,11 +605,15 @@ export default function KarhutlaDashboard({
                 </div>
 
                 <div className="flex items-center justify-between pt-1 font-bold text-sm">
-                  <span className="text-neutral-400 uppercase tracking-widest text-xs">National Total</span>
-                  <span className="text-xl font-black text-white tabular-nums">1,103,132 ha</span>
+                  <span className="text-neutral-400 uppercase tracking-widest text-xs">
+                    {lang === 'id' ? 'Total Nasional' : 'National Total'}
+                  </span>
+                  <span className="text-xl font-black text-white tabular-nums">
+                    {lang === 'id' ? '1.103.132 ha' : '1,103,132 ha'}
+                  </span>
                 </div>
                 <p className="mt-4 pt-3 border-t border-white/10 text-[11px] font-mono text-neutral-400">
-                  Source: {STATISTIC_CARDS[0].source}
+                  {sourceLabel}: {statisticCards[0].source}
                 </p>
               </div>
             )}
@@ -554,26 +622,40 @@ export default function KarhutlaDashboard({
             {activeModal === 'casualties' && (
               <div>
                 <h3 className="text-2xl font-black text-white mb-1">
-                  351 Frontline Casualties
+                  {lang === 'id' ? '351 Korban di Garis Depan' : '351 Frontline Casualties'}
                 </h3>
                 <p className="text-xs text-neutral-400 mb-5">
-                  Brave personnel and volunteers exposed to extreme fire fronts.
+                  {lang === 'id'
+                    ? 'Petugas pemadam dan relawan yang berhadapan langsung dengan kobaran api ekstrem.'
+                    : 'Brave personnel and volunteers exposed to extreme fire fronts.'}
                 </p>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 rounded-2xl bg-black/40 hover:bg-black/75 border border-white/15 hover:border-white/30 transition-all duration-200">
                     <div className="text-3xl font-black text-red-400 tabular-nums">4</div>
-                    <div className="text-xs font-bold uppercase tracking-wider text-red-200 mt-1">Deaths</div>
-                    <p className="text-[11px] text-neutral-400 mt-2">Fatal entrapments on volatile perimeters during sudden wind shifts.</p>
+                    <div className="text-xs font-bold uppercase tracking-wider text-red-200 mt-1">
+                      {lang === 'id' ? 'Meninggal' : 'Deaths'}
+                    </div>
+                    <p className="text-[11px] text-neutral-400 mt-2">
+                      {lang === 'id'
+                        ? 'Terjebak kepungan api di perimeter berisiko saat arah angin berubah mendadak.'
+                        : 'Fatal entrapments on volatile perimeters during sudden wind shifts.'}
+                    </p>
                   </div>
                   <div className="p-4 rounded-2xl bg-black/40 hover:bg-black/75 border border-white/15 hover:border-white/30 transition-all duration-200">
                     <div className="text-3xl font-black text-white tabular-nums">347</div>
-                    <div className="text-xs font-bold uppercase tracking-wider text-neutral-200 mt-1">Injuries</div>
-                    <p className="text-[11px] text-neutral-400 mt-2">Severe burns, smoke inhalation, heat exhaustion, and blunt trauma.</p>
+                    <div className="text-xs font-bold uppercase tracking-wider text-neutral-200 mt-1">
+                      {lang === 'id' ? 'Luka-luka' : 'Injuries'}
+                    </div>
+                    <p className="text-[11px] text-neutral-400 mt-2">
+                      {lang === 'id'
+                        ? 'Luka bakar, menghirup asap pekat, kelelahan panas, dan cedera lapangan.'
+                        : 'Severe burns, smoke inhalation, heat exhaustion, and blunt trauma.'}
+                    </p>
                   </div>
                 </div>
                 <p className="mt-5 pt-3 border-t border-white/10 text-[11px] font-mono text-neutral-400">
-                  Source: {STATISTIC_CARDS[1].source}
+                  {sourceLabel}: {statisticCards[1].source}
                 </p>
               </div>
             )}
@@ -582,29 +664,51 @@ export default function KarhutlaDashboard({
             {activeModal === 'health' && (
               <div>
                 <h3 className="text-2xl font-black text-white mb-1">
-                  333,470 ARI Cases
+                  {lang === 'id' ? '333.470 Kasus ISPA' : '333,470 ARI Cases'}
                 </h3>
                 <p className="text-xs text-neutral-400 mb-5">
-                  Acute Respiratory Infections triggered by toxic smoke particulates (PM2.5).
+                  {lang === 'id'
+                    ? 'Infeksi Saluran Pernapasan Akut akibat partikel asap beracun (PM2.5).'
+                    : 'Acute Respiratory Infections triggered by toxic smoke particulates (PM2.5).'}
                 </p>
 
                 <div className="space-y-3">
                   <div className="p-3.5 rounded-xl bg-black/40 hover:bg-black/75 border border-white/15 hover:border-white/30 transition-all duration-200">
-                    <div className="text-sm font-bold text-neutral-200">Acute Respiratory Infections (ISPA)</div>
-                    <div className="text-2xl font-black text-white mt-0.5 tabular-nums">333,470 cases</div>
-                    <p className="text-xs text-neutral-400 mt-1">Continuous inhalation of soot, carbon monoxide, and chemical irritants.</p>
+                    <div className="text-sm font-bold text-neutral-200">
+                      {lang === 'id'
+                        ? 'Infeksi Saluran Pernapasan Akut (ISPA)'
+                        : 'Acute Respiratory Infections (ISPA)'}
+                    </div>
+                    <div className="text-2xl font-black text-white mt-0.5 tabular-nums">
+                      {lang === 'id' ? '333.470 kasus' : '333,470 cases'}
+                    </div>
+                    <p className="text-xs text-neutral-400 mt-1">
+                      {lang === 'id'
+                        ? 'Paparan jelaga, karbon monoksida, dan zat iritan kimia secara terus-menerus.'
+                        : 'Continuous inhalation of soot, carbon monoxide, and chemical irritants.'}
+                    </p>
                   </div>
 
                   <div className="p-3.5 rounded-xl bg-black/40 hover:bg-black/75 border border-white/15 hover:border-white/30 transition-all duration-200">
                     <ul className="text-xs text-neutral-300 list-disc list-inside space-y-1.5">
-                      <li>Infants and toddlers with developing pulmonary systems</li>
-                      <li>Elderly individuals with existing cardiovascular conditions</li>
-                      <li>Asthma, COPD, and bronchitis sufferers</li>
+                      {lang === 'id' ? (
+                        <>
+                          <li>Bayi dan balita dengan sistem pernapasan yang masih berkembang</li>
+                          <li>Lansia dengan riwayat penyakit kardiovaskular</li>
+                          <li>Penderita asma, PPOK, dan bronkitis</li>
+                        </>
+                      ) : (
+                        <>
+                          <li>Infants and toddlers with developing pulmonary systems</li>
+                          <li>Elderly individuals with existing cardiovascular conditions</li>
+                          <li>Asthma, COPD, and bronchitis sufferers</li>
+                        </>
+                      )}
                     </ul>
                   </div>
                 </div>
                 <p className="mt-5 pt-3 border-t border-white/10 text-[11px] font-mono text-neutral-400">
-                  Source: {STATISTIC_CARDS[2].source}
+                  {sourceLabel}: {statisticCards[2].source}
                 </p>
               </div>
             )}

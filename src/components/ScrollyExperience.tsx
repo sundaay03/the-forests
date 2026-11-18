@@ -12,6 +12,7 @@ import LoadingScreen from './LoadingScreen';
 import NavbarLiquidTransition, {
   type LiquidTransitionRequest,
 } from './NavbarLiquidTransition';
+import type { Language } from '@/lib/i18n';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -49,9 +50,30 @@ export default function ScrollyExperience() {
   const [loadProgress, setLoadProgress] = useState(12);
   const [isLoaderExiting, setIsLoaderExiting] = useState(false);
   const [isLoaderDone, setIsLoaderDone] = useState(false);
+  const [lang, setLang] = useState<Language>('en');
 
   useEffect(() => {
     setIsMounted(true);
+    try {
+      const saved = window.localStorage.getItem('the-forest-lang');
+      if (saved === 'id' || saved === 'en') {
+        setLang(saved);
+      }
+    } catch {
+      // Ignore storage access errors
+    }
+  }, []);
+
+  const handleToggleLanguage = useCallback(() => {
+    setLang((prev) => {
+      const next: Language = prev === 'en' ? 'id' : 'en';
+      try {
+        window.localStorage.setItem('the-forest-lang', next);
+      } catch {
+        // Ignore storage access errors
+      }
+      return next;
+    });
   }, []);
 
   // Coordinate real asset readiness (fonts + opening scene videos) before dismissing LoadingScreen
@@ -352,6 +374,7 @@ export default function ScrollyExperience() {
           activeChapter={activeChapter}
           scrollProgress={scrollProgress}
           isReady={isLoaderExiting || isLoaderDone}
+          lang={lang}
         />
 
         {/* Liquid Morphing Transition Overlay (Navbar Navigation) */}
@@ -366,10 +389,16 @@ export default function ScrollyExperience() {
           activeChapter={activeChapter}
           scrollProgress={scrollProgress}
           onJumpToChapter={handleJumpToChapter}
+          lang={lang}
+          onToggleLanguage={handleToggleLanguage}
         />
 
         {/* Top-Right Backsound Controller & Toggle */}
-        <ScrollyBacksound activeChapter={activeChapter} />
+        <ScrollyBacksound
+          activeChapter={activeChapter}
+          isReady={isLoaderExiting || isLoaderDone}
+          lang={lang}
+        />
 
         {/* Initial Preloader Covering Component & Video Hydration */}
         {!isLoaderDone && (

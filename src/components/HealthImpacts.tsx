@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type CSSProperties } from 'react';
 import CursorTiltCard from './CursorTiltCard';
+import type { Language } from '@/lib/i18n';
 
 export interface HealthImpactItem {
   id: number;
@@ -9,38 +10,74 @@ export interface HealthImpactItem {
   desc: string;
 }
 
-export const HEALTH_IMPACTS_DATA: HealthImpactItem[] = [
-  {
-    id: 1,
-    title: 'Acute Respiratory Infections',
-    desc: 'The most dominant illness caused by weakened lung immunity due to continuous inhalation of irritants in smoke.',
-  },
-  {
-    id: 2,
-    title: 'Chronic Lung Disease',
-    desc: 'Smog triggers severe flare-ups and worsens the condition of asthma sufferers.',
-  },
-  {
-    id: 3,
-    title: 'Pneumonia',
-    desc: 'A more serious lung infection that poses a high risk to vulnerable groups such as infants, toddlers, and the elderly.',
-  },
-  {
-    id: 4,
-    title: 'Irritation',
-    desc: 'Irritation of the eyes, nose, throat, and skin.',
-  },
-  {
-    id: 5,
-    title: 'Heart and Cardiovascular Disorders',
-    desc: 'Poor air quality forces the heart to work harder, increasing the risk of coronary heart attacks, arrhythmia, and stroke.',
-  },
-  {
-    id: 6,
-    title: 'Digestive System Disorders',
-    desc: 'Settling smoke pollutants can contaminate drinking water and food sources, triggering illnesses like diarrhea.',
-  },
-];
+const HEALTH_IMPACTS_BY_LANG: Record<Language, HealthImpactItem[]> = {
+  en: [
+    {
+      id: 1,
+      title: 'Acute Respiratory Infections',
+      desc: 'The most dominant illness caused by weakened lung immunity due to continuous inhalation of irritants in smoke.',
+    },
+    {
+      id: 2,
+      title: 'Chronic Lung Disease',
+      desc: 'Smog triggers severe flare-ups and worsens the condition of asthma sufferers.',
+    },
+    {
+      id: 3,
+      title: 'Pneumonia',
+      desc: 'A more serious lung infection that poses a high risk to vulnerable groups such as infants, toddlers, and the elderly.',
+    },
+    {
+      id: 4,
+      title: 'Irritation',
+      desc: 'Irritation of the eyes, nose, throat, and skin.',
+    },
+    {
+      id: 5,
+      title: 'Heart and Cardiovascular Disorders',
+      desc: 'Poor air quality forces the heart to work harder, increasing the risk of coronary heart attacks, arrhythmia, and stroke.',
+    },
+    {
+      id: 6,
+      title: 'Digestive System Disorders',
+      desc: 'Settling smoke pollutants can contaminate drinking water and food sources, triggering illnesses like diarrhea.',
+    },
+  ],
+  id: [
+    {
+      id: 1,
+      title: 'Infeksi Saluran Pernapasan Akut (ISPA)',
+      desc: 'Penyakit paling dominan akibat melemahnya daya tahan paru-paru karena menghirup zat iritan dalam asap secara terus-menerus.',
+    },
+    {
+      id: 2,
+      title: 'Penyakit Paru-paru Kronis',
+      desc: 'Asap pekat memicu kekambuhan parah dan memperburuk kondisi penderita asma.',
+    },
+    {
+      id: 3,
+      title: 'Pneumonia',
+      desc: 'Infeksi paru-paru lebih serius yang sangat berisiko bagi kelompok rentan seperti bayi, balita, dan lansia.',
+    },
+    {
+      id: 4,
+      title: 'Iritasi',
+      desc: 'Iritasi pada mata, hidung, tenggorokan, dan kulit.',
+    },
+    {
+      id: 5,
+      title: 'Gangguan Jantung dan Kardiovaskular',
+      desc: 'Kualitas udara yang buruk memaksa jantung bekerja lebih keras, meningkatkan risiko serangan jantung koroner, aritmia, hingga stroke.',
+    },
+    {
+      id: 6,
+      title: 'Gangguan Sistem Pencernaan',
+      desc: 'Polutan asap yang mengendap dapat mencemari sumber air minum dan makanan, memicu penyakit seperti diare.',
+    },
+  ],
+};
+
+export const HEALTH_IMPACTS_DATA: HealthImpactItem[] = HEALTH_IMPACTS_BY_LANG.en;
 
 const cardGlassStyle: CSSProperties = {
   backdropFilter: 'blur(22px) saturate(185%) brightness(1.04)',
@@ -54,14 +91,17 @@ interface HealthImpactsProps {
   s6Prog: number; // 0.0 to 1.0 (local progress within Scene 6)
   isInteractive?: boolean;
   isActive?: boolean;
+  lang?: Language;
 }
 
 export default function HealthImpacts({
   s6Prog,
   isInteractive = true,
   isActive = true,
+  lang = 'en',
 }: HealthImpactsProps) {
   const [hasEntered, setHasEntered] = useState(false);
+  const items = HEALTH_IMPACTS_BY_LANG[lang];
 
   // Trigger upward fade-in entrance whenever Scene 6 becomes active
   useEffect(() => {
@@ -90,7 +130,7 @@ export default function HealthImpacts({
     >
       {/* Centered Single-Slot Card Stage (3D glass cards rising & fading in from below) */}
       <div className="relative w-full grid grid-cols-1 items-center">
-        {HEALTH_IMPACTS_DATA.map((item, idx) => {
+        {items.map((item, idx) => {
           const isCurrent = hasEntered && idx === activeIndex;
           const isPast = hasEntered && idx < activeIndex;
 
@@ -168,7 +208,7 @@ export default function HealthImpacts({
           hasEntered ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        Source: Ucare Indonesia
+        {lang === 'id' ? 'Sumber: Ucare Indonesia' : 'Source: Ucare Indonesia'}
       </p>
     </div>
   );

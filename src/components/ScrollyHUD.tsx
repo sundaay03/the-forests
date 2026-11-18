@@ -1,11 +1,14 @@
 'use client';
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import { CHAPTER_LABELS, type Language } from '@/lib/i18n';
 
 interface ScrollyHUDProps {
   activeChapter: number;
   scrollProgress?: number;
   onJumpToChapter: (index: number, origin?: { x: number; y: number }) => void;
+  lang?: Language;
+  onToggleLanguage?: () => void;
 }
 
 interface ChapterItem {
@@ -208,6 +211,8 @@ export default function ScrollyHUD({
   activeChapter,
   scrollProgress = 0,
   onJumpToChapter,
+  lang = 'en',
+  onToggleLanguage,
 }: ScrollyHUDProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -225,10 +230,69 @@ export default function ScrollyHUD({
   const thumbHeightPct = 14;
   const thumbTopPct = rawScrollRatio * (100 - thumbHeightPct);
 
+  const chapterLabels = CHAPTER_LABELS[lang];
   const currentChap = CHAPTERS[activeChapter] ?? CHAPTERS[0];
+  const currentChapLabel = chapterLabels[activeChapter] ?? currentChap.label;
 
   return (
     <>
+      {/* ===================== TOP-LEFT LANGUAGE SWITCHER (EN / ID) ===================== */}
+      <div className="fixed top-4 left-[72px] sm:top-7 sm:left-10 lg:left-14 xl:left-16 z-40 select-none pointer-events-auto">
+        <button
+          type="button"
+          onClick={onToggleLanguage}
+          aria-label={
+            lang === 'en'
+              ? 'Ganti bahasa ke Bahasa Indonesia'
+              : 'Switch language to English'
+          }
+          title={lang === 'en' ? 'Switch to Indonesia (ID)' : 'Ganti ke English (EN)'}
+          className="group relative flex items-center gap-2.5 sm:gap-3 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 rounded-full"
+        >
+          {/* Frosted Circular Globe Glass Button */}
+          <span
+            style={glassBackdropStyle}
+            className="relative flex items-center justify-center w-11 h-11 sm:w-[48px] sm:h-[48px] rounded-full bg-white/[0.14] border border-white/35 text-white shadow-[0_14px_32px_rgba(0,0,0,0.45),inset_0_1.5px_1.5px_rgba(255,255,255,0.65),inset_0_-2px_6px_rgba(0,0,0,0.22)] transition-all duration-300 ease-out group-hover:border-white/70 group-hover:bg-white/[0.22] group-hover:scale-105 active:scale-95"
+          >
+            {/* Specular Curved Glass Highlight */}
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(180deg,rgba(255,255,255,0.28)_0%,rgba(255,255,255,0.04)_45%,rgba(255,255,255,0.1)_100%)]"
+            />
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.85}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="relative z-10 w-[18px] h-[18px] sm:w-5 sm:h-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.65)]"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+              <path d="M2 12h20" />
+            </svg>
+          </span>
+
+          {/* Active Language Code beside icon */}
+          <span className="inline-flex sm:hidden lg:inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-mono font-medium tracking-[0.18em] sm:tracking-[0.2em] uppercase drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
+            <span className={lang === 'id' ? 'text-white font-bold' : 'text-white/45'}>ID</span>
+            <span className="text-white/30">/</span>
+            <span className={lang === 'en' ? 'text-white font-bold' : 'text-white/45'}>EN</span>
+          </span>
+
+          {/* Tablet Tooltip */}
+          <span
+            role="tooltip"
+            style={tooltipGlassStyle}
+            className="hidden sm:block lg:hidden absolute top-full left-0 mt-2.5 px-2.5 py-1 rounded-full bg-white/[0.14] border border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.55),0_8px_20px_rgba(0,0,0,0.45)] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] text-[10px] font-medium tracking-wider uppercase whitespace-nowrap pointer-events-none opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200"
+          >
+            {lang === 'id' ? 'Bahasa: ID' : 'Language: EN'}
+          </span>
+        </button>
+      </div>
+
       {/* ===================== MOBILE: SINGLE GLASS BUBBLE + EXPANDABLE MENU (< sm) ===================== */}
       {isMobileMenuOpen && (
         <div
@@ -243,7 +307,15 @@ export default function ScrollyHUD({
           type="button"
           onClick={() => setIsMobileMenuOpen((prev) => !prev)}
           style={glassBackdropStyle}
-          aria-label={isMobileMenuOpen ? 'Close navigation menu' : `Open navigation menu (${currentChap.label})`}
+          aria-label={
+            isMobileMenuOpen
+              ? lang === 'id'
+                ? 'Tutup menu navigasi'
+                : 'Close navigation menu'
+              : lang === 'id'
+                ? `Buka menu navigasi (${currentChapLabel})`
+                : `Open navigation menu (${currentChapLabel})`
+          }
           aria-expanded={isMobileMenuOpen}
           className={`relative flex items-center justify-center w-11 h-11 rounded-full cursor-pointer transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 ${
             isMobileMenuOpen
@@ -309,7 +381,7 @@ export default function ScrollyHUD({
                     {chap.icon}
                   </span>
                   <span className="flex-1 text-xs font-semibold uppercase tracking-wider truncate">
-                    {chap.label}
+                    {chapterLabels[idx] ?? chap.label}
                   </span>
                   <span className="text-[10px] font-mono text-white/45 tabular-nums">
                     {chap.tag}
@@ -338,6 +410,7 @@ export default function ScrollyHUD({
             const isActive = activeChapter === idx;
             const isFirst = idx === 0;
             const isLast = idx === CHAPTERS.length - 1;
+            const chapLabel = chapterLabels[idx] ?? chap.label;
 
             const tooltipHorizontalAlign = isFirst
               ? 'left-0 sm:left-1/2 sm:-translate-x-1/2'
@@ -356,7 +429,7 @@ export default function ScrollyHUD({
                     y: rect.top + rect.height * 0.5,
                   });
                 }}
-                aria-label={`${chap.tag} ${chap.label}`}
+                aria-label={`${chap.tag} ${chapLabel}`}
                 aria-current={isActive ? 'step' : undefined}
                 className={`group relative z-10 flex items-center justify-center shrink-0 w-[44px] h-[44px] rounded-full cursor-pointer transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 ${
                   isActive
@@ -372,7 +445,7 @@ export default function ScrollyHUD({
                   style={tooltipGlassStyle}
                   className={`absolute top-full mt-2.5 ${tooltipHorizontalAlign} px-2.5 py-1 rounded-full bg-white/[0.14] border border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.55),0_8px_20px_rgba(0,0,0,0.45)] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] text-[10px] font-medium tracking-wider uppercase whitespace-nowrap pointer-events-none opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 group-focus-visible:opacity-100 group-focus-visible:translate-y-0 transition-all duration-200`}
                 >
-                  {chap.label}
+                  {chapLabel}
                 </span>
               </button>
             );
@@ -383,7 +456,9 @@ export default function ScrollyHUD({
       {/* ===================== BOTTOM-LEFT COPYRIGHT NOTICE ===================== */}
       <footer className="fixed bottom-3.5 left-4 sm:bottom-5 sm:left-6 z-40 pointer-events-none select-none">
         <p className="text-[9px] sm:text-[10.5px] font-mono uppercase tracking-[0.14em] text-white/55 drop-shadow-[0_1px_4px_rgba(0,0,0,0.85)]">
-          &copy; 2026 THE FOREST. All rights reserved.
+          {lang === 'id'
+            ? '\u00A9 2026 THE FOREST. Seluruh hak cipta dilindungi.'
+            : '\u00A9 2026 THE FOREST. All rights reserved.'}
         </p>
       </footer>
 

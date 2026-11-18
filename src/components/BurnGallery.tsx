@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import CursorTiltCard from './CursorTiltCard';
 import CursorParallaxText from './CursorParallaxText';
+import type { Language } from '@/lib/i18n';
 
 export interface BurnGalleryItem {
   id: number;
@@ -33,11 +34,13 @@ export const DEFAULT_BURN_ITEMS: BurnGalleryItem[] = [
 interface BurnGalleryProps {
   activeChapter: number;
   scrollProgress: number; // Global scroll progress 0.0 to 1.0
+  lang?: Language;
 }
 
 export default function BurnGallery({
   activeChapter,
   scrollProgress,
+  lang = 'en',
 }: BurnGalleryProps) {
   const [items, setItems] = useState<BurnGalleryItem[]>(DEFAULT_BURN_ITEMS);
   const [selectedItem, setSelectedItem] = useState<BurnGalleryItem | null>(null);
@@ -308,7 +311,7 @@ export default function BurnGallery({
         {/* Editorial Title - Same typography & heat-shimmer as FOREST AND LAND FIRES */}
         <CursorParallaxText shiftX={24} shiftY={15} tilt={6} disabled={activeChapter !== 2}>
           <h2 className="text-[clamp(1.45rem,min(4.8vw,6dvh),3.75rem)] font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)] leading-[1.05] text-center px-4">
-            BURNING THE FUTURE
+            {lang === 'id' ? 'MEMBAKAR MASA DEPAN' : 'BURNING THE FUTURE'}
           </h2>
         </CursorParallaxText>
       </div>

@@ -7,17 +7,20 @@ import HealthImpacts from './HealthImpacts';
 import PortalTransition from './PortalTransition';
 import KarhutlaDashboard from './KarhutlaDashboard';
 import CursorParallaxText from './CursorParallaxText';
+import type { Language } from '@/lib/i18n';
 
 interface ScrollyChapterProps {
   activeChapter: number;
   scrollProgress?: number;
   isReady?: boolean;
+  lang?: Language;
 }
 
 export default function ScrollyChapter({
   activeChapter,
   scrollProgress = 0,
   isReady = true,
+  lang = 'en',
 }: ScrollyChapterProps) {
   // Scene 1 Video Playback Time (mapped from scrollProgress 0.0 to 0.09 across 9.93s duration)
   const s1Time = Math.min(9.93, Math.max(0, (scrollProgress / 0.09) * 9.93));
@@ -188,7 +191,7 @@ export default function ScrollyChapter({
                   isReady && activeChapter === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
               >
-                The Message For Everyone.
+                {lang === 'id' ? 'Pesan Untuk Semua Orang.' : 'The Message For Everyone.'}
               </p>
             </CursorParallaxText>
           </div>
@@ -204,7 +207,7 @@ export default function ScrollyChapter({
               <span className="w-1 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.85)] animate-scroll-wheel" />
             </div>
             <span className="text-[9px] sm:text-[10px] font-mono uppercase tracking-[0.28em] text-white/70 subtitle-cinematic-shadow">
-              Scroll
+              {lang === 'id' ? 'Gulir' : 'Scroll'}
             </span>
           </div>
         </div>
@@ -222,14 +225,16 @@ export default function ScrollyChapter({
             {/* Headline */}
             <CursorParallaxText shiftX={26} shiftY={16} tilt={6} disabled={activeChapter !== 0}>
               <h2 className="relative text-[clamp(2.25rem,min(7.5vw,11dvh),6rem)] font-black uppercase tracking-tight text-white text-cinematic-shadow">
-                ABOUT
+                {lang === 'id' ? 'TENTANG' : 'ABOUT'}
               </h2>
             </CursorParallaxText>
 
             {/* Narrative Overview */}
             <CursorParallaxText shiftX={14} shiftY={9} tilt={3.5} disabled={activeChapter !== 0}>
               <p className="relative mt-4 sm:mt-6 text-[clamp(0.85rem,min(1.6vw,2.4dvh),1.125rem)] font-normal text-white/95 tracking-wide max-w-2xl leading-relaxed subtitle-cinematic-shadow">
-                An interactive cinematic journey into ancient woodlands — witnessing their primordial majesty, the sudden terror of wildfire, and nature&apos;s quiet resilience toward rebirth.
+                {lang === 'id'
+                  ? 'Perjalanan sinematik interaktif menembus hutan purba — menyaksikan kemegahan alamnya, dahsyatnya ancaman kebakaran hutan, serta ketangguhan alam menuju pemulihan.'
+                  : "An interactive cinematic journey into ancient woodlands — witnessing their primordial majesty, the sudden terror of wildfire, and nature's quiet resilience toward rebirth."}
               </p>
             </CursorParallaxText>
           </div>
@@ -240,6 +245,7 @@ export default function ScrollyChapter({
       <IndonesiaGallery
         activeChapter={activeChapter}
         scrollProgress={scrollProgress}
+        lang={lang}
       />
 
       {/* ===================== TRANSISI TERBAKAR / TERKIKIS (DISSOLVE / EROSION) ===================== */}
@@ -258,7 +264,7 @@ export default function ScrollyChapter({
         {/* Fast kinetic reveal with heat-shimmer & orange-amber text glow */}
         <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 2}>
           <h1 className="text-[clamp(2rem,min(7.2vw,11dvh),7.5rem)] font-black uppercase tracking-tight text-white animate-heat-shimmer drop-shadow-[0_0_35px_rgba(255,87,34,0.8)]">
-            FOREST AND LAND FIRES
+            {lang === 'id' ? 'KEBAKARAN HUTAN DAN LAHAN' : 'FOREST AND LAND FIRES'}
           </h1>
         </CursorParallaxText>
       </div>
@@ -267,6 +273,7 @@ export default function ScrollyChapter({
       <BurnGallery
         activeChapter={activeChapter}
         scrollProgress={scrollProgress}
+        lang={lang}
       />
 
       {/* ===================== SCENE 4: STATISTIC ===================== */}
@@ -286,6 +293,7 @@ export default function ScrollyChapter({
             cardsProgress={s4CardsEnter}
             exitProgress={s4ExitProg}
             localProgress={s4Prog}
+            lang={lang}
           />
         </div>
       </div>
@@ -303,9 +311,9 @@ export default function ScrollyChapter({
         {/* Letter-by-letter opacity fade mimicking settling ash */}
         <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 4}>
           <h1 className="text-[clamp(2.1rem,min(7.8vw,11.5dvh),7.5rem)] font-black uppercase tracking-tight text-neutral-200 flex flex-wrap justify-center py-2">
-            {'WHAT REMAINS'.split('').map((char, i) => (
+            {(lang === 'id' ? 'YANG TERSISA' : 'WHAT REMAINS').split('').map((char, i) => (
               <span
-                key={i}
+                key={`${lang}-${i}`}
                 style={{
                   transitionDelay: `${100 + i * 40}ms`,
                 }}
@@ -329,7 +337,9 @@ export default function ScrollyChapter({
               opacity: s5ExitProg > 0.05 ? 0 : 0.85,
             }}
           >
-            Where ancient canopies stood, silence and ash.
+            {lang === 'id'
+              ? 'Di tempat kanopi purba pernah berdiri, kini hanya sunyi dan abu.'
+              : 'Where ancient canopies stood, silence and ash.'}
           </p>
         </CursorParallaxText>
       </div>
@@ -363,7 +373,7 @@ export default function ScrollyChapter({
             disabled={!(activeChapter === 5 && s6Opacity > 0.1)}
           >
             <h1 className="text-[clamp(2.1rem,min(6vw,9dvh),5.5rem)] font-black uppercase tracking-tight text-white leading-[0.95] py-1 text-center drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)]">
-              HEALTH IMPACTS
+              {lang === 'id' ? 'DAMPAK KESEHATAN' : 'HEALTH IMPACTS'}
             </h1>
           </CursorParallaxText>
 
@@ -373,6 +383,7 @@ export default function ScrollyChapter({
               s6Prog={s6Prog}
               isInteractive={activeChapter === 5 && s6Opacity > 0.1}
               isActive={activeChapter === 5 && s6Opacity > 0.05}
+              lang={lang}
             />
           </div>
         </div>
@@ -400,7 +411,7 @@ export default function ScrollyChapter({
                 : 'opacity-0 translate-y-6 scale-95'
             }`}
           >
-            REFOREST
+            {lang === 'id' ? 'REBOISASI' : 'REFOREST'}
           </h1>
         </CursorParallaxText>
 
@@ -411,7 +422,9 @@ export default function ScrollyChapter({
               activeChapter === 6 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
           >
-            From the ashes of yesterday, human hands plant the seeds of tomorrow.
+            {lang === 'id'
+              ? 'Dari abu masa lalu, tangan manusia menanam benih harapan esok hari.'
+              : 'From the ashes of yesterday, human hands plant the seeds of tomorrow.'}
           </p>
         </CursorParallaxText>
       </div>
@@ -443,14 +456,16 @@ export default function ScrollyChapter({
           {/* Headline */}
           <CursorParallaxText shiftX={28} shiftY={18} tilt={7} disabled={activeChapter !== 7}>
             <h1 className="text-[clamp(2.35rem,min(8.5vw,11.5dvh),7.5rem)] font-black uppercase tracking-tight leading-[0.9] text-white text-cinematic-shadow">
-              LET&apos;S BUILD
+              {lang === 'id' ? 'MARI PULIHKAN' : <>LET&apos;S BUILD</>}
             </h1>
           </CursorParallaxText>
 
           {/* Subtitle */}
           <CursorParallaxText shiftX={16} shiftY={10} tilt={4} disabled={activeChapter !== 7}>
             <p className="mt-4 sm:mt-6 text-[clamp(0.85rem,min(1.6vw,2.3dvh),1.125rem)] font-light text-white/90 tracking-wide max-w-xl leading-relaxed subtitle-cinematic-shadow">
-              Every voice, action, and collaboration helps protect Indonesia&apos;s ancient rainforests and restore what was lost.
+              {lang === 'id'
+                ? 'Setiap suara, tindakan, dan kolaborasi membantu menjaga hutan hujan purba Indonesia serta memulihkan yang telah hilang.'
+                : <>Every voice, action, and collaboration helps protect Indonesia&apos;s ancient rainforests and restore what was lost.</>}
             </p>
           </CursorParallaxText>
 
@@ -460,7 +475,7 @@ export default function ScrollyChapter({
               href="mailto:sandi03riandi@gmail.com"
               className="group relative flex items-center gap-2.5 px-6 py-3.5 rounded-full bg-black/45 backdrop-blur-md border border-white/20 hover:border-white/80 hover:bg-white/15 text-white text-xs sm:text-sm font-mono uppercase tracking-widest transition-all duration-300 hover:-translate-y-0.5 shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
             >
-              <span>Contact Us</span>
+              <span>{lang === 'id' ? 'Hubungi Kami' : 'Contact Us'}</span>
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
